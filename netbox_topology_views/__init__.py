@@ -10,7 +10,9 @@ class TopologyViewsConfig(PluginConfig):
     base_url = 'topology-views'
     required_settings = []
     default_settings = {
-        'loud': False
+        'PRESELECTED_DEVICE_ROLES': 'Firewall,Router,Distribution Switch,Core Switch,Internal Switch,Access Switch,Server,Storage,Backup,Wireless AP',
+        'IGNORE_CABLE_TYPE': 'dcim.poweroutlet,dcim.powerport',
+        'DEVICE_IMG': 'access-switch,core-switch,firewall,router,distribution-switch,backup,storage,wan-network,wireless-ap,server,internal-switch,isp-cpe-material,non-racked-devices,power-units'
     }
 
 config = TopologyViewsConfig
