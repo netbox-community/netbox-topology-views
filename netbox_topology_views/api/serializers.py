@@ -1,10 +1,10 @@
-from rest_framework.serializers import ModelSerializer, ValidatedModelSerializer
+from rest_framework.serializers import ModelSerializer
 
 from dcim.models import DeviceRole
 
-class PreDeviceRoleSerializer(ValidatedModelSerializer):
+class PreDeviceRoleSerializer(ModelSerializer):
 
     class Meta:
         model = DeviceRole
-        fields = ('id', 'name', 'slug', 'color', 'vm_role', 'description')
+        fields = ('id', 'name')
         
