@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+{% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
+<link rel="stylesheet" href="{% static 'netbox_topology_views/css/vendor.css' %}">
+<link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+
+<div class="row ">
+	<div class="col-md-9">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<strong>Network</strong>  <span id="status"></span>
+			</div>
+			<div class="panel-body">
+				<div id="visgraph" class=""></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<strong>Search</strong> 
+			</div>
+			<div class="panel-body">
+				<form id="search-form" class="form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input id="name" class="form-control" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-roles">Device roles</label>
+                        <select class="form-control" multiple="multiple" id="device-roles"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sites">Sites</label>
+                        <select class="form-control" multiple="multiple" id="sites"></select>
+                    </div>
+					<hr class="mb-4">
+					<button class="btn btn-primary btn-lg btn-block" type="submit" id="start-search">Search</button>
+				</form>
+			</div>
+
+		</div>
+
+		<div class="panel panel-default mt-3">
+			<div class="panel-heading">
+				<strong>Settings</strong>
+			</div>
+			<div class="panel-body">
+				<div class="custom-control custom-checkbox">
+					<input type="checkbox" class="custom-control-input" id="checkSaveCoordinates">
+					<label class="custom-control-label" for="checkSaveCoordinates">Save coordinates</label>
+				</div>
+				<div>
+					<span id="coordstatus"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endwith %}
+{% endblock %}
+
+{% block javascript %}
+
+<script src="{% static 'netbox_topology_views/js/vendor.js' %}"></script>
+<script src="{% static 'netbox_topology_views/js/app.js' %}"></script>
+
+<script type="application/javascript"> iniPlotboxIndex()</script>
+
+{% endblock %}
