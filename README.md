@@ -20,6 +20,19 @@ Then run `python3 manage.py collectstatic --no-input`
 There is also support for custom fiels.
 If you create a custom field "coordinates" for "dcim > device" with type "text" and name "coordinates" you will see the same layout every time.
 
+## Configure
+
+| Setting        | Default value           | Description  |
+| ------------- |-------------| -----|
+| device_img      | 'access-switch,core-switch,firewall,router,distribution-switch,backup,storage,wan-network,wireless-ap,server,internal-switch,isp-cpe-material,non-racked-devices,power-units' | The slug of the device roles that you have a image for. |
+| preselected_device_roles      | 'Firewall,Router,Distribution Switch,Core Switch,Internal Switch,Access Switch,Server,Storage,Backup,Wireless AP' | The full name of the device roles you want to pre select in the global view. |
+
+### Custom Images
+
+You upload you own custom images to the netbox static dir (`static/netbox_topology_views/img/`).
+These images need to be named after de device role slug and have the .png format/extension.
+If you add your own image you also need to add the slug to the `device_img` setting.
+
 ## Use
 
 Go to the plugins tab in the navbar and click topology or go to NETBOX_URL/plugins/topology-views/ view your topologies
