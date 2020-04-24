@@ -28,7 +28,7 @@ Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'device_img': 'rooter,switch,firewall',
+        'device_img': 'router,switch,firewall',
         'preselected_device_roles': 'Router, Firewall'
     }
 }
