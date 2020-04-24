@@ -22,6 +22,18 @@ If you create a custom field "coordinates" for "dcim > device" with type "text" 
 
 ## Configure
 
+If you want to override the default values configure the `PLUGINS_CONFIG` in your `netbox configuration.py`.
+
+Example:
+```
+PLUGINS_CONFIG = {
+    'netbox_topology_views': {
+        'device_img': 'rooter,switch,firewall',
+        'preselected_device_roles': 'Router, Firewall'
+    }
+}
+```
+
 | Setting        | Default value           | Description  |
 | ------------- |-------------| -----|
 | device_img      | 'access-switch,core-switch,firewall,router,distribution-switch,backup,storage,wan-network,wireless-ap,server,internal-switch,isp-cpe-material,non-racked-devices,power-units' | The slug of the device roles that you have a image for. |
