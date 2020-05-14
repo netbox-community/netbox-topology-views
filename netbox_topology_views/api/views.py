@@ -66,12 +66,12 @@ class SearchViewSet(ViewSet):
             node = {}
             node["id"] = device.id
             node["name"] = device.name
-            node["label"] = device.name + device.device_type.display_name
+            node["label"] = device.name + " " + device.device_type.display_name
             node["shape"] = 'image'
             if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-                node["image"] = '/static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
+                node["image"] = '../../static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
             else:
-                node["image"] = "/static/netbox_topology_views/img/role-unknown.png"
+                node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
 
             for device_custom_field in device.custom_field_values.all():
                 if device_custom_field.field.name == "coordinates":
