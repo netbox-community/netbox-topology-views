@@ -11,7 +11,7 @@ var options = {
     },
     nodes: {
         shape: 'image',
-        brokenImage: '/static/netbox_topology_views/img/role-unknown.png',
+        brokenImage: '../../static/netbox_topology_views/img/role-unknown.png',
         size: 35,
         font: {
             multi: 'md',
@@ -46,7 +46,7 @@ function startLoadSearchBar() {
         theme: "bootstrap",
         multiple: true,
         ajax: {
-            url: "/api/dcim/device-roles/?brief=true",
+            url: "../../api/dcim/device-roles/?brief=true",
             dataType: "json",
             type: "GET",
             data: function (params) {
@@ -73,7 +73,7 @@ function startLoadSearchBar() {
         theme: "bootstrap",
         multiple: true,
         ajax: {
-            url: "/api/dcim/sites/?brief=true",
+            url: "../../api/dcim/sites/?brief=true",
             dataType: "json",
             type: "GET",
             data: function (params) {
@@ -99,7 +99,7 @@ function startLoadSearchBar() {
     var deviceRolesSelect = $('#device-roles');
     $.ajax({
         type: 'GET',
-        url: '/api/plugins/topology-views/preselectdeviceroles/'
+        url: '../../api/plugins/topology-views/preselectdeviceroles/'
     }).then(function (data) {
         $.each(data.results, function (index, device_role_to_preload) {
             var option = new Option(device_role_to_preload.name, device_role_to_preload.id, true, true);
@@ -123,7 +123,7 @@ function handleButtonPress() {
         var value3 = $("#sites").val();
         $.ajax({
             type: "POST",
-            url: "/api/plugins/topology-views/search/search/",
+            url: "../../api/plugins/topology-views/search/search/",
             data: JSON.stringify({
                 'name': value,
                 'devicerole': value2,
@@ -157,7 +157,7 @@ function handleButtonPress() {
                         if ($('#checkSaveCoordinates').is(":checked")) {
                             nodes.update({ id: node_id, physics: false });
                             $.ajax({
-                                url: "/api/save_coords",
+                                url: "../../api/save_coords",
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: { "X-CSRFToken": csrftoken },
