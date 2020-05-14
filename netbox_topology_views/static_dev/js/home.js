@@ -116,7 +116,7 @@ function startLoadSearchBar() {
 
 function handleButtonPress() {
     $("#search-form").submit(function (event) {
-        $("#status").html('<span class="badge badge-pill badge-info">Loading data</span>');
+        $("#status").html('<span class="label  label-info">Loading data</span>');
         event.preventDefault();
         var value = $("#name").val();
         var value2 = $("#device-roles").val();
@@ -133,7 +133,7 @@ function handleButtonPress() {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data_result) {
-                $("#status").html('<span class="badge badge-pill badge-info">Drawing network</span>');
+                $("#status").html('<span class="label  label-info">Drawing network</span>');
                 graph = null;
                 nodes = new vis.DataSet();
                 edges = new vis.DataSet();
@@ -147,7 +147,7 @@ function handleButtonPress() {
                 graph.fit();
 
                 graph.on('afterDrawing', function () {
-                    $("#status").html('<span class="badge badge-pill badge-success">Ready</span>');
+                    $("#status").html('<span class="label label-success">Ready</span>');
                 });
 
                 graph.on("dragEnd", function (params) {
@@ -157,7 +157,7 @@ function handleButtonPress() {
                         if ($('#checkSaveCoordinates').is(":checked")) {
                             nodes.update({ id: node_id, physics: false });
                             $.ajax({
-                                url: "../../api/save_coords",
+                                url: "../../api/plugins/topology-views/save-coords/save_coords/",
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: { "X-CSRFToken": csrftoken },
@@ -168,18 +168,10 @@ function handleButtonPress() {
                                     'y': coordinates.y
                                 }),
                                 error: function (error_result) {
-                                    $("#coordstatus").html('<span class="badge badge-pill badge-warning">Failed to update coordinates</span>');
+                                    $("#coordstatus").html('<span class="label label-warning">Failed to update coordinates</span>');
                                 },
                                 success: function (data_result) {
-                                    $("#coordstatus").html('<span class="badge badge-pill badge-success">Updated coordinates</span>');
-                                    $.ajax({
-                                        url: '/api/reload_devices',
-                                        type: 'GET',
-                                        headers: { "X-CSRFToken": csrftoken },
-                                        success: function (data) {
-                                            //nothing
-                                        },
-                                    });
+                                    $("#coordstatus").html('<span class="label label-success">Updated coordinates</span>');
                                 },
                             });
                         }
@@ -187,7 +179,7 @@ function handleButtonPress() {
                 });
             },
             error: function (error_result) {
-                $("#status").html('<span class="badge badge-pill badge-warning">Something went wrong</span>');
+                $("#status").html('<span class="label label-warning">Something went wrong</span>');
             },
         });
     });

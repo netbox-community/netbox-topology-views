@@ -1,24 +1,68 @@
-from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet, GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import PreDeviceRoleSerializer
+from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer
 from django.conf import settings
 
 from utilities.api import IsAuthenticatedOrLoginNotRequired
 
 from dcim.models import  DeviceRole, Device, Cable
 
+ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
+ignore_cable_type = ignore_cable_type_raw.split(",")
+
+preselected_device_roles_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
+preselected_device_roles = preselected_device_roles_raw.split(",")
+
 
 class PreSelectDeviceRolesViewSet(ReadOnlyModelViewSet):
-    preselected_device_roles_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
-    preselected_device_roles = preselected_device_roles_raw.split(",")
     queryset = DeviceRole.objects.filter(name__in=preselected_device_roles)
     serializer_class = PreDeviceRoleSerializer
 
-class SearchViewSet(ViewSet):
-    _ignore_model_permissions = True
-    permission_classes = [IsAuthenticatedOrLoginNotRequired]
+class SaveCoordsViewSet(GenericViewSet):
+    queryset = Device.objects.all()
+    serializer_class = TopologyDummySerializer
+
+    @action(detail=False, methods=['post'])
+    def save_coords(self, request):
+        if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
+            device_id = None
+            x_coord = None
+            y_coord = None
+            if "node_id" in request.data:
+                if request.data["node_id"]:
+                    device_id = request.data["node_id"]
+            if "x" in request.data:
+                if request.data["x"]:
+                    x_coord = request.data["x"]
+            if "y" in request.data:
+                if request.data["y"]:
+                    y_coord = request.data["y"]
+
+            actual_device= Device.objects.get(id=device_id)
+            for device_custom_field in actual_device.custom_field_values.all():
+                if device_custom_field.field.name == "coordinates":
+                    old_cords =  device_custom_field.serialized_value.split(";")
+                    device_custom_field.value = "%s;%s" % (x_coord,y_coord)
+                    device_custom_field.save()
+                    actual_device.save()
+                    results = {}
+                    results["status"] = "ok"
+                    return Response(results)
+
+            print('notok')
+            #TODO
+            return Response(status=500)
+        else:
+            return Response(status=500)
+
+class SearchViewSet(GenericViewSet):
+    #_ignore_model_permissions = True
+    #permission_classes = [IsAuthenticatedOrLoginNotRequired]
+
+    queryset = Device.objects.all()
+    serializer_class = TopologyDummySerializer
 
     def _filter(self, site, role, name):
         filter_devices = Device.objects.all()
@@ -47,6 +91,7 @@ class SearchViewSet(ViewSet):
                 name = request.data["name"]
 
         devices = self._filter(sites, devicerole, name)
+
         nodes = []
         edges = []
         edge_ids = 0
@@ -55,14 +100,15 @@ class SearchViewSet(ViewSet):
             cables = device.get_cables()
             for cable in cables:
                 if cable.id not in cable_ids:
-                    cable_ids.append(cable.id)
-                    edge_ids += 1
-                    edge = {}
-                    edge["id"] = edge_ids
-                    edge["from"] = cable.termination_a.device.id
-                    edge["to"] = cable.termination_b.device.id
-                    edge["title"] = "Connection between <br> " + cable.termination_a.device.name + " [" + cable.termination_a.name +  "]<br>" + cable.termination_b.device.name + " [" + cable.termination_b.name + "]"
-                    edges.append(edge)
+                    if cable.termination_a_type.name not in ignore_cable_type:
+                        cable_ids.append(cable.id)
+                        edge_ids += 1
+                        edge = {}
+                        edge["id"] = edge_ids
+                        edge["from"] = cable.termination_a.device.id
+                        edge["to"] = cable.termination_b.device.id
+                        edge["title"] = "Connection between <br> " + cable.termination_a.device.name + " [" + cable.termination_a.name +  "]<br>" + cable.termination_b.device.name + " [" + cable.termination_b.name + "]"
+                        edges.append(edge)
             node = {}
             node["id"] = device.id
             node["name"] = device.name
