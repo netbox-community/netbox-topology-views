@@ -7,7 +7,7 @@ var options = {
     interaction: {
         hover: true,
         hoverConnectedEdges: true,
-        multiselect: true
+        multiselect: false
     },
     nodes: {
         shape: 'image',
@@ -95,6 +95,33 @@ function startLoadSearchBar() {
             }
         }
     });
+    $('#tags').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/extras/tags/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    term: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
 
     var deviceRolesSelect = $('#device-roles');
     $.ajax({
@@ -112,28 +139,47 @@ function startLoadSearchBar() {
             });
         });
     });
+
+    var tagsSelect = $('#tags');
+    $.ajax({
+        type: 'GET',
+        url: '../../api/plugins/topology-views/preselecttags/'
+    }).then(function (data) {
+        $.each(data.results, function (index, tags_to_preload) {
+            var option = new Option(tags_to_preload.name, tags_to_preload.id, true, true);
+            tagsSelect.append(option).trigger('change');
+            tagsSelect.trigger({
+                type: 'select2:select',
+                params: {
+                    data: tags_to_preload
+                }
+            });
+        });
+    });
 }
 
 function handleButtonPress() {
     $("#search-form").submit(function (event) {
-        $("#status").html('<span class="badge badge-pill badge-info">Loading data</span>');
+        $("#status").html('<span class="label  label-info">Loading data</span>');
         event.preventDefault();
         var value = $("#name").val();
         var value2 = $("#device-roles").val();
         var value3 = $("#sites").val();
+        var value4 = $("#tags").val();
         $.ajax({
             type: "POST",
             url: "../../api/plugins/topology-views/search/search/",
             data: JSON.stringify({
                 'name': value,
                 'devicerole': value2,
-                'sites': value3
+                'sites': value3,
+                'tags': value4
             }),
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data_result) {
-                $("#status").html('<span class="badge badge-pill badge-info">Drawing network</span>');
+                $("#status").html('<span class="label  label-info">Drawing network</span>');
                 graph = null;
                 nodes = new vis.DataSet();
                 edges = new vis.DataSet();
@@ -147,7 +193,7 @@ function handleButtonPress() {
                 graph.fit();
 
                 graph.on('afterDrawing', function () {
-                    $("#status").html('<span class="badge badge-pill badge-success">Ready</span>');
+                    $("#status").html('<span class="label label-success">Ready</span>');
                 });
 
                 graph.on("dragEnd", function (params) {
@@ -155,9 +201,9 @@ function handleButtonPress() {
                     $.each(dragged, function (node_id, coordinates) {
                         $("#coordstatus").html('');
                         if ($('#checkSaveCoordinates').is(":checked")) {
-                            nodes.update({ id: node_id, physics: false });
+                            //nodes.update({ id: node_id, physics: false });
                             $.ajax({
-                                url: "../../api/save_coords",
+                                url: "../../api/plugins/topology-views/save-coords/save_coords/",
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: { "X-CSRFToken": csrftoken },
@@ -168,18 +214,10 @@ function handleButtonPress() {
                                     'y': coordinates.y
                                 }),
                                 error: function (error_result) {
-                                    $("#coordstatus").html('<span class="badge badge-pill badge-warning">Failed to update coordinates</span>');
+                                    $("#coordstatus").html('<span class="label label-warning">Failed to update coordinates</span>');
                                 },
                                 success: function (data_result) {
-                                    $("#coordstatus").html('<span class="badge badge-pill badge-success">Updated coordinates</span>');
-                                    $.ajax({
-                                        url: '/api/reload_devices',
-                                        type: 'GET',
-                                        headers: { "X-CSRFToken": csrftoken },
-                                        success: function (data) {
-                                            //nothing
-                                        },
-                                    });
+                                    $("#coordstatus").html('<span class="label label-success">Updated coordinates</span>');
                                 },
                             });
                         }
@@ -187,7 +225,7 @@ function handleButtonPress() {
                 });
             },
             error: function (error_result) {
-                $("#status").html('<span class="badge badge-pill badge-warning">Something went wrong</span>');
+                $("#status").html('<span class="label label-warning">Something went wrong</span>');
             },
         });
     });

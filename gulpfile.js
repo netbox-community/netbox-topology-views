@@ -10,7 +10,7 @@ var jsVendorFiles = [
 ];
 
 var cssVendorFiles = [
-    'node_modules/vis-network/styles/vis-network.min.css',
+    'node_modules/vis-network/dist/dist/vis-network.min.css',
 ];
 var sassFiles = './netbox_topology_views/static_dev/css/*.scss',
     cssDest = './netbox_topology_views/static/netbox_topology_views/css/';
