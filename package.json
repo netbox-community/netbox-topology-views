@@ -13,8 +13,6 @@
     "gulp-concat": "^2.6.1",
     "gulp-sass": "^4.0.2",
     "gulp-uglify": "^3.0.2",
-    "vis-data": "^6.2.3",
-    "vis-util": "^1.1.8",
-    "vis-network": "^6.4.4"
+    "vis-network": "^7.6.4"
   }
 }

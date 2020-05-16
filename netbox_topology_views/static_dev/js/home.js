@@ -7,7 +7,7 @@ var options = {
     interaction: {
         hover: true,
         hoverConnectedEdges: true,
-        multiselect: true
+        multiselect: false
     },
     nodes: {
         shape: 'image',
@@ -201,7 +201,7 @@ function handleButtonPress() {
                     $.each(dragged, function (node_id, coordinates) {
                         $("#coordstatus").html('');
                         if ($('#checkSaveCoordinates').is(":checked")) {
-                            nodes.update({ id: node_id, physics: false });
+                            //nodes.update({ id: node_id, physics: false });
                             $.ajax({
                                 url: "../../api/plugins/topology-views/save-coords/save_coords/",
                                 type: 'POST',
