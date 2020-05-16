@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet, GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.contrib.contenttypes.models import ContentType
 
 from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer, PreTagSerializer
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.conf import settings
 from utilities.api import IsAuthenticatedOrLoginNotRequired
 
 from dcim.models import  DeviceRole, Device, Cable
-from extras.models import Tag
+from extras.models import Tag, CustomField, CustomFieldValue
 
 ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 ignore_cable_type = ignore_cable_type_raw.split(",")
@@ -34,7 +35,16 @@ class SaveCoordsViewSet(GenericViewSet):
 
     @action(detail=False, methods=['post'])
     def save_coords(self, request):
+        results = {}
         if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
+            try:
+                 cfCoords = CustomField.objects.get(name='coordinates')
+            except CustomField.DoesNotExist:
+                results["status"] = "coords custom field not created"
+                return Response(status=500)
+
+            obj_type = ContentType.objects.get_for_model(Device)
+
             device_id = None
             x_coord = None
             y_coord = None
@@ -49,21 +59,21 @@ class SaveCoordsViewSet(GenericViewSet):
                     y_coord = request.data["y"]
 
             actual_device= Device.objects.get(id=device_id)
-            for device_custom_field in actual_device.custom_field_values.all():
-                if device_custom_field.field.name == "coordinates":
-                    old_cords =  device_custom_field.serialized_value.split(";")
-                    device_custom_field.value = "%s;%s" % (x_coord,y_coord)
-                    device_custom_field.save()
-                    actual_device.save()
-                    results = {}
-                    results["status"] = "ok"
-                    return Response(results)
-
-            print('notok')
-            #TODO
-            return Response(status=500)
+            try:
+                cfvCoords = CustomFieldValue.objects.get(obj_type=obj_type, obj_id=actual_device.pk, field__name='coordinates')
+                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
+                cfvCoords.save()
+                results["status"] = "coords set"
+            except CustomFieldValue.DoesNotExist:
+                cfvCoords = CustomFieldValue(field=cfCoords, obj_type=obj_type, obj_id=actual_device.id)
+                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
+                cfvCoords.save()
+                results["status"] = "coords set for first time"
+            
+            return Response(results)
         else:
-            return Response(status=500)
+            results["status"] = "not allowed to save coords"
+            return Response(results, status=500)
 
 class SearchViewSet(GenericViewSet):
     #_ignore_model_permissions = True
