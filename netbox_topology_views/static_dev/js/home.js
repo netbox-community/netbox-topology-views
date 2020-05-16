@@ -95,6 +95,33 @@ function startLoadSearchBar() {
             }
         }
     });
+    $('#tags').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/extras/tags/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    term: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
 
     var deviceRolesSelect = $('#device-roles');
     $.ajax({
@@ -112,6 +139,23 @@ function startLoadSearchBar() {
             });
         });
     });
+
+    var tagsSelect = $('#tags');
+    $.ajax({
+        type: 'GET',
+        url: '../../api/plugins/topology-views/preselecttags/'
+    }).then(function (data) {
+        $.each(data.results, function (index, tags_to_preload) {
+            var option = new Option(tags_to_preload.name, tags_to_preload.id, true, true);
+            tagsSelect.append(option).trigger('change');
+            tagsSelect.trigger({
+                type: 'select2:select',
+                params: {
+                    data: tags_to_preload
+                }
+            });
+        });
+    });
 }
 
 function handleButtonPress() {
@@ -121,13 +165,15 @@ function handleButtonPress() {
         var value = $("#name").val();
         var value2 = $("#device-roles").val();
         var value3 = $("#sites").val();
+        var value4 = $("#tags").val();
         $.ajax({
             type: "POST",
             url: "../../api/plugins/topology-views/search/search/",
             data: JSON.stringify({
                 'name': value,
                 'devicerole': value2,
-                'sites': value3
+                'sites': value3,
+                'tags': value4
             }),
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",

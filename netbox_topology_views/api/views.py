@@ -2,12 +2,13 @@ from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet,
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer
+from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer, PreTagSerializer
 from django.conf import settings
 
 from utilities.api import IsAuthenticatedOrLoginNotRequired
 
 from dcim.models import  DeviceRole, Device, Cable
+from extras.models import Tag
 
 ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 ignore_cable_type = ignore_cable_type_raw.split(",")
@@ -15,10 +16,17 @@ ignore_cable_type = ignore_cable_type_raw.split(",")
 preselected_device_roles_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
 preselected_device_roles = preselected_device_roles_raw.split(",")
 
+preselected_tags_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
+preselected_tags = preselected_tags_raw.split(",")
+
 
 class PreSelectDeviceRolesViewSet(ReadOnlyModelViewSet):
     queryset = DeviceRole.objects.filter(name__in=preselected_device_roles)
     serializer_class = PreDeviceRoleSerializer
+
+class PreSelectTagsViewSet(ReadOnlyModelViewSet):
+    queryset = Tag.objects.filter(name__in=preselected_tags)
+    serializer_class = PreTagSerializer
 
 class SaveCoordsViewSet(GenericViewSet):
     queryset = Device.objects.all()
@@ -64,7 +72,7 @@ class SearchViewSet(GenericViewSet):
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
-    def _filter(self, site, role, name):
+    def _filter(self, site, role, name, tags):
         filter_devices = Device.objects.all()
         if name is not None:
             filter_devices = filter_devices.filter(name__contains=name)
@@ -72,6 +80,8 @@ class SearchViewSet(GenericViewSet):
             filter_devices = filter_devices.filter(site__id__in=site)
         if role is not None:
             filter_devices = filter_devices.filter(device_role__id__in=role)
+        if tags is not None:
+            filter_devices = filter_devices.filter(tags__id__in=tags)
         return filter_devices
 
 
@@ -80,6 +90,7 @@ class SearchViewSet(GenericViewSet):
         name = None
         sites = None
         devicerole = None
+        tags = None
         if "devicerole" in request.data:
             if request.data["devicerole"]:
                 devicerole = request.data["devicerole"]
@@ -89,8 +100,11 @@ class SearchViewSet(GenericViewSet):
         if "name" in request.data:
             if request.data["name"]:
                 name = request.data["name"]
+        if "tags" in request.data:
+            if request.data["tags"]:
+                tags = request.data["tags"]
 
-        devices = self._filter(sites, devicerole, name)
+        devices = self._filter(sites, devicerole, name, tags)
 
         nodes = []
         edges = []
