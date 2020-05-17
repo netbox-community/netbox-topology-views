@@ -51,7 +51,7 @@ function startLoadSearchBar() {
             type: "GET",
             data: function (params) {
                 var queryParameters = {
-                    term: params.term
+                    q: params.term
                 }
                 return queryParameters;
             },
@@ -79,7 +79,7 @@ function startLoadSearchBar() {
             data: function (params) {
 
                 var queryParameters = {
-                    term: params.term
+                    q: params.term
                 }
                 return queryParameters;
             },
@@ -106,7 +106,7 @@ function startLoadSearchBar() {
             type: "GET",
             data: function (params) {
                 var queryParameters = {
-                    term: params.term
+                    q: params.term
                 }
                 return queryParameters;
             },
