@@ -128,19 +128,42 @@ class SearchViewSet(GenericViewSet):
                         if cable.termination_a_type.name not in ignore_cable_type and cable.termination_b_type.name not in ignore_cable_type:
                             cable_ids.append(cable.id)
                             edge_ids += 1
+
+                            cable_a_dev_name = cable.termination_a.device.name
+                            if cable_a_dev_name is None:
+                                cable_a_dev_name = "device A name unkown"
+                            cable_a_name = cable.termination_a.name
+                            if cable_a_name is None:
+                                cable_a_name = "cable A name unkown"
+                            cable_b_dev_name = cable.termination_b.device.name
+                            if cable_b_dev_name is None:
+                                cable_b_dev_name = "device B name unkown"
+                            cable_b_name = cable.termination_b.name
+                            if cable_b_name is None:
+                                cable_b_name = "cable B name unkown"
+
                             edge = {}
                             edge["id"] = edge_ids
                             edge["from"] = cable.termination_a.device.id
                             edge["to"] = cable.termination_b.device.id
-                            edge["title"] = "Connection between <br> " + cable.termination_a.device.name + " [" + cable.termination_a.name +  "]<br>" + cable.termination_b.device.name + " [" + cable.termination_b.name + "]"
+                            edge["title"] = "Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
                             edges.append(edge)
                 else:
                     pass
                     #circuittermination not supported for now
+            
+            dev_name = device.name
+            if dev_name is None:
+                dev_name = "device name unkown"
+
+            cable_role_name = device.device_type.display_name
+            if cable_role_name is None:
+                cable_role_name = "device role name unkown"
+
             node = {}
             node["id"] = device.id
-            node["name"] = device.name
-            node["label"] = device.name + " " + device.device_type.display_name
+            node["name"] = dev_name
+            node["label"] = dev_name + " {" + cable_role_name + "}"
             node["shape"] = 'image'
             if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
                 node["image"] = '../../static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
