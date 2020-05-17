@@ -123,16 +123,20 @@ class SearchViewSet(GenericViewSet):
         for device in devices:
             cables = device.get_cables()
             for cable in cables:
-                if cable.id not in cable_ids:
-                    if cable.termination_a_type.name not in ignore_cable_type:
-                        cable_ids.append(cable.id)
-                        edge_ids += 1
-                        edge = {}
-                        edge["id"] = edge_ids
-                        edge["from"] = cable.termination_a.device.id
-                        edge["to"] = cable.termination_b.device.id
-                        edge["title"] = "Connection between <br> " + cable.termination_a.device.name + " [" + cable.termination_a.name +  "]<br>" + cable.termination_b.device.name + " [" + cable.termination_b.name + "]"
-                        edges.append(edge)
+                if cable.termination_a_type.name != "circuit termination" and cable.termination_b_type.name != "circuit termination":
+                    if cable.id not in cable_ids:
+                        if cable.termination_a_type.name not in ignore_cable_type and cable.termination_b_type.name not in ignore_cable_type:
+                            cable_ids.append(cable.id)
+                            edge_ids += 1
+                            edge = {}
+                            edge["id"] = edge_ids
+                            edge["from"] = cable.termination_a.device.id
+                            edge["to"] = cable.termination_b.device.id
+                            edge["title"] = "Connection between <br> " + cable.termination_a.device.name + " [" + cable.termination_a.name +  "]<br>" + cable.termination_b.device.name + " [" + cable.termination_b.name + "]"
+                            edges.append(edge)
+                else:
+                    pass
+                    #circuittermination not supported for now
             node = {}
             node["id"] = device.id
             node["name"] = device.name
