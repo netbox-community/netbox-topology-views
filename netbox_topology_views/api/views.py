@@ -131,16 +131,16 @@ class SearchViewSet(GenericViewSet):
 
                             cable_a_dev_name = cable.termination_a.device.name
                             if cable_a_dev_name is None:
-                                cable_a_dev_name = "device A name unkown"
+                                cable_a_dev_name = "device A name unknown"
                             cable_a_name = cable.termination_a.name
                             if cable_a_name is None:
-                                cable_a_name = "cable A name unkown"
+                                cable_a_name = "cable A name unknown"
                             cable_b_dev_name = cable.termination_b.device.name
                             if cable_b_dev_name is None:
-                                cable_b_dev_name = "device B name unkown"
+                                cable_b_dev_name = "device B name unknown"
                             cable_b_name = cable.termination_b.name
                             if cable_b_name is None:
-                                cable_b_name = "cable B name unkown"
+                                cable_b_name = "cable B name unknown"
 
                             edge = {}
                             edge["id"] = edge_ids
@@ -154,11 +154,11 @@ class SearchViewSet(GenericViewSet):
             
             dev_name = device.name
             if dev_name is None:
-                dev_name = "device name unkown"
+                dev_name = "device name unknown"
 
             cable_role_name = device.device_type.display_name
             if cable_role_name is None:
-                cable_role_name = "device role name unkown"
+                cable_role_name = "device role name unknown"
 
             node = {}
             node["id"] = device.id
