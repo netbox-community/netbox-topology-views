@@ -156,15 +156,18 @@ class SearchViewSet(GenericViewSet):
             if dev_name is None:
                 dev_name = "device name unknown"
 
-            cable_role_name = device.device_type.display_name
-            if cable_role_name is None:
-                cable_role_name = "device role name unknown"
-            dev_title = "<table><tr><th>Type:</th><td>" + cable_role_name + "</td></tr><tr><th>Role:</th><td>" + device.device_role.name
+            node_content = ""
+
+            if device.device_type.display_name is not None:
+                node_content += "<tr><th>Type: </th><td>" + device.device_type.display_name + "</td></tr>"
+            if device.device_role.name is not None:
+                node_content +=  "<tr><th>Role: </th><td>" + device.device_role.name + "</td></tr>"
             if device.serial != "":
-                dev_title = dev_title + "</td></tr><tr><th>Serial:</th><td>" + device.serial
+                node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
             if device.primary_ip is not None:
-                dev_title = dev_title + "</td></tr><tr><th>IP Address:</th><td>" + str(device.primary_ip.address)
-            dev_title = dev_title + "</td></tr></table>"
+                node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
+
+            dev_title = "<table> %s </table>" % (node_content)
 
             node = {}
             node["id"] = device.id
