@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "netbox_topology_views",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "scripts": {
     "resources": "gulp build",
     "resources_dev": "gulp build_dev"
