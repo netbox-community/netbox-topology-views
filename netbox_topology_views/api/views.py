@@ -159,11 +159,18 @@ class SearchViewSet(GenericViewSet):
             cable_role_name = device.device_type.display_name
             if cable_role_name is None:
                 cable_role_name = "device role name unknown"
+            dev_title = "<table><tr><th>Type:</th><td>" + cable_role_name + "</td></tr><tr><th>Role:</th><td>" + device.device_role.name
+            if device.serial != "":
+                dev_title = dev_title + "</td></tr><tr><th>Serial:</th><td>" + device.serial
+            if device.primary_ip is not None:
+                dev_title = dev_title + "</td></tr><tr><th>IP Address:</th><td>" + str(device.primary_ip.address)
+            dev_title = dev_title + "</td></tr></table>"
 
             node = {}
             node["id"] = device.id
             node["name"] = dev_name
-            node["label"] = dev_name + " {" + cable_role_name + "}"
+            node["label"] = dev_name
+            node["title"] = dev_title
             node["shape"] = 'image'
             if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
                 node["image"] = '../../static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
