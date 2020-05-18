@@ -147,6 +147,8 @@ class SearchViewSet(GenericViewSet):
                             edge["from"] = cable.termination_a.device.id
                             edge["to"] = cable.termination_b.device.id
                             edge["title"] = "Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+                            if cable.color != "":
+                                edge["color"] = "#" + cable.color
                             edges.append(edge)
                 else:
                     pass
