@@ -44,7 +44,7 @@ PLUGINS_CONFIG = {
 | allow_coordinates_saving      | False | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates |
 | ignore_cable_type      | 'power outlet,power port' | The cable types that you want to ignore in the views  |
 | preselected_tags      | '' | The name of tags you want to preload  |
-
+| enable_circuit_terminations      | False  | (bool) Set to true if you want to see circuit terminations in the topology  |
 
 ### Custom Images
 
