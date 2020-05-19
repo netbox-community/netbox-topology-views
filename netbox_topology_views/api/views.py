@@ -178,30 +178,33 @@ class SearchViewSet(GenericViewSet):
                                 if cable.termination_a.circuit.termination_a is not None:
                                     if cable.termination_a.circuit.termination_a.cable is not None:
                                         if cable.termination_a.circuit.termination_a.cable.id != cable.id:
-                                            edge["from"] = cable.termination_a.circuit.termination_a.cable.termination_b.device.id
+                                            if cable.termination_a.circuit.termination_a.cable.termination_b is not None:
+                                                edge["from"] = cable.termination_a.circuit.termination_a.cable.termination_b.device.id
 
-                                            cable_a_dev_name = cable.termination_a.circuit.termination_a.cable.termination_b.device.name
-                                            if cable_a_dev_name is None:
-                                                cable_a_dev_name = "device B name unknown"
-                                            cable_b_name = cable.termination_a.circuit.termination_a.cable.termination_b.name
-                                            if cable_a_name is None:
-                                                cable_a_name = "cable B name unknown"
-                                            title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                                cable_a_dev_name = cable.termination_a.circuit.termination_a.cable.termination_b.device.name
+                                                if cable_a_dev_name is None:
+                                                    cable_a_dev_name = "device B name unknown"
+                                                cable_b_name = cable.termination_a.circuit.termination_a.cable.termination_b.name
+                                                if cable_a_name is None:
+                                                    cable_a_name = "cable B name unknown"
+                                                title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                                edge["title"] = title
+                                                edges.append(edge)
                                 if cable.termination_a.circuit.termination_z is not None:
                                     if cable.termination_a.circuit.termination_z.cable is not None:
                                         if cable.termination_a.circuit.termination_z.cable.id != cable.id:
-                                            edge["from"] = cable.termination_a.circuit.termination_z.cable.termination_b.device.id
+                                            if cable.termination_a.circuit.termination_z.cable.termination_b is not None:
+                                                edge["from"] = cable.termination_a.circuit.termination_z.cable.termination_b.device.id
 
-                                            cable_a_dev_name = cable.termination_a.circuit.termination_z.cable.termination_b.device.name
-                                            if cable_a_dev_name is None:
-                                                cable_a_dev_name = "device B name unknown"
-                                            cable_a_name = cable.termination_a.circuit.termination_z.cable.termination_b.name
-                                            if cable_a_name is None:
-                                                cable_a_name = "cable B name unknown"
-                                            title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
-
-                                edge["title"] = title
-                                edges.append(edge)
+                                                cable_a_dev_name = cable.termination_a.circuit.termination_z.cable.termination_b.device.name
+                                                if cable_a_dev_name is None:
+                                                    cable_a_dev_name = "device B name unknown"
+                                                cable_a_name = cable.termination_a.circuit.termination_z.cable.termination_b.name
+                                                if cable_a_name is None:
+                                                    cable_a_name = "cable B name unknown"
+                                                title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                                edge["title"] = title
+                                                edges.append(edge)
                 
             dev_name = device.name
             if dev_name is None:
