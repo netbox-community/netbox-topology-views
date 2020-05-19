@@ -1,7 +1,8 @@
 # Netbox Topology Views Plugin
 
 Create topology views/maps from your devices in netbox.
-Support to filter on name, site and device role.
+The connections are based on the cables you created in netbox.
+Support to filter on name, site, tag and device role.
 
 ## Preview
 
@@ -62,4 +63,4 @@ Run `pip install netbox-topology-views --upgrade` in your venv.
 
 Run `python3 manage.py collectstatic --no-input`
 
-Clear you browser cache.
+Clear your browser cache.
