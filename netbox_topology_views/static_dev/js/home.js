@@ -1,5 +1,8 @@
 var graph = null;
 var container = null;
+var downloadButton = null;
+var MIME_TYPE = "image/png";
+var canvas = null;
 var csrftoken = null;
 var nodes = new vis.DataSet();
 var edges = new vis.DataSet();
@@ -36,6 +39,7 @@ function iniPlotboxIndex() {
         csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
         startLoadSearchBar();
         handleButtonPress();
+        downloadButton = document.getElementById('btnDownloadImage');
     }, false);
 }
 
@@ -167,14 +171,14 @@ function handleButtonPress() {
         var value3 = $("#sites").val();
         var value4 = $("#tags").val();
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: "../../api/plugins/topology-views/search/search/",
-            data: JSON.stringify({
+            data: {
                 'name': value,
-                'devicerole': value2,
-                'sites': value3,
-                'tags': value4
-            }),
+                'devicerole[]': value2,
+                'sites[]': value3,
+                'tags[]': value4
+            },
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -191,9 +195,13 @@ function handleButtonPress() {
                     edges.add(edge);
                 });
                 graph.fit();
+                canvas = document.getElementById('visgraph').getElementsByTagName('canvas')[0];
 
                 graph.on('afterDrawing', function () {
                     $("#status").html('<span class="label label-success">Ready</span>');
+                    var image = canvas.toDataURL(MIME_TYPE);
+                    downloadButton.href = image;
+                    downloadButton.download = "topology";
                 });
 
                 graph.on("dragEnd", function (params) {
@@ -223,6 +231,7 @@ function handleButtonPress() {
                         }
                     });
                 });
+
             },
             error: function (error_result) {
                 $("#status").html('<span class="label label-warning">Something went wrong</span>');
