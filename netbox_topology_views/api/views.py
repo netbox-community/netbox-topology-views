@@ -34,7 +34,7 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['patch'])
     def save_coords(self, request):
         results = {}
         if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
@@ -109,7 +109,7 @@ class SearchViewSet(ReadOnlyModelViewSet):
         devicerole = request.query_params.getlist('devicerole[]', None)
         if devicerole == []:
             devicerole = None
-            
+
         tags = request.query_params.getlist('tags[]', None)
         if tags == []:
             tags = None

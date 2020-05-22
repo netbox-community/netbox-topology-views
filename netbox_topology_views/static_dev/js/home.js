@@ -212,10 +212,11 @@ function handleButtonPress() {
                             //nodes.update({ id: node_id, physics: false });
                             $.ajax({
                                 url: "../../api/plugins/topology-views/save-coords/save_coords/",
-                                type: 'POST',
+                                type: 'PATCH',
                                 dataType: 'json',
                                 headers: { "X-CSRFToken": csrftoken },
                                 contentType: "application/json; charset=utf-8",
+                                processData: false,
                                 data: JSON.stringify({
                                     'node_id': node_id,
                                     'x': coordinates.x,
