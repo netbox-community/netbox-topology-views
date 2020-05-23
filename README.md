@@ -10,9 +10,21 @@ Support to filter on name, site, tag and device role.
 
 ## Install
 
+The plugin is available as a Python package and can be installed with pip.
+
 Run `pip install netbox-topology-views` in your virtual env.
 
-Add 'netbox_topology_views' to the PLUGINS array in your django configuration file.  
+To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
+
+```no-highlight
+# echo netbox-topology-views >> local_requirements.txt
+```
+
+Once installed, the plugin needs to be enabled in your `configuration.py`
+
+```python
+# In your configuration.py
+PLUGINS = ["netbox-topology-views"]
 
 Then run `python3 manage.py collectstatic --no-input`
 
