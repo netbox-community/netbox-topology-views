@@ -24,7 +24,7 @@ Once installed, the plugin needs to be enabled in your `configuration.py`
 
 ```python
 # In your configuration.py
-PLUGINS = ["netbox-topology-views"]
+PLUGINS = ["netbox_topology_views"]
 ```
 
 Then run `python3 manage.py collectstatic --no-input`
