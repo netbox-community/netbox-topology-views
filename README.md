@@ -76,4 +76,14 @@ Run `pip install netbox-topology-views --upgrade` in your venv.
 
 Run `python3 manage.py collectstatic --no-input`
 
-Clear your browser cache.
+
+Clear you browser cache.
+
+
+### Permissions
+
+To view `/plugins/topology-views/` you need the following permissions:
+ + dcim | device | can view device
+ + dcim | site | can view site
+ + extras | tag | can view tag
+ + dcim | device role | can view device role

@@ -30,11 +30,11 @@ class PreSelectTagsViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.filter(name__in=preselected_tags)
     serializer_class = PreTagSerializer
 
-class SaveCoordsViewSet(GenericViewSet):
+class SaveCoordsViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['patch'])
     def save_coords(self, request):
         results = {}
         if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
@@ -76,7 +76,7 @@ class SaveCoordsViewSet(GenericViewSet):
             results["status"] = "not allowed to save coords"
             return Response(results, status=500)
 
-class SearchViewSet(GenericViewSet):
+class SearchViewSet(ReadOnlyModelViewSet):
     #_ignore_model_permissions = True
     #permission_classes = [IsAuthenticatedOrLoginNotRequired]
 
@@ -96,24 +96,23 @@ class SearchViewSet(GenericViewSet):
         return filter_devices
 
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['get'])
     def search(self, request):
-        name = None
-        sites = None
-        devicerole = None
-        tags = None
-        if "devicerole" in request.data:
-            if request.data["devicerole"]:
-                devicerole = request.data["devicerole"]
-        if "sites" in request.data:
-            if request.data["sites"]:
-                sites = request.data["sites"]
-        if "name" in request.data:
-            if request.data["name"]:
-                name = request.data["name"]
-        if "tags" in request.data:
-            if request.data["tags"]:
-                tags = request.data["tags"]
+        name = request.query_params.get('name', None)
+        if name == "":
+            name = None
+
+        sites = request.query_params.getlist('sites[]', None)
+        if sites == []:
+            sites = None
+
+        devicerole = request.query_params.getlist('devicerole[]', None)
+        if devicerole == []:
+            devicerole = None
+
+        tags = request.query_params.getlist('tags[]', None)
+        if tags == []:
+            tags = None
 
         devices = self._filter(sites, devicerole, name, tags)
 
