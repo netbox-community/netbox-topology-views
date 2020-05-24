@@ -1,7 +1,8 @@
 # Netbox Topology Views Plugin
 
 Create topology views/maps from your devices in netbox.
-Support to filter on name, site and device role.
+The connections are based on the cables you created in netbox.
+Support to filter on name, site, tag and device role.
 
 ## Preview
 
@@ -9,9 +10,22 @@ Support to filter on name, site and device role.
 
 ## Install
 
+The plugin is available as a Python package and can be installed with pip.
+
 Run `pip install netbox-topology-views` in your virtual env.
 
-Add 'netbox_topology_views' to the PLUGINS array in your django configuration file.  
+To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
+
+```no-highlight
+# echo netbox-topology-views >> local_requirements.txt
+```
+
+Once installed, the plugin needs to be enabled in your `configuration.py`
+
+```python
+# In your configuration.py
+PLUGINS = ["netbox_topology_views"]
+```
 
 Then run `python3 manage.py collectstatic --no-input`
 
@@ -61,6 +75,7 @@ Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plu
 Run `pip install netbox-topology-views --upgrade` in your venv.
 
 Run `python3 manage.py collectstatic --no-input`
+
 
 Clear you browser cache.
 
