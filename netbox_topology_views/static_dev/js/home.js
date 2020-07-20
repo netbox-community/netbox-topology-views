@@ -41,6 +41,7 @@ function iniPlotboxIndex() {
         startLoadSearchBar();
         handleButtonPress();
         downloadButton = document.getElementById('btnDownloadImage');
+        btnFullView = document.getElementById('btnFullView');
     }, false);
 }
 
@@ -244,7 +245,15 @@ function handleButtonPress() {
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (data_result) {
+            beforeSend: function(){ 
+                new_url = this.url.split("../../api/plugins/topology-views/search/search/?");
+                new_url = new_url[1];
+                new_url = "../../plugins/topology-views/full?" + new_url
+
+                btnFullView.classList.remove("disabled");
+                btnFullView.href = new_url;
+            },
+            success: function (data_result, status, xhr) {
                 $("#status").html('<span class="label  label-info">Drawing network</span>');
                 graph = null;
                 nodes = new vis.DataSet();

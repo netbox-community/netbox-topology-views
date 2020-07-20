@@ -1,5 +1,41 @@
 var graph = null;
 var container = null;
+
+function iniPlotboxFull() {
+    document.addEventListener('DOMContentLoaded', function () {
+        container = document.getElementById('fullvisgraph');
+        startRender();
+    }, false);
+}
+
+function startRender() {
+  var url = location.search;
+
+  $.ajax({
+    type: "GET",
+    url: "../../api/plugins/topology-views/search/search/" + url,
+    contentType: "application/json; charset=utf-8",
+    success: function (data_result, status, xhr) {
+        graph = null;
+        nodes = new vis.DataSet();
+        edges = new vis.DataSet();
+        graph = new vis.Network(container, { nodes: nodes, edges: edges }, options);
+        $.each(data_result["nodes"], function (index, device) {
+            nodes.add(device);
+        });
+        $.each(data_result["edges"], function (index, edge) {
+            edges.add(edge);
+        });
+        graph.fit();
+        canvas = document.getElementById('fullvisgraph').getElementsByTagName('canvas')[0];
+    },
+    error: function (error_result) {
+       
+    },
+});
+}
+var graph = null;
+var container = null;
 var downloadButton = null;
 var MIME_TYPE = "image/png";
 var canvas = null;
@@ -41,6 +77,7 @@ function iniPlotboxIndex() {
         startLoadSearchBar();
         handleButtonPress();
         downloadButton = document.getElementById('btnDownloadImage');
+        btnFullView = document.getElementById('btnFullView');
     }, false);
 }
 
@@ -244,7 +281,15 @@ function handleButtonPress() {
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (data_result) {
+            beforeSend: function(){ 
+                new_url = this.url.split("../../api/plugins/topology-views/search/search/?");
+                new_url = new_url[1];
+                new_url = "../../plugins/topology-views/full?" + new_url
+
+                btnFullView.classList.remove("disabled");
+                btnFullView.href = new_url;
+            },
+            success: function (data_result, status, xhr) {
                 $("#status").html('<span class="label  label-info">Drawing network</span>');
                 graph = null;
                 nodes = new vis.DataSet();

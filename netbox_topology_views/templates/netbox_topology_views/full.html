@@ -1,0 +1,24 @@
+{% load static %}
+{% load helpers %}
+
+{% block content %}
+{% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
+<link rel="stylesheet" href="{% static 'netbox_topology_views/css/vendor.css' %}">
+<link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+
+
+<div class="panel-body">
+    <div id="fullvisgraph" class=""></div>
+</div>
+
+
+{% endwith %}
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'jquery/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'netbox_topology_views/js/vendor.js' %}"></script>
+<script src="{% static 'netbox_topology_views/js/app.js' %}"></script>
+
+<script type="application/javascript"> iniPlotboxFull()</script>
+{% endblock %}
