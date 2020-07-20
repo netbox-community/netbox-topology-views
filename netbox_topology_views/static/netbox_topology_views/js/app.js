@@ -1,1 +1,304 @@
-var graph=null,container=null,downloadButton=null,MIME_TYPE="image/png",canvas=null,csrftoken=null,nodes=new vis.DataSet,edges=new vis.DataSet,options={interaction:{hover:!0,hoverConnectedEdges:!0,multiselect:!1},nodes:{shape:"image",brokenImage:"../../static/netbox_topology_views/img/role-unknown.png",size:35,font:{multi:"md",face:"helvetica"}},edges:{length:100,width:2,font:{face:"helvetica"}},physics:{solver:"forceAtlas2Based"}};function iniPlotboxIndex(){document.addEventListener("DOMContentLoaded",function(){container=document.getElementById("visgraph"),csrftoken=jQuery("[name=csrfmiddlewaretoken]").val(),startLoadSearchBar(),handleButtonPress(),downloadButton=document.getElementById("btnDownloadImage")},!1)}function startLoadSearchBar(){$("#device-roles").select2({allowClear:!0,placeholder:"---------",theme:"bootstrap",multiple:!0,ajax:{url:"../../api/dcim/device-roles/?brief=true",dataType:"json",type:"GET",data:function(e){return{q:e.term}},processResults:function(e){return{results:$.map(e.results,function(e){return{text:e.name,id:e.id}})}}}}),$("#sites").select2({allowClear:!0,placeholder:"---------",theme:"bootstrap",multiple:!0,ajax:{url:"../../api/dcim/sites/?brief=true",dataType:"json",type:"GET",data:function(e){return{q:e.term}},processResults:function(e){return{results:$.map(e.results,function(e){return{text:e.name,id:e.id}})}}}}),$("#tags").select2({allowClear:!0,placeholder:"---------",theme:"bootstrap",multiple:!0,ajax:{url:"../../api/extras/tags/?brief=true",dataType:"json",type:"GET",data:function(e){return{q:e.term}},processResults:function(e){return{results:$.map(e.results,function(e){return{text:e.name,id:e.id}})}}}});var n=$("#device-roles");$.ajax({type:"GET",url:"../../api/plugins/topology-views/preselectdeviceroles/"}).then(function(e){$.each(e.results,function(e,t){var a=new Option(t.name,t.id,!0,!0);n.append(a).trigger("change"),n.trigger({type:"select2:select",params:{data:t}})})});var s=$("#tags");$.ajax({type:"GET",url:"../../api/plugins/topology-views/preselecttags/"}).then(function(e){$.each(e.results,function(e,t){var a=new Option(t.name,t.id,!0,!0);s.append(a).trigger("change"),s.trigger({type:"select2:select",params:{data:t}})})})}function handleButtonPress(){$("#search-form").submit(function(e){$("#status").html('<span class="label  label-info">Loading data</span>'),e.preventDefault();var t=$("#name").val(),a=$("#device-roles").val(),n=$("#sites").val(),s=$("#tags").val();$.ajax({type:"GET",url:"../../api/plugins/topology-views/search/search/",data:{name:t,"devicerole[]":a,"sites[]":n,"tags[]":s},headers:{"X-CSRFToken":csrftoken},contentType:"application/json; charset=utf-8",dataType:"json",success:function(e){$("#status").html('<span class="label  label-info">Drawing network</span>'),graph=null,nodes=new vis.DataSet,edges=new vis.DataSet,graph=new vis.Network(container,{nodes:nodes,edges:edges},options),$.each(e.nodes,function(e,t){nodes.add(t)}),$.each(e.edges,function(e,t){edges.add(t)}),graph.fit(),canvas=document.getElementById("visgraph").getElementsByTagName("canvas")[0],graph.on("afterDrawing",function(){$("#status").html('<span class="label label-success">Ready</span>');var e=canvas.toDataURL(MIME_TYPE);downloadButton.href=e,downloadButton.download="topology"}),graph.on("dragEnd",function(e){dragged=this.getPositions(e.nodes),$.each(dragged,function(e,t){$("#coordstatus").html(""),$("#checkSaveCoordinates").is(":checked")&&$.ajax({url:"../../api/plugins/topology-views/save-coords/save_coords/",type:"PATCH",dataType:"json",headers:{"X-CSRFToken":csrftoken},contentType:"application/json; charset=utf-8",processData:!1,data:JSON.stringify({node_id:e,x:t.x,y:t.y}),error:function(e){$("#coordstatus").html('<span class="label label-warning">Failed to update coordinates</span>')},success:function(e){$("#coordstatus").html('<span class="label label-success">Updated coordinates</span>')}})})})},error:function(e){$("#status").html('<span class="label label-warning">Something went wrong</span>')}})})}
+var graph = null;
+var container = null;
+var downloadButton = null;
+var MIME_TYPE = "image/png";
+var canvas = null;
+var csrftoken = null;
+var nodes = new vis.DataSet();
+var edges = new vis.DataSet();
+var options = {
+    interaction: {
+        hover: true,
+        hoverConnectedEdges: true,
+        multiselect: false
+    },
+    nodes: {
+        shape: 'image',
+        brokenImage: '../../static/netbox_topology_views/img/role-unknown.png',
+        size: 35,
+        font: {
+            multi: 'md',
+            face: 'helvetica',
+        },
+    },
+    edges: {
+        length: 100,
+        width: 2,
+        font: {
+            face: 'helvetica',
+        },
+    },
+    physics: {
+        solver: 'forceAtlas2Based'
+    }
+};
+var selected_regions = [];
+
+function iniPlotboxIndex() {
+    document.addEventListener('DOMContentLoaded', function () {
+        container = document.getElementById('visgraph');
+        csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+        startLoadSearchBar();
+        handleButtonPress();
+        downloadButton = document.getElementById('btnDownloadImage');
+    }, false);
+}
+
+function startLoadSearchBar() {
+    $('#device-roles').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/dcim/device-roles/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
+    $('#sites').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: function (params) { 
+                var base_url = "../../api/dcim/sites/?brief=true";
+                if (selected_regions.length == 0) {
+                    return base_url;
+                }
+                else {
+                    selected_regions.forEach(element => {
+                        var tmp = "&region_id=" + element;
+                        base_url = base_url + tmp;
+                    });
+                    return base_url;
+                }
+
+            },
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
+    $('#tags').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/extras/tags/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
+    $('#regions').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/dcim/regions/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
+
+    $('#regions').on('select2:select', function (e) {
+        var data = e.params.data;
+        var index = selected_regions.indexOf(data.id.toString());
+        if (index == -1) {
+            selected_regions.push(data.id.toString());
+        }
+    });
+    $('#regions').on('select2:unselect', function (e) {
+        var data = e.params.data;
+        var index = selected_regions.indexOf(data.id.toString());
+        console.log(index);
+        if (index > -1) {
+            selected_regions.splice(index, 1);
+          }
+    });
+    $('#regions').on('select2:clear', function (e) {
+         selected_regions = [];
+    });
+
+
+    var deviceRolesSelect = $('#device-roles');
+    $.ajax({
+        type: 'GET',
+        url: '../../api/plugins/topology-views/preselectdeviceroles/'
+    }).then(function (data) {
+        $.each(data.results, function (index, device_role_to_preload) {
+            var option = new Option(device_role_to_preload.name, device_role_to_preload.id, true, true);
+            deviceRolesSelect.append(option).trigger('change');
+            deviceRolesSelect.trigger({
+                type: 'select2:select',
+                params: {
+                    data: device_role_to_preload
+                }
+            });
+        });
+    });
+
+    var tagsSelect = $('#tags');
+    $.ajax({
+        type: 'GET',
+        url: '../../api/plugins/topology-views/preselecttags/'
+    }).then(function (data) {
+        $.each(data.results, function (index, tags_to_preload) {
+            var option = new Option(tags_to_preload.name, tags_to_preload.id, true, true);
+            tagsSelect.append(option).trigger('change');
+            tagsSelect.trigger({
+                type: 'select2:select',
+                params: {
+                    data: tags_to_preload
+                }
+            });
+        });
+    });
+}
+
+function handleButtonPress() {
+    $("#search-form").submit(function (event) {
+        $("#status").html('<span class="label  label-info">Loading data</span>');
+        event.preventDefault();
+        var value = $("#name").val();
+        var value2 = $("#device-roles").val();
+        var value3 = $("#sites").val();
+        var value4 = $("#tags").val();
+        var value5 = $("#regions").val();
+        $.ajax({
+            type: "GET",
+            url: "../../api/plugins/topology-views/search/search/",
+            data: {
+                'name': value,
+                'devicerole[]': value2,
+                'sites[]': value3,
+                'tags[]': value4,
+                'regions[]': value5
+            },
+            headers: { "X-CSRFToken": csrftoken },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data_result) {
+                $("#status").html('<span class="label  label-info">Drawing network</span>');
+                graph = null;
+                nodes = new vis.DataSet();
+                edges = new vis.DataSet();
+                graph = new vis.Network(container, { nodes: nodes, edges: edges }, options);
+                $.each(data_result["nodes"], function (index, device) {
+                    nodes.add(device);
+                });
+                $.each(data_result["edges"], function (index, edge) {
+                    edges.add(edge);
+                });
+                graph.fit();
+                canvas = document.getElementById('visgraph').getElementsByTagName('canvas')[0];
+
+                graph.on('afterDrawing', function () {
+                    $("#status").html('<span class="label label-success">Ready</span>');
+                    var image = canvas.toDataURL(MIME_TYPE);
+                    downloadButton.href = image;
+                    downloadButton.download = "topology";
+                });
+
+                graph.on("dragEnd", function (params) {
+                    dragged = this.getPositions(params.nodes);
+                    $.each(dragged, function (node_id, coordinates) {
+                        $("#coordstatus").html('');
+                        if ($('#checkSaveCoordinates').is(":checked")) {
+                            //nodes.update({ id: node_id, physics: false });
+                            $.ajax({
+                                url: "../../api/plugins/topology-views/save-coords/save_coords/",
+                                type: 'PATCH',
+                                dataType: 'json',
+                                headers: { "X-CSRFToken": csrftoken },
+                                contentType: "application/json; charset=utf-8",
+                                processData: false,
+                                data: JSON.stringify({
+                                    'node_id': node_id,
+                                    'x': coordinates.x,
+                                    'y': coordinates.y
+                                }),
+                                error: function (error_result) {
+                                    $("#coordstatus").html('<span class="label label-warning">Failed to update coordinates</span>');
+                                },
+                                success: function (data_result) {
+                                    $("#coordstatus").html('<span class="label label-success">Updated coordinates</span>');
+                                },
+                            });
+                        }
+                    });
+                });
+
+            },
+            error: function (error_result) {
+                $("#status").html('<span class="label label-warning">Something went wrong</span>');
+            },
+        });
+    });
+}
