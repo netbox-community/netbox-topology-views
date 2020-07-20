@@ -85,10 +85,10 @@ function startLoadSearchBar() {
                     return base_url;
                 }
                 else {
-                    selected_regions.forEach(element => {
-                        var tmp = "&region_id=" + element;
+                    for (var i = 0; i < selected_regions.length; i++) {
+                        var tmp = "&region_id=" + selected_regions[i];
                         base_url = base_url + tmp;
-                    });
+                    }
                     return base_url;
                 }
 

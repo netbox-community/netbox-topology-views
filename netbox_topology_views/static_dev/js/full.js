@@ -28,9 +28,6 @@ function startRender() {
         });
         graph.fit();
         canvas = document.getElementById('fullvisgraph').getElementsByTagName('canvas')[0];
-    },
-    error: function (error_result) {
-       
-    },
+    }
 });
 }
