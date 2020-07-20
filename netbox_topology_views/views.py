@@ -10,3 +10,12 @@ class TopologyHomeView(PermissionRequiredMixin, View):
     """
     def get(self, request):        
         return render(request, 'netbox_topology_views/index.html')
+
+class TopologyFullView(PermissionRequiredMixin, View):
+    permission_required = ('dcim.view_site', 'dcim.view_device')
+
+    """
+    Show the full view page
+    """
+    def get(self, request):        
+        return render(request, 'netbox_topology_views/full.html')
