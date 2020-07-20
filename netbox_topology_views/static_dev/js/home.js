@@ -32,6 +32,7 @@ var options = {
         solver: 'forceAtlas2Based'
     }
 };
+var selected_regions = [];
 
 function iniPlotboxIndex() {
     document.addEventListener('DOMContentLoaded', function () {
@@ -77,11 +78,23 @@ function startLoadSearchBar() {
         theme: "bootstrap",
         multiple: true,
         ajax: {
-            url: "../../api/dcim/sites/?brief=true",
+            url: function (params) { 
+                var base_url = "../../api/dcim/sites/?brief=true";
+                if (selected_regions.length == 0) {
+                    return base_url;
+                }
+                else {
+                    selected_regions.forEach(element => {
+                        var tmp = "&region_id=" + element;
+                        base_url = base_url + tmp;
+                    });
+                    return base_url;
+                }
+
+            },
             dataType: "json",
             type: "GET",
             data: function (params) {
-
                 var queryParameters = {
                     q: params.term
                 }
@@ -126,6 +139,53 @@ function startLoadSearchBar() {
             }
         }
     });
+    $('#regions').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: "../../api/dcim/regions/?brief=true",
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
+
+    $('#regions').on('select2:select', function (e) {
+        var data = e.params.data;
+        var index = selected_regions.indexOf(data.id.toString());
+        if (index == -1) {
+            selected_regions.push(data.id.toString());
+        }
+    });
+    $('#regions').on('select2:unselect', function (e) {
+        var data = e.params.data;
+        var index = selected_regions.indexOf(data.id.toString());
+        console.log(index);
+        if (index > -1) {
+            selected_regions.splice(index, 1);
+          }
+    });
+    $('#regions').on('select2:clear', function (e) {
+         selected_regions = [];
+    });
+
 
     var deviceRolesSelect = $('#device-roles');
     $.ajax({
@@ -170,6 +230,7 @@ function handleButtonPress() {
         var value2 = $("#device-roles").val();
         var value3 = $("#sites").val();
         var value4 = $("#tags").val();
+        var value5 = $("#regions").val();
         $.ajax({
             type: "GET",
             url: "../../api/plugins/topology-views/search/search/",
@@ -177,7 +238,8 @@ function handleButtonPress() {
                 'name': value,
                 'devicerole[]': value2,
                 'sites[]': value3,
-                'tags[]': value4
+                'tags[]': value4,
+                'regions[]': value5
             },
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",
