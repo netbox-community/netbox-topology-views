@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer, PreTagSerializer
 from django.conf import settings
 
-from utilities.api import IsAuthenticatedOrLoginNotRequired
+from netbox.api.authentication import IsAuthenticatedOrLoginNotRequired
 
 from dcim.models import  DeviceRole, Device, Cable
 from circuits.models import Circuit
