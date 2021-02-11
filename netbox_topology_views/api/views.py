@@ -2,15 +2,15 @@ from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet,
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.routers import APIRootView
 
 from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer, PreTagSerializer
 from django.conf import settings
 
-from utilities.api import IsAuthenticatedOrLoginNotRequired
-
 from dcim.models import  DeviceRole, Device, Cable
 from circuits.models import Circuit
-from extras.models import Tag, CustomField, CustomFieldValue
+from extras.models import Tag
+
 
 ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 ignore_cable_type = ignore_cable_type_raw.split(",")
@@ -21,6 +21,9 @@ preselected_device_roles = preselected_device_roles_raw.split(",")
 preselected_tags_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
 preselected_tags = preselected_tags_raw.split(",")
 
+class TopologyViewsRootView(APIRootView):
+    def get_view_name(self):
+        return 'TopologyViews'
 
 class PreSelectDeviceRolesViewSet(ReadOnlyModelViewSet):
     queryset = DeviceRole.objects.filter(name__in=preselected_device_roles)
@@ -38,14 +41,6 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
     def save_coords(self, request):
         results = {}
         if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
-            try:
-                 cfCoords = CustomField.objects.get(name='coordinates')
-            except CustomField.DoesNotExist:
-                results["status"] = "coords custom field not created"
-                return Response(status=500)
-
-            obj_type = ContentType.objects.get_for_model(Device)
-
             device_id = None
             x_coord = None
             y_coord = None
@@ -60,26 +55,26 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
                     y_coord = request.data["y"]
 
             actual_device= Device.objects.get(id=device_id)
-            try:
-                cfvCoords = CustomFieldValue.objects.get(obj_type=obj_type, obj_id=actual_device.pk, field__name='coordinates')
-                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
-                cfvCoords.save()
-                results["status"] = "coords set"
-            except CustomFieldValue.DoesNotExist:
-                cfvCoords = CustomFieldValue(field=cfCoords, obj_type=obj_type, obj_id=actual_device.id)
-                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
-                cfvCoords.save()
-                results["status"] = "coords set for first time"
-            
+
+            if "coordinates" in actual_device.custom_field_data:
+                actual_device.custom_field_data["coordinates"] = "%s;%s" % (x_coord,y_coord)
+                actual_device.save()
+                results["status"] = "saved coords"
+            else:
+                try:
+                    actual_device.custom_field_data["coordinates"] = "%s;%s" % (x_coord,y_coord)
+                    actual_device.save()
+                    results["status"] = "saved coords"
+                except :
+                    results["status"] = "coords custom field not created"
+                    return Response(status=500)
+
             return Response(results)
         else:
             results["status"] = "not allowed to save coords"
             return Response(results, status=500)
 
 class SearchViewSet(ReadOnlyModelViewSet):
-    #_ignore_model_permissions = True
-    #permission_classes = [IsAuthenticatedOrLoginNotRequired]
-
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
@@ -245,9 +240,9 @@ class SearchViewSet(ReadOnlyModelViewSet):
             if device.device_role.color != "":
                 node["color.border"] = "#" + device.device_role.color
 
-            for device_custom_field in device.custom_field_values.all():
-                if device_custom_field.field.name == "coordinates":
-                    cords =  device_custom_field.serialized_value.split(";")
+            if "coordinates" in device.custom_field_data:
+                if device.custom_field_data["coordinates"] != "":
+                    cords =  device.custom_field_data["coordinates"].split(";")
                     node["x"] = int(cords[0])
                     node["y"] = int(cords[1])
                     node["physics"] = False
@@ -259,3 +254,4 @@ class SearchViewSet(ReadOnlyModelViewSet):
         results["edges"] = edges
 
         return Response(results)
+ 

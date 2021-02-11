@@ -1,5 +1,7 @@
 # Netbox Topology Views Plugin
 
+![Version](https://img.shields.io/pypi/v/netbox-topology-views) ![Downloads](https://img.shields.io/pypi/dm/netbox-topology-views)
+
 Create topology views/maps from your devices in netbox.
 The connections are based on the cables you created in netbox.
 Support to filter on name, site, tag and device role.

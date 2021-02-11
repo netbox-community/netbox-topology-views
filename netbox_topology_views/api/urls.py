@@ -1,11 +1,13 @@
-from rest_framework import routers
+from netbox.api import OrderedDefaultRouter
+from . import views
 
-from .views import PreSelectDeviceRolesViewSet, SearchViewSet, SaveCoordsViewSet, PreSelectTagsViewSet
+router = OrderedDefaultRouter()
+router.APIRootView = views.TopologyViewsRootView
 
-router = routers.DefaultRouter()
-router.register('preselectdeviceroles', PreSelectDeviceRolesViewSet)
-router.register('preselecttags', PreSelectTagsViewSet)
-router.register('search', SearchViewSet, basename='search')
-router.register('save-coords', SaveCoordsViewSet, basename='save_coords')
+
+router.register('preselectdeviceroles', views.PreSelectDeviceRolesViewSet)
+router.register('preselecttags', views.PreSelectTagsViewSet)
+router.register('search', views.SearchViewSet, basename='search')
+router.register('save-coords', views.SaveCoordsViewSet, basename='save_coords')
 
 urlpatterns = router.urls
