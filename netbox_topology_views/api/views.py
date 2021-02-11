@@ -33,7 +33,6 @@ class PreSelectTagsViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.filter(name__in=preselected_tags)
     serializer_class = PreTagSerializer
 
-
 class SaveCoordsViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
@@ -255,3 +254,4 @@ class SearchViewSet(ReadOnlyModelViewSet):
         results["edges"] = edges
 
         return Response(results)
+ 
