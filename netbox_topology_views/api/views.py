@@ -26,7 +26,6 @@ class TopologyViewsRootView(APIRootView):
         return 'TopologyViews'
 
 class PreSelectDeviceRolesViewSet(ReadOnlyModelViewSet):
-    print(preselected_device_roles)
     queryset = DeviceRole.objects.filter(name__in=preselected_device_roles)
     serializer_class = PreDeviceRoleSerializer
 
