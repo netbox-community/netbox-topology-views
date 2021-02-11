@@ -2,15 +2,15 @@ from rest_framework.viewsets import ModelViewSet, ViewSet, ReadOnlyModelViewSet,
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.routers import APIRootView
 
 from .serializers import PreDeviceRoleSerializer, TopologyDummySerializer, PreTagSerializer
 from django.conf import settings
 
-from utilities.api import IsAuthenticatedOrLoginNotRequired
-
 from dcim.models import  DeviceRole, Device, Cable
 from circuits.models import Circuit
-from extras.models import Tag, CustomField, CustomFieldValue
+from extras.models import Tag
+#from extras.models import Tag, CustomField, CustomFieldValue
 
 ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 ignore_cable_type = ignore_cable_type_raw.split(",")
@@ -21,14 +21,19 @@ preselected_device_roles = preselected_device_roles_raw.split(",")
 preselected_tags_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
 preselected_tags = preselected_tags_raw.split(",")
 
+class TopologyViewsRootView(APIRootView):
+    def get_view_name(self):
+        return 'TopologyViews'
 
 class PreSelectDeviceRolesViewSet(ReadOnlyModelViewSet):
+    print(preselected_device_roles)
     queryset = DeviceRole.objects.filter(name__in=preselected_device_roles)
     serializer_class = PreDeviceRoleSerializer
 
 class PreSelectTagsViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.filter(name__in=preselected_tags)
     serializer_class = PreTagSerializer
+
 
 class SaveCoordsViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.all()
@@ -77,9 +82,6 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
             return Response(results, status=500)
 
 class SearchViewSet(ReadOnlyModelViewSet):
-    #_ignore_model_permissions = True
-    #permission_classes = [IsAuthenticatedOrLoginNotRequired]
-
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
