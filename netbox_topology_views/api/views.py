@@ -246,9 +246,9 @@ class SearchViewSet(ReadOnlyModelViewSet):
             if device.device_role.color != "":
                 node["color.border"] = "#" + device.device_role.color
 
-            for device_custom_field in device.custom_field_values.all():
-                if device_custom_field.field.name == "coordinates":
-                    cords =  device_custom_field.serialized_value.split(";")
+            if "coordinates" in device.custom_field_data:
+                if device.custom_field_data["coordinates"] != "":
+                    cords =  device.custom_field_data["coordinates"].split(";")
                     node["x"] = int(cords[0])
                     node["y"] = int(cords[1])
                     node["physics"] = False
