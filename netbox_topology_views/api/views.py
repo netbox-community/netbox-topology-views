@@ -10,7 +10,7 @@ from django.conf import settings
 from dcim.models import  DeviceRole, Device, Cable
 from circuits.models import Circuit
 from extras.models import Tag
-#from extras.models import Tag, CustomField, CustomFieldValue
+
 
 ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 ignore_cable_type = ignore_cable_type_raw.split(",")
@@ -42,14 +42,6 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
     def save_coords(self, request):
         results = {}
         if settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
-            try:
-                 cfCoords = CustomField.objects.get(name='coordinates')
-            except CustomField.DoesNotExist:
-                results["status"] = "coords custom field not created"
-                return Response(status=500)
-
-            obj_type = ContentType.objects.get_for_model(Device)
-
             device_id = None
             x_coord = None
             y_coord = None
@@ -64,17 +56,20 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
                     y_coord = request.data["y"]
 
             actual_device= Device.objects.get(id=device_id)
-            try:
-                cfvCoords = CustomFieldValue.objects.get(obj_type=obj_type, obj_id=actual_device.pk, field__name='coordinates')
-                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
-                cfvCoords.save()
-                results["status"] = "coords set"
-            except CustomFieldValue.DoesNotExist:
-                cfvCoords = CustomFieldValue(field=cfCoords, obj_type=obj_type, obj_id=actual_device.id)
-                cfvCoords.value = "%s;%s" % (x_coord,y_coord)
-                cfvCoords.save()
-                results["status"] = "coords set for first time"
-            
+
+            if "coordinates" in actual_device.custom_field_data:
+                actual_device.custom_field_data["coordinates"] = "%s;%s" % (x_coord,y_coord)
+                actual_device.save()
+                results["status"] = "saved coords"
+            else:
+                try:
+                    actual_device.custom_field_data["coordinates"] = "%s;%s" % (x_coord,y_coord)
+                    actual_device.save()
+                    results["status"] = "saved coords"
+                except :
+                    results["status"] = "coords custom field not created"
+                    return Response(status=500)
+
             return Response(results)
         else:
             results["status"] = "not allowed to save coords"
