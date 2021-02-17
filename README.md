@@ -31,9 +31,16 @@ PLUGINS = ["netbox_topology_views"]
 
 Then run `python3 manage.py collectstatic --no-input`
 
+### Versions
+
+| netbox version        | netbox-topology-views version          |
+| ------------- |-------------|
+| >= 2.10.0 | >= v0.5.0 |
+| < 2.10.0 | =< v0.4.10 |
+
 ### Custom field: coordinates
 
-There is also support for custom fiels.
+There is also support for custom fields.
 
 If you create a custom field "coordinates" for "dcim > device" with type "text" and name "coordinates" you will see the same layout every time.
 
