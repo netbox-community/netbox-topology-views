@@ -3,7 +3,7 @@ from extras.plugins import PluginConfig
 class TopologyViewsConfig(PluginConfig):
     name = 'netbox_topology_views'
     verbose_name = 'Topology views'
-    description = 'An plugin to render toplogoy maps'
+    description = 'An plugin to render topology maps'
     version = '0.5.0'
     author = 'Mattijs Vanhaverbeke'
     author_email = 'author@example.com'
