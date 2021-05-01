@@ -33,6 +33,7 @@ var options = {
     }
 };
 var selected_regions = [];
+var selected_sites = [];
 
 function iniPlotboxIndex() {
     document.addEventListener('DOMContentLoaded', function () {
@@ -113,6 +114,25 @@ function startLoadSearchBar() {
             }
         }
     });
+
+    $('#sites').on('select2:select', function (e) {
+        var data = e.params.data;
+        var index = selected_sites.indexOf(data.id.toString());
+        if (index == -1) {
+            selected_sites.push(data.id.toString());
+        }
+    });
+    $('#sites').on('select2:unselect', function (e) {
+        var data = e.params.data;
+        var index = selected_sites.indexOf(data.id.toString());
+        if (index > -1) {
+            selected_sites.splice(index, 1);
+          }
+    });
+    $('#sites').on('select2:clear', function (e) {
+        selected_sites = [];
+    });
+
     $('#tags').select2({
         allowClear: true,
         placeholder: "---------",
@@ -178,13 +198,53 @@ function startLoadSearchBar() {
     $('#regions').on('select2:unselect', function (e) {
         var data = e.params.data;
         var index = selected_regions.indexOf(data.id.toString());
-        console.log(index);
         if (index > -1) {
             selected_regions.splice(index, 1);
           }
     });
     $('#regions').on('select2:clear', function (e) {
          selected_regions = [];
+    });
+
+    $('#locations').select2({
+        allowClear: true,
+        placeholder: "---------",
+        theme: "bootstrap",
+        multiple: true,
+        ajax: {
+            url: function (params) { 
+                var base_url = "../../api/dcim/locations/?brief=true";
+                if (selected_sites.length == 0) {
+                    return base_url;
+                }
+                else {
+                    for (var i = 0; i < selected_sites.length; i++) {
+                        var tmp = "&site_id=" + selected_sites[i];
+                        base_url = base_url + tmp;
+                    }
+                    return base_url;
+                }
+
+            },
+            dataType: "json",
+            type: "GET",
+            data: function (params) {
+                var queryParameters = {
+                    q: params.term
+                }
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data.results, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
     });
 
 
@@ -233,6 +293,7 @@ function handleButtonPress() {
         var value4 = $("#tags").val();
         var value5 = $("#regions").val();
         var value6 = $('#checkHideUnconnected').is(":checked");
+        var value7 = $("#locations").val();
         $.ajax({
             type: "GET",
             url: "../../api/plugins/topology-views/search/search/",
@@ -242,7 +303,8 @@ function handleButtonPress() {
                 'sites[]': value3,
                 'tags[]': value4,
                 'regions[]': value5,
-                'hide_unconnected': value6
+                'hide_unconnected': value6,
+                'locations[]': value7
             },
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",

@@ -78,7 +78,7 @@ class SearchViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.all()
     serializer_class = TopologyDummySerializer
 
-    def _filter(self, site, role, name, tags, region):
+    def _filter(self, site, role, name, tags, region, location):
         filter_devices = Device.objects.all()
         if name is not None:
             filter_devices = filter_devices.filter(name__contains=name)
@@ -90,6 +90,8 @@ class SearchViewSet(ReadOnlyModelViewSet):
             filter_devices = filter_devices.filter(tags__id__in=tags)
         if region is not None:
             filter_devices = filter_devices.filter(site__region__id__in=region)
+        if location is not None:
+            filter_devices = filter_devices.filter(location__id__in=location)
         return filter_devices
 
 
@@ -115,14 +117,15 @@ class SearchViewSet(ReadOnlyModelViewSet):
         if regions == []:
             regions = None
 
+        locations = request.query_params.getlist('locations[]', None)
+        if locations == []:
+            locations = None
+
         hide_unconnected = request.query_params.get('hide_unconnected', None)
         if hide_unconnected == "":
             hide_unconnected = None
-        print(hide_unconnected)
-        if hide_unconnected == 'false':
-            print("ok")
 
-        devices = self._filter(sites, devicerole, name, tags, regions)
+        devices = self._filter(sites, devicerole, name, tags, regions, locations)
 
         nodes = []
         edges = []
