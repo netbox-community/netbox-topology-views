@@ -232,6 +232,7 @@ function handleButtonPress() {
         var value3 = $("#sites").val();
         var value4 = $("#tags").val();
         var value5 = $("#regions").val();
+        var value6 = $('#checkHideUnconnected').is(":checked");
         $.ajax({
             type: "GET",
             url: "../../api/plugins/topology-views/search/search/",
@@ -240,7 +241,8 @@ function handleButtonPress() {
                 'devicerole[]': value2,
                 'sites[]': value3,
                 'tags[]': value4,
-                'regions[]': value5
+                'regions[]': value5,
+                'hide_unconnected': value6
             },
             headers: { "X-CSRFToken": csrftoken },
             contentType: "application/json; charset=utf-8",

@@ -115,6 +115,13 @@ class SearchViewSet(ReadOnlyModelViewSet):
         if regions == []:
             regions = None
 
+        hide_unconnected = request.query_params.get('hide_unconnected', None)
+        if hide_unconnected == "":
+            hide_unconnected = None
+        print(hide_unconnected)
+        if hide_unconnected == 'false':
+            print("ok")
+
         devices = self._filter(sites, devicerole, name, tags, regions)
 
         nodes = []
@@ -124,41 +131,21 @@ class SearchViewSet(ReadOnlyModelViewSet):
         circuit_ids = []
         for device in devices:
             cables = device.get_cables()
-            for cable in cables:
-                if cable.termination_a_type.name != "circuit termination" and cable.termination_b_type.name != "circuit termination":
-                    if cable.id not in cable_ids:
-                        if cable.termination_a_type.name not in ignore_cable_type and cable.termination_b_type.name not in ignore_cable_type:
-                            cable_ids.append(cable.id)
-                            edge_ids += 1
-
-                            cable_a_dev_name = cable.termination_a.device.name
-                            if cable_a_dev_name is None:
-                                cable_a_dev_name = "device A name unknown"
-                            cable_a_name = cable.termination_a.name
-                            if cable_a_name is None:
-                                cable_a_name = "cable A name unknown"
-                            cable_b_dev_name = cable.termination_b.device.name
-                            if cable_b_dev_name is None:
-                                cable_b_dev_name = "device B name unknown"
-                            cable_b_name = cable.termination_b.name
-                            if cable_b_name is None:
-                                cable_b_name = "cable B name unknown"
-
-                            edge = {}
-                            edge["id"] = edge_ids
-                            edge["from"] = cable.termination_a.device.id
-                            edge["to"] = cable.termination_b.device.id
-                            edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-                            if cable.color != "":
-                                edge["color"] = "#" + cable.color
-                            edges.append(edge)
-                else:
-                    if cable.termination_a_type.name == "circuit termination":
-                        if settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]:
-                            if cable.termination_a.circuit.id not in circuit_ids:
-                                circuit_ids.append(cable.termination_a.circuit.id)
+            if cables.exists():
+                device_has_connections = True
+                for cable in cables:
+                    if cable.termination_a_type.name != "circuit termination" and cable.termination_b_type.name != "circuit termination":
+                        if cable.id not in cable_ids:
+                            if cable.termination_a_type.name not in ignore_cable_type and cable.termination_b_type.name not in ignore_cable_type:
+                                cable_ids.append(cable.id)
                                 edge_ids += 1
 
+                                cable_a_dev_name = cable.termination_a.device.name
+                                if cable_a_dev_name is None:
+                                    cable_a_dev_name = "device A name unknown"
+                                cable_a_name = cable.termination_a.name
+                                if cable_a_name is None:
+                                    cable_a_name = "cable A name unknown"
                                 cable_b_dev_name = cable.termination_b.device.name
                                 if cable_b_dev_name is None:
                                     cable_b_dev_name = "device B name unknown"
@@ -168,86 +155,112 @@ class SearchViewSet(ReadOnlyModelViewSet):
 
                                 edge = {}
                                 edge["id"] = edge_ids
+                                edge["from"] = cable.termination_a.device.id
                                 edge["to"] = cable.termination_b.device.id
-                                edge["dashes"] = True
-                                title = ""
+                                edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+                                if cable.color != "":
+                                    edge["color"] = "#" + cable.color
+                                edges.append(edge)
+                    else:
+                        if cable.termination_a_type.name == "circuit termination":
+                            if settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]:
+                                if cable.termination_a.circuit.id not in circuit_ids:
+                                    circuit_ids.append(cable.termination_a.circuit.id)
+                                    edge_ids += 1
 
-                                title += "Circuit provider: "  + cable.termination_a.circuit.provider.name + "<br>"
-                                title += "Termination between <br>"
-                                title += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
-                                # To Many if's
-                                if cable.termination_a.circuit.termination_a is not None:
-                                    if cable.termination_a.circuit.termination_a.cable is not None:
-                                        if cable.termination_a.circuit.termination_a.cable.id != cable.id:
-                                            if cable.termination_a.circuit.termination_a.cable.termination_b is not None:
-                                                if cable.termination_a.circuit.termination_a.cable.termination_b.device is not None:
-                                                    edge["from"] = cable.termination_a.circuit.termination_a.cable.termination_b.device.id
+                                    cable_b_dev_name = cable.termination_b.device.name
+                                    if cable_b_dev_name is None:
+                                        cable_b_dev_name = "device B name unknown"
+                                    cable_b_name = cable.termination_b.name
+                                    if cable_b_name is None:
+                                        cable_b_name = "cable B name unknown"
 
-                                                    cable_a_dev_name = cable.termination_a.circuit.termination_a.cable.termination_b.device.name
-                                                    if cable_a_dev_name is None:
-                                                        cable_a_dev_name = "device B name unknown"
-                                                    cable_b_name = cable.termination_a.circuit.termination_a.cable.termination_b.name
-                                                    if cable_a_name is None:
-                                                        cable_a_name = "cable B name unknown"
-                                                    title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
-                                                    edge["title"] = title
-                                                    edges.append(edge)
-                                # To Many if's
-                                if cable.termination_a.circuit.termination_z is not None:
-                                    if cable.termination_a.circuit.termination_z.cable is not None:
-                                        if cable.termination_a.circuit.termination_z.cable.id != cable.id:
-                                            if cable.termination_a.circuit.termination_z.cable.termination_b is not None:
-                                                if cable.termination_a.circuit.termination_z.cable.termination_b.device is not None:
-                                                    edge["from"] = cable.termination_a.circuit.termination_z.cable.termination_b.device.id
+                                    edge = {}
+                                    edge["id"] = edge_ids
+                                    edge["to"] = cable.termination_b.device.id
+                                    edge["dashes"] = True
+                                    title = ""
 
-                                                    cable_a_dev_name = cable.termination_a.circuit.termination_z.cable.termination_b.device.name
-                                                    if cable_a_dev_name is None:
-                                                        cable_a_dev_name = "device B name unknown"
-                                                    cable_a_name = cable.termination_a.circuit.termination_z.cable.termination_b.name
-                                                    if cable_a_name is None:
-                                                        cable_a_name = "cable B name unknown"
-                                                    title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
-                                                    edge["title"] = title
-                                                    edges.append(edge)
-            dev_name = device.name
-            if dev_name is None:
-                dev_name = "device name unknown"
+                                    title += "Circuit provider: "  + cable.termination_a.circuit.provider.name + "<br>"
+                                    title += "Termination between <br>"
+                                    title += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
+                                    # To Many if's
+                                    if cable.termination_a.circuit.termination_a is not None:
+                                        if cable.termination_a.circuit.termination_a.cable is not None:
+                                            if cable.termination_a.circuit.termination_a.cable.id != cable.id:
+                                                if cable.termination_a.circuit.termination_a.cable.termination_b is not None:
+                                                    if cable.termination_a.circuit.termination_a.cable.termination_b.device is not None:
+                                                        edge["from"] = cable.termination_a.circuit.termination_a.cable.termination_b.device.id
 
-            node_content = ""
+                                                        cable_a_dev_name = cable.termination_a.circuit.termination_a.cable.termination_b.device.name
+                                                        if cable_a_dev_name is None:
+                                                            cable_a_dev_name = "device B name unknown"
+                                                        cable_b_name = cable.termination_a.circuit.termination_a.cable.termination_b.name
+                                                        if cable_a_name is None:
+                                                            cable_a_name = "cable B name unknown"
+                                                        title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                                        edge["title"] = title
+                                                        edges.append(edge)
+                                    # To Many if's
+                                    if cable.termination_a.circuit.termination_z is not None:
+                                        if cable.termination_a.circuit.termination_z.cable is not None:
+                                            if cable.termination_a.circuit.termination_z.cable.id != cable.id:
+                                                if cable.termination_a.circuit.termination_z.cable.termination_b is not None:
+                                                    if cable.termination_a.circuit.termination_z.cable.termination_b.device is not None:
+                                                        edge["from"] = cable.termination_a.circuit.termination_z.cable.termination_b.device.id
 
-            if device.device_type.display_name is not None:
-                node_content += "<tr><th>Type: </th><td>" + device.device_type.display_name + "</td></tr>"
-            if device.device_role.name is not None:
-                node_content +=  "<tr><th>Role: </th><td>" + device.device_role.name + "</td></tr>"
-            if device.serial != "":
-                node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
-            if device.primary_ip is not None:
-                node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
-
-            dev_title = "<table> %s </table>" % (node_content)
-
-            node = {}
-            node["id"] = device.id
-            node["name"] = dev_name
-            node["label"] = dev_name
-            node["title"] = dev_title
-            node["shape"] = 'image'
-            if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-                node["image"] = '../../static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
+                                                        cable_a_dev_name = cable.termination_a.circuit.termination_z.cable.termination_b.device.name
+                                                        if cable_a_dev_name is None:
+                                                            cable_a_dev_name = "device B name unknown"
+                                                        cable_a_name = cable.termination_a.circuit.termination_z.cable.termination_b.name
+                                                        if cable_a_name is None:
+                                                            cable_a_name = "cable B name unknown"
+                                                        title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                                        edge["title"] = title
+                                                        edges.append(edge)
             else:
-                node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
+                device_has_connections = False
 
-            if device.device_role.color != "":
-                node["color.border"] = "#" + device.device_role.color
+            if hide_unconnected == 'false' or (hide_unconnected == 'true' and device_has_connections is True):  
+                dev_name = device.name
+                if dev_name is None:
+                    dev_name = "device name unknown"
 
-            if "coordinates" in device.custom_field_data:
-                if device.custom_field_data["coordinates"] != "":
-                    cords =  device.custom_field_data["coordinates"].split(";")
-                    node["x"] = int(cords[0])
-                    node["y"] = int(cords[1])
-                    node["physics"] = False
-            
-            nodes.append(node)
+                node_content = ""
+
+                if device.device_type.display_name is not None:
+                    node_content += "<tr><th>Type: </th><td>" + device.device_type.display_name + "</td></tr>"
+                if device.device_role.name is not None:
+                    node_content +=  "<tr><th>Role: </th><td>" + device.device_role.name + "</td></tr>"
+                if device.serial != "":
+                    node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
+                if device.primary_ip is not None:
+                    node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
+
+                dev_title = "<table> %s </table>" % (node_content)
+
+                node = {}
+                node["id"] = device.id
+                node["name"] = dev_name
+                node["label"] = dev_name
+                node["title"] = dev_title
+                node["shape"] = 'image'
+                if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
+                    node["image"] = '../../static/netbox_topology_views/img/'  + device.device_role.slug + ".png"
+                else:
+                    node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
+
+                if device.device_role.color != "":
+                    node["color.border"] = "#" + device.device_role.color
+
+                if "coordinates" in device.custom_field_data:
+                    if device.custom_field_data["coordinates"] != "":
+                        cords =  device.custom_field_data["coordinates"].split(";")
+                        node["x"] = int(cords[0])
+                        node["y"] = int(cords[1])
+                        node["physics"] = False
+                
+                nodes.append(node)
 
         results = {}
         results["nodes"] = nodes
