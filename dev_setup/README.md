@@ -6,9 +6,8 @@
  + clone netbox_topology_views repo
  + create venv: `/usr/bin/python3 -m venv venv`
  + activate venv: `source venv/bin/activate`
- + install deps: `pip3 install -r requirements.txt`
  + install build tools: `python3 -m pip install --upgrade build setuptools wheel`
-
+ + install deps: `pip3 install -r requirements.txt` (in the netbox folder)
 
 # Build
  + build the package: `python3 setup.py develop`
