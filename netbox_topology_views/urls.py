@@ -7,5 +7,4 @@ from . import views
 # a specific view so that it can be accessed by users.
 urlpatterns = (
     path('', views.TopologyHomeView.as_view(), name='home'),
-    path('full', views.TopologyFullView.as_view(), name='full'),
 )

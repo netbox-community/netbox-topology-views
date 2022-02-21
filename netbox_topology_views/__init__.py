@@ -7,7 +7,7 @@ class TopologyViewsConfig(PluginConfig):
     version = '0.5.3'
     author = 'Mattijs Vanhaverbeke'
     author_email = 'author@example.com'
-    base_url = 'topology-views'
+    base_url = 'netbox_topology_views'
     required_settings = []
     default_settings = {
         'preselected_device_roles': 'Firewall,Router,Distribution Switch,Core Switch,Internal Switch,Access Switch,Server,Storage,Backup,Wireless AP',
