@@ -8,7 +8,7 @@ menu_items = (
         buttons=(
                PluginMenuButton(
                 link='plugins:netbox_topology_views:home',
-                title='AS Numbers',
+                title='Topology View',
                 icon_class='mdi mdi-plus-thick',
                 permissions=[],
             ),
