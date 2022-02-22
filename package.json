@@ -6,21 +6,22 @@
     "resources": "gulp build",
     "resources_dev": "gulp build_dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "vis-data": "^7.1.2",
+    "vis-network": "^9.1.0",
+    "vis-util": "^5.0.2"
+  },
   "devDependencies": {
-    "@egjs/hammerjs": "^2.0.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
     "gulp-sass": "^4.1.0",
-    "gulp-uglify": "^3.0.2",
-    "keycharm": "^0.3.0",
-    "moment": "^2.24.0",
-    "timsort": "^0.3.0",
-    "uuid": "7.0.0",
-    "vis-data": "^6.2.1",
-    "vis-network": "^7.10.2",
-    "vis-util": "^4.0.0"
+    "gulp-uglify": "^3.0.2"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "@egjs/hammerjs": "^2.0.0",
+    "uuid": "^8.0.0",
+    "keycharm": "^0.4.0",
+    "timsort": "^0.3.0"
+  }
 }
