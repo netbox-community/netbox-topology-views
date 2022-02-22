@@ -10,6 +10,7 @@ from .forms import DeviceFilterForm
 from .filters import DeviceFilterSet
 
 import json
+import distutils
 
 from dcim.models import Device, Cable, DeviceRole, DeviceType
 from extras.models import Tag
@@ -161,8 +162,13 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         self.queryset = Device.objects.all()
         self.queryset = self.filterset(request.GET, self.queryset).qs
         topo_data = None
+
         if request.GET:
-            topo_data = get_topology_data(self.queryset)
+            if 'draw_init' in request.GET:
+                if bool(distutils.util.strtobool(request.GET["draw_init"])):
+                    topo_data = get_topology_data(self.queryset)
+            else:
+                topo_data = get_topology_data(self.queryset)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
@@ -173,6 +179,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q = QueryDict(mutable=True)
             q.setlist('device_role_id', list(q_device_role_id))
             q.setlist('tag', list(q_tags))
+            q['draw_init'] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
             query_string = q.urlencode()
             print(query_string)
             return HttpResponseRedirect(request.path + "?" + query_string)
