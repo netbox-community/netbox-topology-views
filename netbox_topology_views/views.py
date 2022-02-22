@@ -15,7 +15,7 @@ import distutils
 from dcim.models import Device, Cable, DeviceRole, DeviceType
 from extras.models import Tag
 
-def get_topology_data(queryset):
+def get_topology_data(queryset, hide_unconnected):
     nodes = []
     nodes_ids = []
     edges = []
@@ -25,36 +25,43 @@ def get_topology_data(queryset):
     if not queryset:
         return None
 
+    device_ids = [d.id for d in queryset]
+
     for qs_device in queryset:
         device_has_connections = False
-        links_from_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) |  Q(_termination_b_device_id=qs_device.id) )
-        for link_from in links_from_device:
-            device_has_connections = True
+
+        links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) )
+        for link_from in links_device:
             if link_from.termination_a_type.name != "circuit termination" and link_from.termination_b_type.name != "circuit termination":
                 if link_from.id not in cable_ids:
-                    cable_ids.append(link_from.id)
-                    edge_ids += 1
-                    cable_a_dev_name = link_from.termination_a.device.name
-                    if cable_a_dev_name is None:
-                        cable_a_dev_name = "device A name unknown"
-                    cable_a_name = link_from.termination_a.name
-                    if cable_a_name is None:
-                        cable_a_name = "cable A name unknown"
-                    cable_b_dev_name = link_from.termination_b.device.name
-                    if cable_b_dev_name is None:
-                        cable_b_dev_name = "device B name unknown"
-                    cable_b_name = link_from.termination_b.name
-                    if cable_b_name is None:
-                        cable_b_name = "cable B name unknown"
+                    if link_from.termination_a.device.id in device_ids and link_from.termination_b.device.id in device_ids:
+                        device_has_connections = True
+                        cable_ids.append(link_from.id)
+                        edge_ids += 1
+                        cable_a_dev_name = link_from.termination_a.device.name
+                        if cable_a_dev_name is None:
+                            cable_a_dev_name = "device A name unknown"
+                        cable_a_name = link_from.termination_a.name
+                        if cable_a_name is None:
+                            cable_a_name = "cable A name unknown"
+                        cable_b_dev_name = link_from.termination_b.device.name
+                        if cable_b_dev_name is None:
+                            cable_b_dev_name = "device B name unknown"
+                        cable_b_name = link_from.termination_b.name
+                        if cable_b_name is None:
+                            cable_b_name = "cable B name unknown"
 
-                    edge = {}
-                    edge["id"] = edge_ids
-                    edge["from"] = link_from.termination_a.device.id
-                    edge["to"] = link_from.termination_b.device.id
-                    edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-                    if link_from.color != "":
-                        edge["color"] = "#" + link_from.color
-                    edges.append(edge)
+                        edge = {}
+                        edge["id"] = edge_ids
+                        edge["from"] = link_from.termination_a.device.id
+                        edge["to"] = link_from.termination_b.device.id
+                        edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+                        if link_from.color != "":
+                            edge["color"] = "#" + link_from.color
+                        edges.append(edge)
+                else:
+                    if link_from.termination_a.device.id in device_ids and link_from.termination_b.device.id in device_ids:
+                        device_has_connections = True
             else:
                 if settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]:
                     if link_from.termination_a.circuit.id not in circuit_ids:
@@ -104,7 +111,8 @@ def get_topology_data(queryset):
                             edge["title"] = title
                             edges.append(edge)
 
-            if qs_device.id not in nodes_ids:
+        if qs_device.id not in nodes_ids:
+            if hide_unconnected == None or (hide_unconnected is True and device_has_connections is True): 
                 nodes_ids.append(qs_device.id)
 
                 dev_name = qs_device.name
@@ -165,11 +173,16 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         topo_data = None
 
         if request.GET:
+            hide_unconnected = None
+            if 'hide_unconnected' in request.GET:
+                if request.GET["hide_unconnected"] == "on" :
+                    hide_unconnected = True
+
             if 'draw_init' in request.GET:
                 if bool(distutils.util.strtobool(request.GET["draw_init"])):
-                    topo_data = get_topology_data(self.queryset)
+                    topo_data = get_topology_data(self.queryset, hide_unconnected)
             else:
-                topo_data = get_topology_data(self.queryset)
+                topo_data = get_topology_data(self.queryset, hide_unconnected)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
@@ -182,7 +195,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist('tag', list(q_tags))
             q['draw_init'] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
             query_string = q.urlencode()
-            print(query_string)
             return HttpResponseRedirect(request.path + "?" + query_string)
 
         return render(request, 'netbox_topology_views/index.html' , {

@@ -4,14 +4,14 @@ from django.utils.translation import gettext as _
 
 from extras.models import Tag
 from dcim.models import Device, Site, Region, DeviceRole, Location
-from extras.forms import CustomFieldModelFilterForm
 
-from utilities.forms import (TagFilterField,  DynamicModelMultipleChoiceField, BootstrapMixin)
 
-class DeviceFilterForm(CustomFieldModelFilterForm):
+from utilities.forms import (TagFilterField,  DynamicModelMultipleChoiceField, FilterForm)
+
+class DeviceFilterForm(FilterForm):
     model = Device
     field_groups = [
-        ['q'],
+        ['q', 'hide_unconnected'],
         ['region_id', 'site_id', 'location_id'],
         ['device_role_id'],
         ['tag'],
@@ -44,5 +44,10 @@ class DeviceFilterForm(CustomFieldModelFilterForm):
         },
         label=_('Location')
     )
+
+    hide_unconnected = forms.BooleanField(
+        label=_("Hide Unconnected"),
+        required=False,
+        initial=False)
 
     tag = TagFilterField(model)
