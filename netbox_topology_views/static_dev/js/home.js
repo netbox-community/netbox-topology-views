@@ -35,11 +35,19 @@ var options = {
 var selected_regions = [];
 var selected_sites = [];
 
+function htmlTitle(html) {
+    container = document.createElement("div");
+    container.innerHTML = html;
+    return container;
+  }
+
 function addEdge(item) {
+    item.title = htmlTitle( item.title );
     edges.add(item);
 }
 
 function addNode(item) {
+    item.title = htmlTitle( item.title );
     nodes.add(item);
 }
 
