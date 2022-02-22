@@ -11,7 +11,7 @@ class DeviceFilterSet(django_filters.FilterSet):
     )
     tag = TagFilter()
 
-    role_id = django_filters.ModelMultipleChoiceFilter(
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
         field_name='device_role_id',
         queryset=DeviceRole.objects.all(),
         label='Role (ID)',

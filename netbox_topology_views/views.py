@@ -3,12 +3,16 @@ from django.db.models import Q
 from django.views.generic import View
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.conf import settings
+from django.http import QueryDict
+from django.http import HttpResponseRedirect
 
 from .forms import DeviceFilterForm
 from .filters import DeviceFilterSet
+
 import json
 
 from dcim.models import Device, Cable, DeviceRole, DeviceType
+from extras.models import Tag
 
 def get_topology_data(queryset):
     nodes = []
@@ -133,7 +137,6 @@ def get_topology_data(queryset):
                     node["color.border"] = "#" + qs_device.device_role.color
 
                 if "coordinates" in qs_device.custom_field_data:
-                    print(qs_device.custom_field_data)
                     if qs_device.custom_field_data["coordinates"] is not None:
                         cords =  qs_device.custom_field_data["coordinates"].split(";")
                         node["x"] = int(cords[0])
@@ -160,6 +163,19 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         topo_data = None
         if request.GET:
             topo_data = get_topology_data(self.queryset)
+        else:
+            preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
+            preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
+
+            q_device_role_id = DeviceRole.objects.filter(name__in=preselected_device_roles).values_list('id', flat=True)
+            q_tags = Tag.objects.filter(name__in=preselected_tags).values_list('name', flat=True)
+
+            q = QueryDict(mutable=True)
+            q.setlist('device_role_id', list(q_device_role_id))
+            q.setlist('tag', list(q_tags))
+            query_string = q.urlencode()
+            print(query_string)
+            return HttpResponseRedirect(request.path + "?" + query_string)
 
         return render(request, 'netbox_topology_views/index.html' , {
              'filter_form': DeviceFilterForm(request.GET, label_suffix=''),

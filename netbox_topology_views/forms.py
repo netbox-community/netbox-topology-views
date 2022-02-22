@@ -46,4 +46,3 @@ class DeviceFilterForm(CustomFieldModelFilterForm):
     )
 
     tag = TagFilterField(model)
-
