@@ -12,15 +12,6 @@ from circuits.models import Circuit
 from extras.models import Tag
 
 
-ignore_cable_type_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
-ignore_cable_type = ignore_cable_type_raw.split(",")
-
-preselected_device_roles_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
-preselected_device_roles = preselected_device_roles_raw.split(",")
-
-preselected_tags_raw = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
-preselected_tags = preselected_tags_raw.split(",")
-
 class TopologyViewsRootView(APIRootView):
     def get_view_name(self):
         return 'TopologyViews'
