@@ -10,7 +10,6 @@ from .forms import DeviceFilterForm
 from .filters import DeviceFilterSet
 
 import json
-import distutils
 
 from dcim.models import Device, Cable, DeviceRole, DeviceType
 from extras.models import Tag
@@ -182,7 +181,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     hide_unconnected = True
 
             if 'draw_init' in request.GET:
-                if bool(distutils.util.strtobool(request.GET["draw_init"])):
+                if request.GET["draw_init"].lower() == 'true':
                     topo_data = get_topology_data(self.queryset, hide_unconnected)
             else:
                 topo_data = get_topology_data(self.queryset, hide_unconnected)
