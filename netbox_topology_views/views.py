@@ -150,10 +150,11 @@ def get_topology_data(queryset, hide_unconnected):
 
                 if "coordinates" in qs_device.custom_field_data:
                     if qs_device.custom_field_data["coordinates"] is not None:
-                        cords =  qs_device.custom_field_data["coordinates"].split(";")
-                        node["x"] = int(cords[0])
-                        node["y"] = int(cords[1])
-                        node["physics"] = False
+                        if ';' in qs_device.custom_field_data["coordinates"]:
+                            cords =  qs_device.custom_field_data["coordinates"].split(";")
+                            node["x"] = int(cords[0])
+                            node["y"] = int(cords[1])
+                            node["physics"] = False
                 nodes.append(node)
 
     results = {}
