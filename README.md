@@ -80,7 +80,7 @@ If you add your own image you also need to add the slug to the `device_img` sett
 
 ## Use
 
-Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/topology-views/` to view your topologies
+Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/netbox_topology_views/` to view your topologies
 
 ### Update
 
