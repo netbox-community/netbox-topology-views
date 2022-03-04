@@ -8,7 +8,7 @@ Support to filter on name, site, tag and device role.
 
 ## Preview
 
-![preview image](doc/img/preview.png?raw=true "preview")
+![preview image](doc/img/preview_3.1.jpeg?raw=true "preview")
 
 ## Install
 
