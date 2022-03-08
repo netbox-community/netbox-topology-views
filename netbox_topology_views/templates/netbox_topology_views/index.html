@@ -1,103 +1,74 @@
-{% extends 'base.html' %}
+{% extends 'base/layout.html' %}
+{% load buttons %}
+{% load render_table from django_tables2 %}
 {% load static %}
+{% load perms %}
 {% load helpers %}
 
-{% block content %}
-{% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
+{% block title %}Topology Views{% endblock %}
+
+{% block head %}
 <link rel="stylesheet" href="{% static 'netbox_topology_views/css/vendor.css' %}">
 <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+{% endblock %} 
 
-<div class="row ">
-	<div class="col-md-9">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<strong>Network</strong>  <span id="status"></span>
-				<div class="buttons pull-right">
-					<a id="btnDownloadImage" class="btn btn-xs btn-info">
-						<i class="mdi mdi-download"></i>
-					</a>
-					<a id="btnFullView" class="btn btn-xs btn-info disabled" target="_blank">
-						<i class="mdi mdi-share"></i>
-					</a>
-				</div>
-			</div>
+{% block controls %}
+  <div class="controls">
+    	<div class="control-group">
+			{% block extra_controls %}{% endblock %}
+			<a id="btnDownloadImage" class="btn btn-sm btn-info">
+				<i class="mdi mdi-download"></i>
+				Download
+			</a>
+    	</div>
+	</div>
+{% endblock controls %}
+
+{% block tabs %}
+	<ul class="nav nav-tabs px-3">
+    	{% block tab_items %}
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="network-tab" data-bs-toggle="tab" data-bs-target="#networks" type="button" role="tab" aria-controls="filters-form" aria-selected="true">
+			  Network
+			</button>
+		</li>
+		{% if filter_form %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="filters-form-tab" data-bs-toggle="tab" data-bs-target="#filters-form" type="button" role="tab" aria-controls="object-list" aria-selected="false">
+            Filters
+            {% if filter_form %}{% badge filter_form.changed_data|length bg_class="primary" %}{% endif %}
+          </button>
+        </li>
+      	{% endif %}
+		{% endblock tab_items %}
+	</ul>
+{% endblock tabs %}
+
+{% block content-wrapper %}
+{% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
+	<div class="tab-content">
+
+		<div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
 			<div class="panel-body">
 				<div id="visgraph" class=""></div>
 			</div>
+
+			<script type="text/javascript">
+				var topology_data = {{ topology_data | safe }};
+			</script>
 		</div>
+
+		{% if filter_form %}
+		<div class="tab-pane show" id="filters-form" role="tabpanel" aria-labelledby="filters-form-tab">
+		  {% include 'inc/filter_list.html' %}
+		</div>
+	  {% endif %}
+
 	</div>
-	<div class="col-md-3">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<strong>Search</strong> 
-			</div>
-			<div class="panel-body">
-				<form id="search-form" class="form" autocomplete="off">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input id="name" class="form-control" type="text">
-                    </div>
-                    <div class="form-group">
-                        <label for="device-roles">Device roles</label>
-                        <select class="form-control" multiple="multiple" id="device-roles"></select>
-                    </div>
-					<div class="form-group">
-                        <label for="regions">Regions</label>
-                        <select class="form-control" multiple="multiple" id="regions"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sites">Sites</label>
-                        <select class="form-control" multiple="multiple" id="sites"></select>
-					</div>
-					<div class="form-group">
-                        <label for="locations">Locations</label>
-                        <select class="form-control" multiple="multiple" id="locations"></select>
-					</div>
-					<div class="form-group">
-                        <label for="tags">Tags</label>
-                        <select class="form-control" multiple="multiple" id="tags"></select>
-					</div>
-					<div class="form-group">
-                        <div class="custom-control custom-checkbox">
-							<input type="checkbox" class="custom-control-input" id="checkHideUnconnected">
-							<label class="custom-control-label" for="checkHideUnconnected">Hide Unconnected</label>
-						</div>
-                    </div>
-					<hr class="mb-4">
-					<button class="btn btn-primary btn-lg btn-block" type="submit" id="start-search">Search</button>
-				</form>
-			</div>
 
-		</div>
+	<script src="{% static 'netbox_topology_views/js/vendor.js' %}"></script>
+	<script src="{% static 'netbox_topology_views/js/app.js' %}"></script>
 
-		{% if config.allow_coordinates_saving == True %}
-		<div class="panel panel-default mt-3">
-			<div class="panel-heading">
-				<strong>Settings</strong>
-			</div>
-			<div class="panel-body">
-				<div class="custom-control custom-checkbox">
-					<input type="checkbox" class="custom-control-input" id="checkSaveCoordinates">
-					<label class="custom-control-label" for="checkSaveCoordinates">Save coordinates</label>
-				</div>
-				<div>
-					<span id="coordstatus"></span>
-				</div>
-			</div>
-		</div>
-		{% endif %}
-	</div>
-</div>
-
+	<script type="application/javascript"> iniPlotboxIndex()</script>
 {% endwith %}
-{% endblock %}
-
-{% block javascript %}
-
-<script src="{% static 'netbox_topology_views/js/vendor.js' %}"></script>
-<script src="{% static 'netbox_topology_views/js/app.js' %}"></script>
-
-<script type="application/javascript"> iniPlotboxIndex()</script>
-
-{% endblock %}
+{% endblock content-wrapper %}

@@ -5,6 +5,13 @@ menu_items = (
     PluginMenuItem(
         link='plugins:netbox_topology_views:home',
         link_text='Topology',
-        buttons=()
+        buttons=(
+               PluginMenuButton(
+                link='plugins:netbox_topology_views:home',
+                title='Topology View',
+                icon_class='mdi mdi-plus-thick',
+                permissions=[],
+            ),
+        )
     ),
 )

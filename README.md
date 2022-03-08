@@ -8,7 +8,7 @@ Support to filter on name, site, tag and device role.
 
 ## Preview
 
-![preview image](doc/img/preview.png?raw=true "preview")
+![preview image](doc/img/preview_3.1.jpeg?raw=true "preview")
 
 ## Install
 
@@ -35,6 +35,7 @@ Then run `python3 manage.py collectstatic --no-input`
 
 | netbox version        | netbox-topology-views version          |
 | ------------- |-------------|
+| >= 3.1.8 | >= v1.0.0a1 |
 | >= 2.11.1 | >= v0.5.3 |
 | >= 2.10.0 | >= v0.5.0 |
 | < 2.10.0 | =< v0.4.10 |
@@ -55,20 +56,21 @@ Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'device_img': 'router,switch,firewall',
-        'preselected_device_roles': 'Router, Firewall'
+        'device_img': ['router','switch', 'firewall'],
+        'preselected_device_roles': ['Router', 'Firewall']
     }
 }
 ```
 
 | Setting        | Default value           | Description  |
 | ------------- |-------------| -----|
-| device_img      | 'access-switch,core-switch,firewall,router,distribution-switch,backup,storage,wan-network,wireless-ap,server,internal-switch,isp-cpe-material,non-racked-devices,power-units' | The slug of the device roles that you have a image for. |
-| preselected_device_roles      | 'Firewall,Router,Distribution Switch,Core Switch,Internal Switch,Access Switch,Server,Storage,Backup,Wireless AP' | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive|
+| device_img      |['access-switch', 'core-switch', 'firewall', 'router', 'distribution-switch', 'backup', 'storage,wan-network', 'wireless-ap', 'server', 'internal-switch', 'isp-cpe-material', 'non-racked-devices', 'power-units'] | The slug of the device roles that you have a image for. |
+| preselected_device_roles      | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive|
 | allow_coordinates_saving      | False | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates |
-| ignore_cable_type      | 'power outlet,power port' | The cable types that you want to ignore in the views  |
-| preselected_tags      | '' | The name of tags you want to preload  |
+| ignore_cable_type      | ['power outlet', 'power port'] | The cable types that you want to ignore in the views  |
+| preselected_tags      | '[]' | The name of tags you want to preload  |
 | enable_circuit_terminations      | False  | (bool) Set to true if you want to see circuit terminations in the topology  |
+| draw_default_layout | False | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
 
 ### Custom Images
 
@@ -78,7 +80,7 @@ If you add your own image you also need to add the slug to the `device_img` sett
 
 ## Use
 
-Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/topology-views/` to view your topologies
+Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/netbox_topology_views/` to view your topologies
 
 ### Update
 
