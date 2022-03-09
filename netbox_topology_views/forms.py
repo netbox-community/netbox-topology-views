@@ -1,22 +1,22 @@
-from django import forms
-from django.conf import settings
 from django.utils.translation import gettext as _
 
-from extras.models import Tag
 from dcim.models import Device, Site, Region, DeviceRole, Location
+from django import forms
 from django.conf import settings
+from netbox.forms import NetBoxModelFilterSetForm
+from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField)
 
-from utilities.forms import (TagFilterField,  DynamicModelMultipleChoiceField, FilterForm)
 allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
 
-class DeviceFilterForm(FilterForm):
+
+class DeviceFilterForm(NetBoxModelFilterSetForm):
     model = Device
-    field_groups = [
-        ['q', 'hide_unconnected', 'save_coords'],
-        ['region_id', 'site_id', 'location_id'],
-        ['device_role_id'],
-        ['tag'],
-    ]
+    fieldsets = (
+        (None, ('q', 'hide_unconnected', 'save_coords')),
+        (None, ('region_id', 'site_id', 'location_id')),
+        (None, ('device_role_id',)),
+        (None, ('tag',)),
+    )
 
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(),
@@ -45,7 +45,6 @@ class DeviceFilterForm(FilterForm):
         },
         label=_('Location')
     )
-
     hide_unconnected = forms.BooleanField(
         label=_("Hide Unconnected"),
         required=False,
@@ -56,5 +55,4 @@ class DeviceFilterForm(FilterForm):
         required=False,
         disabled=(not allow_coordinates_saving),
         initial=False)
-
     tag = TagFilterField(model)
