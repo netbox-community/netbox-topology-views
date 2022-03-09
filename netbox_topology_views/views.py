@@ -33,7 +33,6 @@ def get_topology_data(queryset, hide_unconnected):
 
         links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) )
         for link_from in links_device:
-            print(link_from.termination_a_type.name)
             if link_from.termination_a_type.name != "circuit termination" and link_from.termination_b_type.name != "circuit termination":
                 if link_from.termination_a_type.name not in ignore_cable_type and link_from.termination_b_type.name not in ignore_cable_type:
                     if link_from.id not in cable_ids:
