@@ -66,52 +66,53 @@ def get_topology_data(queryset, hide_unconnected):
                             device_has_connections = True
             else:
                 if settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]:
-                    if link_from.termination_a.circuit.id not in circuit_ids:
-                        circuit_ids.append(link_from.termination_a.circuit.id)
-                        edge_ids += 1
+                    if link_from.termination_a_type.name == "circuit termination":
+                        if link_from.termination_a.circuit.id not in circuit_ids:
+                            circuit_ids.append(link_from.termination_a.circuit.id)
+                            edge_ids += 1
 
-                        cable_b_dev_name = link_from.termination_b.device.name
-                        if cable_b_dev_name is None:
-                            cable_b_dev_name = "device B name unknown"
-                        cable_b_name = link_from.termination_b.name
-                        if cable_b_name is None:
-                            cable_b_name = "cable B name unknown"
+                            cable_b_dev_name = link_from.termination_b.device.name
+                            if cable_b_dev_name is None:
+                                cable_b_dev_name = "device B name unknown"
+                            cable_b_name = link_from.termination_b.name
+                            if cable_b_name is None:
+                                cable_b_name = "cable B name unknown"
 
-                        edge = {}
-                        edge["id"] = edge_ids
-                        edge["to"] = link_from.termination_b.device.id
-                        edge["dashes"] = True
-                        title = ""
+                            edge = {}
+                            edge["id"] = edge_ids
+                            edge["to"] = link_from.termination_b.device.id
+                            edge["dashes"] = True
+                            title = ""
 
-                        title += "Circuit provider: "  + link_from.termination_a.circuit.provider.name + "<br>"
-                        title += "Termination between <br>"
-                        title += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
+                            title += "Circuit provider: "  + link_from.termination_a.circuit.provider.name + "<br>"
+                            title += "Termination between <br>"
+                            title += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
 
-                        if link_from.termination_a.circuit.termination_a is not None and link_from.termination_a.circuit.termination_a.cable is not None and link_from.termination_a.circuit.termination_a.cable.id != link_from.id and link_from.termination_a.circuit.termination_a.cable.termination_b is not None and link_from.termination_a.circuit.termination_a.cable.termination_b.device is not None:
-                            edge["from"] = link_from.termination_a.circuit.termination_a.cable.termination_b.device.id
+                            if link_from.termination_a.circuit.termination_a is not None and link_from.termination_a.circuit.termination_a.cable is not None and link_from.termination_a.circuit.termination_a.cable.id != link_from.id and link_from.termination_a.circuit.termination_a.cable.termination_b is not None and link_from.termination_a.circuit.termination_a.cable.termination_b.device is not None:
+                                edge["from"] = link_from.termination_a.circuit.termination_a.cable.termination_b.device.id
 
-                            cable_a_dev_name = link_from.termination_a.circuit.termination_a.cable.termination_b.device.name
-                            if cable_a_dev_name is None:
-                                cable_a_dev_name = "device B name unknown"
-                            cable_b_name = link_from.termination_a.circuit.termination_a.cable.termination_b.name
-                            if cable_a_name is None:
-                                cable_a_name = "cable B name unknown"
-                            title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
-                            edge["title"] = title
-                            edges.append(edge)
+                                cable_a_dev_name = link_from.termination_a.circuit.termination_a.cable.termination_b.device.name
+                                if cable_a_dev_name is None:
+                                    cable_a_dev_name = "device B name unknown"
+                                cable_b_name = link_from.termination_a.circuit.termination_a.cable.termination_b.name
+                                if cable_a_name is None:
+                                    cable_a_name = "cable B name unknown"
+                                title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                edge["title"] = title
+                                edges.append(edge)
 
-                        if link_from.termination_a.circuit.termination_z is not None and link_from.termination_a.circuit.termination_z.cable is not None and link_from.termination_a.circuit.termination_z.cable.id != link_from.id and link_from.termination_a.circuit.termination_z.cable.termination_b is not None and link_from.termination_a.circuit.termination_z.cable.termination_b.device is not None:
-                            edge["from"] = link_from.termination_a.circuit.termination_z.cable.termination_b.device.id
+                            if link_from.termination_a.circuit.termination_z is not None and link_from.termination_a.circuit.termination_z.cable is not None and link_from.termination_a.circuit.termination_z.cable.id != link_from.id and link_from.termination_a.circuit.termination_z.cable.termination_b is not None and link_from.termination_a.circuit.termination_z.cable.termination_b.device is not None:
+                                edge["from"] = link_from.termination_a.circuit.termination_z.cable.termination_b.device.id
 
-                            cable_a_dev_name = link_from.termination_a.circuit.termination_z.cable.termination_b.device.name
-                            if cable_a_dev_name is None:
-                                cable_a_dev_name = "device B name unknown"
-                            cable_a_name = link_from.termination_a.circuit.termination_z.cable.termination_b.name
-                            if cable_a_name is None:
-                                cable_a_name = "cable B name unknown"
-                            title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
-                            edge["title"] = title
-                            edges.append(edge)
+                                cable_a_dev_name = link_from.termination_a.circuit.termination_z.cable.termination_b.device.name
+                                if cable_a_dev_name is None:
+                                    cable_a_dev_name = "device B name unknown"
+                                cable_a_name = link_from.termination_a.circuit.termination_z.cable.termination_b.name
+                                if cable_a_name is None:
+                                    cable_a_name = "cable B name unknown"
+                                title += cable_a_dev_name + " [" + cable_a_name +  "]<br>"
+                                edge["title"] = title
+                                edges.append(edge)
 
         if qs_device.id not in nodes_ids:
             if hide_unconnected == None or (hide_unconnected is True and device_has_connections is True): 
