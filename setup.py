@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='netbox-topology-views',
-    version='1.0.1',
+    version='1.0.2',
     description='An NetBox plugin to create Topology maps',
     url='https://github.com/mattieserver/netbox-topology-views',
     author='Mattijs Vanhaverbeke',
