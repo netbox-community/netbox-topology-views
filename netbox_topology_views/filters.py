@@ -1,10 +1,12 @@
 import django_filters
 from extras.filters import TagFilter
 from dcim.models import Device, DeviceRole, Region, Site, Location
+from tenancy.models import TenantGroup, Tenant
+from tenancy.filtersets import TenancyFilterSet
 from utilities.filters import TreeNodeMultipleChoiceFilter
 from django.db.models import Q
 
-class DeviceFilterSet(django_filters.FilterSet):
+class DeviceFilterSet(TenancyFilterSet, django_filters.FilterSet):
     q = django_filters.CharFilter(
         method='search',
         label='Search',
