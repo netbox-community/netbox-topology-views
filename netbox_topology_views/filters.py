@@ -1,18 +1,21 @@
 import django_filters
-from extras.filters import TagFilter
-from dcim.models import Device, DeviceRole, Region, Site, Location
-from tenancy.models import TenantGroup, Tenant
-from tenancy.filtersets import TenancyFilterSet
-from utilities.filters import TreeNodeMultipleChoiceFilter
 from django.db.models import Q
 
-class DeviceFilterSet(TenancyFilterSet, django_filters.FilterSet):
+from dcim.models import Device, DeviceRole, Region, Site, Location
+
+from netbox.filtersets import NetBoxModelFilterSet
+
+from tenancy.models import TenantGroup, Tenant
+from tenancy.filtersets import TenancyFilterSet
+
+from utilities.filters import TreeNodeMultipleChoiceFilter
+
+
+class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     q = django_filters.CharFilter(
         method='search',
         label='Search',
     )
-    tag = TagFilter()
-
     device_role_id = django_filters.ModelMultipleChoiceFilter(
         field_name='device_role_id',
         queryset=DeviceRole.objects.all(),
@@ -37,7 +40,7 @@ class DeviceFilterSet(TenancyFilterSet, django_filters.FilterSet):
 
     class Meta:
         model = Device
-        fields = ['id', 'name', ]
+        fields = ['id', 'name']
 
     def search(self, queryset, name, value):
         """Perform the filtered search."""
