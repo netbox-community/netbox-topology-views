@@ -35,6 +35,7 @@ var options = {
 var selected_regions = [];
 var selected_sites = [];
 var coord_save_checkbox = null;
+var htmlElement = null;
 
 function getCookie(name) {
     var cookieValue = null;
@@ -73,6 +74,7 @@ function iniPlotboxIndex() {
     document.addEventListener('DOMContentLoaded', function () {
         csrftoken = getCookie('csrftoken');
         container = document.getElementById('visgraph');
+        htmlElement = document.getElementsByTagName("html")[0];
         handleLoadData();
         downloadButton = document.getElementById('btnDownloadImage');
         btnFullView = document.getElementById('btnFullView');
@@ -82,6 +84,11 @@ function iniPlotboxIndex() {
 
 function handleLoadData() {
     if (topology_data !== null) {
+        
+        if (htmlElement.dataset.netboxColorMode == "dark") {
+            options.nodes.font.color = "#fff";
+        }
+
         graph = null;
         nodes = new vis.DataSet();
         edges = new vis.DataSet();

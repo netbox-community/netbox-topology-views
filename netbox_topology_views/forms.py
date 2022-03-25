@@ -1,7 +1,14 @@
+import imp
+from django import forms
+from django.conf import settings
+
 from django.utils.translation import gettext as _
 
 from dcim.models import Device, Site, Region, DeviceRole, Location
+
 from django import forms
+from tenancy.models import TenantGroup, Tenant
+from tenancy.forms import TenancyFilterForm
 from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm
 from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField)
@@ -9,10 +16,11 @@ from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField)
 allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
 
 
-class DeviceFilterForm(NetBoxModelFilterSetForm):
+class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
         (None, ('q', 'hide_unconnected', 'save_coords')),
+        (None, ('tenant_group_id', 'tenant_id')),
         (None, ('region_id', 'site_id', 'location_id')),
         (None, ('device_role_id',)),
         (None, ('tag',)),

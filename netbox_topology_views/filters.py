@@ -2,11 +2,16 @@ import django_filters
 from django.db.models import Q
 
 from dcim.models import Device, DeviceRole, Region, Site, Location
+
 from netbox.filtersets import NetBoxModelFilterSet
+
+from tenancy.models import TenantGroup, Tenant
+from tenancy.filtersets import TenancyFilterSet
+
 from utilities.filters import TreeNodeMultipleChoiceFilter
 
 
-class DeviceFilterSet(NetBoxModelFilterSet):
+class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     q = django_filters.CharFilter(
         method='search',
         label='Search',
