@@ -35,7 +35,8 @@ Then run `python3 manage.py collectstatic --no-input`
 
 | netbox version        | netbox-topology-views version          |
 | ------------- |-------------|
-| >= 3.1.8 | >= v1.0.0a1 |
+| >= 3.2.0 | >= v1.1.0 |
+| >= 3.1.8 | >= v1.0.0 |
 | >= 2.11.1 | >= v0.5.3 |
 | >= 2.10.0 | >= v0.5.0 |
 | < 2.10.0 | =< v0.4.10 |
