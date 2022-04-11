@@ -27,6 +27,9 @@ var options = {
         font: {
             face: 'helvetica',
         },
+        shadow: {
+            enabled: true
+        }
     },
     physics: {
         solver: 'forceAtlas2Based'
