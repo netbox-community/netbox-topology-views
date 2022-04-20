@@ -38,25 +38,42 @@ def get_topology_data(queryset, hide_unconnected):
                     if link_from.id not in cable_ids:
                         if link_from.termination_a.device.id in device_ids and link_from.termination_b.device.id in device_ids:
                             device_has_connections = True
-                            cable_ids.append(link_from.id)
+                            # use trace if possible
+                            if link_from.termination_a_type.name == 'interface':
+                                trace = link_from.termination_a.trace()
+                                termination_a = trace[0][0]
+                                termination_b = trace[-1][2]
+                                for _, cable, _ in trace:
+                                    cable_ids.append(cable.id)
+                            elif link_from.termination_b_type.name == 'interface':
+                                trace = link_from.termination_b.trace()
+                                termination_b = trace[0][0]
+                                termination_a = trace[-1][2]
+                                for _, cable, _ in trace:
+                                    cable_ids.append(cable.id)
+                            else:
+                                cable_ids.append(link_from.id)
+                                termination_a = link_from.termination_a
+                                termination_b = link_from.termination_b
+
                             edge_ids += 1
-                            cable_a_dev_name = link_from.termination_a.device.name
+                            cable_a_dev_name = termination_a.device.name
                             if cable_a_dev_name is None:
                                 cable_a_dev_name = "device A name unknown"
-                            cable_a_name = link_from.termination_a.name
+                            cable_a_name = termination_a.name
                             if cable_a_name is None:
                                 cable_a_name = "cable A name unknown"
-                            cable_b_dev_name = link_from.termination_b.device.name
+                            cable_b_dev_name = termination_b.device.name
                             if cable_b_dev_name is None:
                                 cable_b_dev_name = "device B name unknown"
-                            cable_b_name = link_from.termination_b.name
+                            cable_b_name = termination_b.name
                             if cable_b_name is None:
                                 cable_b_name = "cable B name unknown"
 
                             edge = {}
                             edge["id"] = edge_ids
-                            edge["from"] = link_from.termination_a.device.id
-                            edge["to"] = link_from.termination_b.device.id
+                            edge["from"] = termination_a.device.id
+                            edge["to"] = termination_b.device.id
                             edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
                             if link_from.color != "":
                                 edge["color"] = "#" + link_from.color
