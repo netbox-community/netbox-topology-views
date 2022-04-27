@@ -22,7 +22,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         (None, ('q', 'hide_unconnected', 'save_coords')),
         (None, ('tenant_group_id', 'tenant_id')),
         (None, ('region_id', 'site_id', 'location_id')),
-        (None, ('device_role_id',)),
+        (None, ('device_role_id', 'hide_role_id')),
         (None, ('tag',)),
     )
 
@@ -35,6 +35,11 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         queryset=DeviceRole.objects.all(),
         required=False,
         label=_('Device Role')
+    )
+    hide_role_id = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        label=_('Hide Role')
     )
     site_id = DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(),
