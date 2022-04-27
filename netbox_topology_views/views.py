@@ -70,8 +70,6 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
     enable_circuit_terminations = settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]
 
-    device_ids = [d.id for d in queryset]
-
     for qs_device in queryset:
         device_has_connections = False
 
@@ -89,7 +87,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                     if not isinstance(link_from.termination_a, PathEndpoint):
                         if isinstance(link_from.termination_b, PathEndpoint):
                             # termination_a can be a CircuitTermination (no trace()) while termination_b is an interface
-                            # If so, with swap them wo we can follow the path using PathEndpoint#trace()
+                            # If so, we swap them so we can follow the path using PathEndpoint#trace()
                             termination_from = link_from.termination_b
                         else:
                             continue
@@ -117,6 +115,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                                     if enable_circuit_terminations and termination_b.circuit.id not in circuit_ids:
                                         iscircuit = True
                                         circuit = termination_b.circuit
+                                        circuit_ids.append(circuit.id)
                                         path.append(termination_b.circuit.cid)
                                     else:
                                         # Ignore this circuit as requested
@@ -146,7 +145,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                                     if cable_b_name is None:
                                         cable_b_name = "cable B name unknown"
 
-                                    # Add intermediary device (if not filtered) as they may not be in devices queryset
+                                    # Add intermediary device (if not filtered) as it may be absent of the queryset
                                     if termination_b.device.id not in nodes_ids and termination_b.device.device_role.id not in filter_role_ids:
                                         nodes_ids.append(termination_b.device.id)
                                         nodes.append(create_node(termination_b.device))
@@ -220,13 +219,16 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 topo_data = get_topology_data(self.queryset, hide_unconnected, hide_role_ids)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
+            preselected_hide_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_hide_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
 
             q_device_role_id = DeviceRole.objects.filter(name__in=preselected_device_roles).values_list('id', flat=True)
+            q_hide_role_id = DeviceRole.objects.filter(name__in=preselected_hide_roles).values_list('id', flat=True)
             q_tags = Tag.objects.filter(name__in=preselected_tags).values_list('name', flat=True)
 
             q = QueryDict(mutable=True)
             q.setlist('device_role_id', list(q_device_role_id))
+            q.setlist('hide_role_id', list(q_hide_role_id))
             q.setlist('tag', list(q_tags))
             q['draw_init'] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
             query_string = q.urlencode()
