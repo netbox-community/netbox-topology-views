@@ -70,6 +70,8 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
     enable_circuit_terminations = settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]
 
+    device_ids = [d.id for d in queryset]
+
     for qs_device in queryset:
         device_has_connections = False
 
@@ -77,111 +79,131 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
             # Skip this device as requested
             continue
 
-        links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) )
+        links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) ).prefetch_related('termination_a_type', 'termination_b_type')
 
         for link_from in links_device:
-            if link_from.termination_a_type.name not in ignore_cable_type:
-                if link_from.id not in cable_ids:
-                    termination_from = link_from.termination_a
+            if link_from.termination_a_type.name in ignore_cable_type:
+                continue
 
-                    if not isinstance(link_from.termination_a, PathEndpoint):
-                        if isinstance(link_from.termination_b, PathEndpoint):
-                            # termination_a can be a CircuitTermination (no trace()) while termination_b is an interface
-                            # If so, we swap them so we can follow the path using PathEndpoint#trace()
-                            termination_from = link_from.termination_b
-                        else:
-                            continue
+            if link_from.id in cable_ids:
+                continue
 
-                    # Ignore incomplete path
-                    if termination_from.path.is_active:
-                        origin = None
-                        iscircuit = False
-                        circuit = None
-                        path = []
+            termination_from = link_from.termination_a
+            
+            if not isinstance(link_from.termination_a, PathEndpoint):
+                if isinstance(link_from.termination_b, PathEndpoint):
+                    # termination_a can be a CircuitTermination (no trace()) while termination_b is an interface
+                    # If so, we swap them so we can follow the path using PathEndpoint#trace()
+                    termination_from = link_from.termination_b
+                else:
+                    continue
 
-                        # trace() : Return the path as a list of three-tuples (A termination, cable, B termination)
-                        for (termination_a, cable, termination_b) in termination_from.trace():
-                            
-                            # ProviderNetwork not supported - It would need to manage several kind of nodes (Device, ProviderNetwork)
-                            # and maps javascript nodes ID with Devices IDs, and ProviderNetworks IDs
-                            if not isinstance(termination_b, ProviderNetwork):
-                                if cable is not None and cable.id in cable_ids:
-                                    break
+            # Ignore incomplete path
+            if not termination_from.path.is_active:
+                continue
 
-                                if origin is None:
-                                    origin = termination_a
+            trace = termination_from.trace()
+            destination = trace[-1][2]  #  last step (0), termination_b (2)
 
-                                if isinstance(termination_b, CircuitTermination):
-                                    if enable_circuit_terminations and termination_b.circuit.id not in circuit_ids:
-                                        iscircuit = True
-                                        circuit = termination_b.circuit
-                                        circuit_ids.append(circuit.id)
-                                        path.append(termination_b.circuit.cid)
-                                    else:
-                                        # Ignore this circuit as requested
-                                        break
-                                elif hasattr(termination_b, 'device') and termination_b.device.device_role.id in filter_role_ids:
-                                    # Skip this device, keep origin device in $origin
-                                    path.append(termination_b.device.name)
-                                elif cable is not None and (cable.termination_a_type in ignore_cable_type or cable.termination_b_type in ignore_cable_type):
-                                    # Ignore this path
-                                    break
-                                else:
-                                    # New link
-                                    device_has_connections = True
-                                    if cable is not None:
-                                        cable_ids.append(cable.id)
-                                    edge_ids += 1
-                                    cable_a_dev_name = origin.device.name
-                                    if cable_a_dev_name is None:
-                                        cable_a_dev_name = "device A name unknown"
-                                    cable_a_name = origin.name
-                                    if cable_a_name is None:
-                                        cable_a_name = "cable A name unknown"
-                                    cable_b_dev_name = termination_b.device.name
-                                    if cable_b_dev_name is None:
-                                        cable_b_dev_name = "device B name unknown"
-                                    cable_b_name = termination_b.name
-                                    if cable_b_name is None:
-                                        cable_b_name = "cable B name unknown"
+            if isinstance(destination, ProviderNetwork):
+                # ProviderNetwork not supported - It would need to manage several kind of nodes (Device, ProviderNetwork)
+                # and maps javascript nodes ID with Devices IDs, and ProviderNetworks IDs
+                continue
 
-                                    # Add intermediary device (if not filtered) as it may be absent of the queryset
-                                    if termination_b.device.id not in nodes_ids and termination_b.device.device_role.id not in filter_role_ids:
-                                        nodes_ids.append(termination_b.device.id)
-                                        nodes.append(create_node(termination_b.device))
+            if destination.device.id not in device_ids:
+                # end device not in queryset, skip
+                continue
 
-                                    edge = {}
-                                    edge["id"] = edge_ids
-                                    edge["from"] = origin.device.id
-                                    edge["to"] = termination_b.device.id
+            # variables needed for trace() browsing
+            origin = None
+            iscircuit = False
+            circuit = None
+            path = []
 
-                                    if iscircuit:
-                                        edge["dashes"] = True
-                                        edge["title"] = "Circuit provider: "  + circuit.provider.name + "<br>"
-                                        edge["title"] += "Termination between <br>"
-                                        edge["title"] += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
-                                        edge["title"] += cable_a_dev_name + " [" + cable_a_name +  "]"
-                                    else:
-                                        edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-                                    
-                                    edge["title"] += '' if len(path) <= 0 else "<br>Through " + '/'.join(path)
-                                    
-                                    if cable is not None and cable.color != "":
-                                        edge["color"] = "#" + cable.color
+            # trace() : Return the path as a list of three-tuples (A termination, cable, B termination)
+            for (termination_a, cable, termination_b) in trace:
+                
+                if origin is None:
+                    # New part of the link, reset variables
+                    origin = termination_a
+                    iscircuit = False
+                    circuit = None
+                    path = []
 
-                                    edges.append(edge)
-                                    
-                                    # Reset for next iteration
-                                    origin = None
-                                    path = []
+                if cable is not None and cable.id in cable_ids:
+                    break
 
-                        # endfor (trace)
+                if isinstance(termination_b, CircuitTermination):
+                    if enable_circuit_terminations and termination_b.circuit.id not in circuit_ids:
+                        iscircuit = True
+                        circuit = termination_b.circuit
+                        circuit_ids.append(circuit.id)
+                        path.append(termination_b.circuit.cid)
+                    else:
+                        # Ignore this circuit as requested
+                        break
+                elif hasattr(termination_b, 'device') and termination_b.device.device_role.id in filter_role_ids:
+                    # Skip this device, keep origin device in $origin
+                    path.append(termination_b.device.name)
+                elif cable is not None and (cable.termination_a_type in ignore_cable_type or cable.termination_b_type in ignore_cable_type):
+                    # Ignore this path
+                    break
+                else:
+                    # New part of the link we want to display
+                    device_has_connections = True
+                    if cable is not None:
+                        cable_ids.append(cable.id)
+                    edge_ids += 1
+                    cable_a_dev_name = origin.device.name
+                    if cable_a_dev_name is None:
+                        cable_a_dev_name = "device A name unknown"
+                    cable_a_name = origin.name
+                    if cable_a_name is None:
+                        cable_a_name = "cable A name unknown"
+                    cable_b_dev_name = termination_b.device.name
+                    if cable_b_dev_name is None:
+                        cable_b_dev_name = "device B name unknown"
+                    cable_b_name = termination_b.name
+                    if cable_b_name is None:
+                        cable_b_name = "cable B name unknown"
+
+                    # Add intermediary device (if not filtered) as it may be absent of the queryset
+                    if termination_b.device.id not in nodes_ids and termination_b.device.device_role.id not in filter_role_ids:
+                        nodes_ids.append(termination_b.device.id)
+                        nodes.append(create_node(termination_b.device))
+
+                    edge = {}
+                    edge["id"] = edge_ids
+                    edge["from"] = origin.device.id
+                    edge["to"] = termination_b.device.id
+
+                    if iscircuit:
+                        edge["dashes"] = True
+                        edge["title"] = "Circuit provider: "  + circuit.provider.name + "<br>"
+                        edge["title"] += "Termination between <br>"
+                        edge["title"] += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
+                        edge["title"] += cable_a_dev_name + " [" + cable_a_name +  "]"
+                    else:
+                        edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+                        
+                    edge["title"] += '' if len(path) <= 0 else "<br>Through " + '/'.join(path)
+                        
+                    if cable is not None and cable.color != "":
+                        edge["color"] = "#" + cable.color
+
+                    edges.append(edge)
+                    
+                    # Reset for next iteration
+                    origin = None
+
+            # endfor (trace)
         # endfor (link)
         
         if(qs_device.id not in nodes_ids):
             if hide_unconnected == None or (hide_unconnected is True and device_has_connections is True):
                 nodes_ids.append(qs_device.id)
                 nodes.append(create_node(qs_device))
+    #endfor (qs_device)
 
     results = {}
     results["nodes"] = nodes
