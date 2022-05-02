@@ -75,11 +75,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
     for qs_device in queryset:
         device_has_connections = False
 
-        if qs_device.device_role.id in filter_role_ids:
-            # Skip this device as requested
-            continue
-
-        links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) ).prefetch_related('termination_a_type', 'termination_b_type')
+        links_device = Cable.objects.filter(Q(_termination_a_device_id=qs_device.id) | Q(_termination_b_device_id=qs_device.id) )
 
         for link_from in links_device:
             if link_from.termination_a_type.name in ignore_cable_type:
@@ -88,12 +84,12 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
             if link_from.id in cable_ids:
                 continue
 
-            termination_from = link_from.termination_a
-            
-            if not isinstance(link_from.termination_a, PathEndpoint):
+            # termination_a can be a CircuitTermination (no trace()) while termination_b is an interface
+            # If so, we swap them so we can follow the path using PathEndpoint#trace()
+            if isinstance(link_from.termination_a, PathEndpoint):
+                termination_from = link_from.termination_a
+            else:
                 if isinstance(link_from.termination_b, PathEndpoint):
-                    # termination_a can be a CircuitTermination (no trace()) while termination_b is an interface
-                    # If so, we swap them so we can follow the path using PathEndpoint#trace()
                     termination_from = link_from.termination_b
                 else:
                     continue
@@ -103,7 +99,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                 continue
 
             trace = termination_from.trace()
-            destination = trace[-1][2]  #  last step (0), termination_b (2)
+            destination = trace[-1][2]  #  last step (-1), termination_b (2)
 
             if isinstance(destination, ProviderNetwork):
                 # ProviderNetwork not supported - It would need to manage several kind of nodes (Device, ProviderNetwork)
@@ -130,8 +126,10 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                     circuit = None
                     path = []
 
-                if cable is not None and cable.id in cable_ids:
-                    break
+                if cable is not None:
+                    if cable.id in cable_ids or cable.termination_a_type in ignore_cable_type or cable.termination_b_type in ignore_cable_type:
+                        # Ignore this path
+                        break
 
                 if isinstance(termination_b, CircuitTermination):
                     if enable_circuit_terminations and termination_b.circuit.id not in circuit_ids:
@@ -140,14 +138,11 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                         circuit_ids.append(circuit.id)
                         path.append(termination_b.circuit.cid)
                     else:
-                        # Ignore this circuit as requested
+                        # Ignore this circuit
                         break
                 elif hasattr(termination_b, 'device') and termination_b.device.device_role.id in filter_role_ids:
-                    # Skip this device, keep origin device in $origin
+                    # Skip this intermediate device (filtered), keep origin device in $origin
                     path.append(termination_b.device.name)
-                elif cable is not None and (cable.termination_a_type in ignore_cable_type or cable.termination_b_type in ignore_cable_type):
-                    # Ignore this path
-                    break
                 else:
                     # New part of the link we want to display
                     device_has_connections = True
@@ -167,7 +162,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                     if cable_b_name is None:
                         cable_b_name = "cable B name unknown"
 
-                    # Add intermediary device (if not filtered) as it may be absent of the queryset
+                    # Add intermediate device (if not filtered) as it may be absent of the queryset
                     if termination_b.device.id not in nodes_ids and termination_b.device.device_role.id not in filter_role_ids:
                         nodes_ids.append(termination_b.device.id)
                         nodes.append(create_node(termination_b.device))
