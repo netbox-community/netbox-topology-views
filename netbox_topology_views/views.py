@@ -106,7 +106,7 @@ def get_topology_data(queryset, hide_unconnected, filter_role_ids):
                 # and maps javascript nodes ID with Devices IDs, and ProviderNetworks IDs
                 continue
 
-            if destination.device.id not in device_ids:
+            if hasattr(destination, 'device') and destination.device.id not in device_ids:
                 # end device not in queryset, skip
                 continue
 
