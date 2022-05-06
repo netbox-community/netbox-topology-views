@@ -75,8 +75,8 @@ function iniPlotboxIndex() {
         csrftoken = getCookie('csrftoken');
         container = document.getElementById('visgraph');
         htmlElement = document.getElementsByTagName("html")[0];
-        handleLoadData();
         downloadButton = document.getElementById('btnDownloadImage');
+        handleLoadData();
         btnFullView = document.getElementById('btnFullView');
         coord_save_checkbox = document.getElementById('id_save_coords');
     }, false);
