@@ -82,6 +82,17 @@ function iniPlotboxIndex() {
     }, false);
 }
 
+function performGraphDownload() {
+    var tempDownloadLink = document.createElement('a');
+    var generatedImageUrl = canvas.toDataURL(MIME_TYPE);
+
+    tempDownloadLink.href = generatedImageUrl;
+    tempDownloadLink.download = "topology";
+    document.body.appendChild(a);
+    tempDownloadLink.click();
+    document.body.removeChild(a);
+}
+
 function handleLoadData() {
     if (topology_data !== null) {
         
@@ -100,11 +111,7 @@ function handleLoadData() {
         graph.fit();
         canvas = document.getElementById('visgraph').getElementsByTagName('canvas')[0];
 
-        graph.on('afterDrawing', function () {
-            var image = canvas.toDataURL(MIME_TYPE);
-            downloadButton.href = image;
-            downloadButton.download = "topology";
-        });
+        downloadButton.onclick = function(e) { performGraphDownload(); return false; };
 
         graph.on("dragEnd", function (params) {
             dragged = this.getPositions(params.nodes);
