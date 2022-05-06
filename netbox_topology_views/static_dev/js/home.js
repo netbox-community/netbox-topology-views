@@ -88,9 +88,9 @@ function performGraphDownload() {
 
     tempDownloadLink.href = generatedImageUrl;
     tempDownloadLink.download = "topology";
-    document.body.appendChild(a);
+    document.body.appendChild(tempDownloadLink);
     tempDownloadLink.click();
-    document.body.removeChild(a);
+    document.body.removeChild(tempDownloadLink);
 }
 
 function handleLoadData() {
