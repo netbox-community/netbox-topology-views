@@ -78,11 +78,22 @@ function iniPlotboxIndex() {
         csrftoken = getCookie('csrftoken');
         container = document.getElementById('visgraph');
         htmlElement = document.getElementsByTagName("html")[0];
-        handleLoadData();
         downloadButton = document.getElementById('btnDownloadImage');
+        handleLoadData();
         btnFullView = document.getElementById('btnFullView');
         coord_save_checkbox = document.getElementById('id_save_coords');
     }, false);
+}
+
+function performGraphDownload() {
+    var tempDownloadLink = document.createElement('a');
+    var generatedImageUrl = canvas.toDataURL(MIME_TYPE);
+
+    tempDownloadLink.href = generatedImageUrl;
+    tempDownloadLink.download = "topology";
+    document.body.appendChild(tempDownloadLink);
+    tempDownloadLink.click();
+    document.body.removeChild(tempDownloadLink);
 }
 
 function handleLoadData() {
@@ -103,11 +114,7 @@ function handleLoadData() {
         graph.fit();
         canvas = document.getElementById('visgraph').getElementsByTagName('canvas')[0];
 
-        graph.on('afterDrawing', function () {
-            var image = canvas.toDataURL(MIME_TYPE);
-            downloadButton.href = image;
-            downloadButton.download = "topology";
-        });
+        downloadButton.onclick = function(e) { performGraphDownload(); return false; };
 
         graph.on("dragEnd", function (params) {
             dragged = this.getPositions(params.nodes);
