@@ -31,6 +31,8 @@ def create_node(device):
         node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
     if device.primary_ip is not None:
         node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
+    if device.site is not None:
+        node_content += "<tr><th>Site: </th><td>" + device.site.name + "</td></tr>"
 
     dev_title = "<table> %s </table>" % (node_content)
 
