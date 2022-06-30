@@ -19,10 +19,10 @@ allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["all
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
-        (None, ('q', 'hide_unconnected', 'save_coords')),
+        (None, ('q', 'hide_unconnected', 'save_coords', 'end2end_connections')),
         (None, ('tenant_group_id', 'tenant_id')),
         (None, ('region_id', 'site_id', 'location_id')),
-        (None, ('device_role_id',)),
+        (None, ('device_role_id', 'intermediate_dev_role_id')),
         (None, ('tag',)),
     )
 
@@ -35,6 +35,17 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         queryset=DeviceRole.objects.all(),
         required=False,
         label=_('Device Role')
+    )
+    end2end_connections = forms.BooleanField(
+        label=_("Display end-to-end connections"),
+        required=False,
+        initial=False
+    )
+    intermediate_dev_role_id = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        label=_('Intermediate Devices Role'),
+        help_text='Intermediate devices to display when using end-to-end connections mode, even if they do not match the query'
     )
     site_id = DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(),
