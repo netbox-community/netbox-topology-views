@@ -1,3 +1,4 @@
+from cProfile import label
 import imp
 from django import forms
 from django.conf import settings
@@ -7,11 +8,12 @@ from django.utils.translation import gettext as _
 from dcim.models import Device, Site, Region, DeviceRole, Location
 
 from django import forms
+from dcim.choices import DeviceStatusChoices
 from tenancy.models import TenantGroup, Tenant
 from tenancy.forms import TenancyFilterForm
 from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm
-from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField)
+from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField, MultipleChoiceField)
 
 allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
 end2end = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
@@ -24,7 +26,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         (None, ('tenant_group_id', 'tenant_id')),
         (None, ('region_id', 'site_id', 'location_id')),
         (None, ('device_role_id', 'intermediate_dev_role_id')),
-        (None, ('tag',)),
+        (None, ('tag', 'status')),
     )
 
     region_id = DynamicModelMultipleChoiceField(
@@ -68,11 +70,17 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     hide_unconnected = forms.BooleanField(
         label=_("Hide Unconnected"),
         required=False,
-        initial=False)
-
+        initial=False
+    )
     save_coords = forms.BooleanField(
         label=_("Save Coordinates"),
         required=False,
         disabled=(not allow_coordinates_saving),
-        initial=False)
+        initial=False
+    )
+    status = MultipleChoiceField(
+        choices=DeviceStatusChoices,
+        required=False,
+        label=_("Device Status")
+    )
     tag = TagFilterField(model)

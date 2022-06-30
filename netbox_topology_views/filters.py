@@ -1,7 +1,9 @@
+from cProfile import label
 import django_filters
 from django.db.models import Q
 
 from dcim.models import Device, DeviceRole, Region, Site, Location
+from dcim.choices import DeviceStatusChoices
 
 from netbox.filtersets import NetBoxModelFilterSet
 
@@ -37,6 +39,11 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
         lookup_expr='in',
         label='Location (ID)',
     )
+    status = django_filters.MultipleChoiceFilter(
+        choices=DeviceStatusChoices,
+        null_value=None
+    )
+
 
     class Meta:
         model = Device
