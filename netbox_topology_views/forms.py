@@ -14,6 +14,7 @@ from netbox.forms import NetBoxModelFilterSetForm
 from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField)
 
 allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
+end2end = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
 
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
@@ -39,7 +40,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     end2end_connections = forms.BooleanField(
         label=_("Display end-to-end connections"),
         required=False,
-        initial=False
+        initial=end2end
     )
     intermediate_dev_role_id = DynamicModelMultipleChoiceField(
         queryset=DeviceRole.objects.all(),

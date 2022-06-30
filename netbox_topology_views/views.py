@@ -286,7 +286,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist("device_role_id", list(q_device_role_id))
             q.setlist("intermediate_dev_role_id", list(q_intermediate_dev_role_id))
             q.setlist("tag", list(q_tags))
-            q["end2end_connections"] = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
             q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
             query_string = q.urlencode()
             return HttpResponseRedirect(request.path + "?" + query_string)
