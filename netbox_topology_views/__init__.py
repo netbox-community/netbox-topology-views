@@ -15,6 +15,7 @@ class TopologyViewsConfig(PluginConfig):
         'device_img': ['access-switch', 'core-switch', 'firewall', 'router', 'distribution-switch', 'backup', 'storage', 'wan-network', 'wireless-ap', 'server', 'internal-switch', 'isp-cpe-material', 'non-racked-devices', 'power-units'],
         'allow_coordinates_saving': False,
         'preselected_tags' : [],
+        'preselected_device_roles': [],
         'enable_circuit_terminations': False,
         'draw_default_layout': False
     }
