@@ -14,7 +14,7 @@ import json
 from dcim.models import Device, Cable, DeviceRole, DeviceType
 from extras.models import Tag
 
-def get_topology_data(queryset, hide_unconnected):
+def get_topology_data(queryset, hide_unconnected, save_coords):
     nodes = []
     nodes_ids = []
     edges = []
@@ -149,13 +149,19 @@ def get_topology_data(queryset, hide_unconnected):
                 if qs_device.device_role.color != "":
                     node["color.border"] = "#" + qs_device.device_role.color
 
-                if "coordinates" in qs_device.custom_field_data:
-                    if qs_device.custom_field_data["coordinates"] is not None:
-                        if ';' in qs_device.custom_field_data["coordinates"]:
-                            cords =  qs_device.custom_field_data["coordinates"].split(";")
-                            node["x"] = int(cords[0])
-                            node["y"] = int(cords[1])
-                            node["physics"] = False
+                if save_coords:
+                    # Load coordinates and disable physics
+                    node["physics"] = False
+                    if "coordinates" in qs_device.custom_field_data:
+                        if qs_device.custom_field_data["coordinates"] is not None:
+                            if ';' in qs_device.custom_field_data["coordinates"]:
+                                cords =  qs_device.custom_field_data["coordinates"].split(";")
+                                node["x"] = int(cords[0])
+                                node["y"] = int(cords[1])
+                else:
+                    # Enable physics without loading coordinates
+                    node["physics"] = True
+
                 nodes.append(node)
 
     results = {}
@@ -177,6 +183,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         topo_data = None
 
         if request.GET:
+            save_coords = False
+            if 'save_coords' in request.GET:
+                if request.GET["save_coords"] == "on":
+                    save_coords = True
+
             hide_unconnected = None
             if 'hide_unconnected' in request.GET:
                 if request.GET["hide_unconnected"] == "on" :
@@ -184,9 +195,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             if 'draw_init' in request.GET:
                 if request.GET["draw_init"].lower() == 'true':
-                    topo_data = get_topology_data(self.queryset, hide_unconnected)
+                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
             else:
-                topo_data = get_topology_data(self.queryset, hide_unconnected)
+                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
