@@ -127,6 +127,11 @@ def get_topology_data(queryset, hide_unconnected, intermediate_dev_role_ids, end
                     if path_destination is not None and path_destination.provider_network is None:
                         # ProviderNetwork not supported at the moment
                         # $path_destination.cable would be none : there is no cable between a CircuitTermination and ProviderNetwork
+
+                        if not hasattr(link.termination_b, 'device'):
+                            #CircuitTermination B Missing Device
+                            continue
+
                         origin_device = link.termination_b.device
                         destination_device = path_destination.cable.termination_b.device
 
