@@ -2,6 +2,7 @@
  + install docker
  + install docker compose
  + install npm
+ + enable yarn
  + clone netbox repo
  + clone netbox_topology_views repo
  + create venv: `/usr/bin/python3 -m venv venv`
@@ -12,7 +13,7 @@
 
 # Build
  + build the package: `python3 setup.py develop`
- + build the resources `npm run resources`
+ + build the resources `yarn run bundle`
 
 # Test
  + copy configuration.py from dev_setup to the netbox/netbox/ folder

@@ -1,11 +1,16 @@
+import { DataSet } from "vis-data/esnext";
+import { Network } from "vis-network/esnext";
+//import 'vis-util';
+
+
 var graph = null;
 var container = null;
 var downloadButton = null;
-var MIME_TYPE = "image/png";
+const MIME_TYPE = "image/png";
 var canvas = null;
 var csrftoken = null;
-var nodes = new vis.DataSet();
-var edges = new vis.DataSet();
+var nodes = new DataSet();
+var edges = new DataSet();
 var options = {
     interaction: {
         hover: true,
@@ -40,7 +45,7 @@ var selected_sites = [];
 var coord_save_checkbox = null;
 var htmlElement = null;
 
-function getCookie(name) {
+export function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         var cookies = document.cookie.split(';');
@@ -54,38 +59,36 @@ function getCookie(name) {
         }
     }
     return cookieValue;
-}
+};
 
 
-function htmlTitle(html) {
+export function htmlTitle(html) {
     container = document.createElement("div");
     container.innerHTML = html;
     return container;
-  }
+};
 
-function addEdge(item) {
+export function addEdge(item) {
     item.title = htmlTitle( item.title );
     edges.add(item);
-}
+};
 
-function addNode(item) {
+export function addNode(item) {
     item.title = htmlTitle( item.title );
     nodes.add(item);
 }
 
-function iniPlotboxIndex() {
-    document.addEventListener('DOMContentLoaded', function () {
-        csrftoken = getCookie('csrftoken');
-        container = document.getElementById('visgraph');
-        htmlElement = document.getElementsByTagName("html")[0];
-        downloadButton = document.getElementById('btnDownloadImage');
-        handleLoadData();
-        btnFullView = document.getElementById('btnFullView');
-        coord_save_checkbox = document.getElementById('id_save_coords');
-    }, false);
-}
+export function iniPlotboxIndex() {
+    csrftoken = getCookie('csrftoken');
+    container = document.getElementById('visgraph');
+    htmlElement = document.getElementsByTagName("html")[0];
+    downloadButton = document.getElementById('btnDownloadImage');
+    handleLoadData();
+    btnFullView = document.getElementById('btnFullView');
+    coord_save_checkbox = document.getElementById('id_save_coords');
+};
 
-function performGraphDownload() {
+export function performGraphDownload() {
     var tempDownloadLink = document.createElement('a');
     var generatedImageUrl = canvas.toDataURL(MIME_TYPE);
 
@@ -94,9 +97,9 @@ function performGraphDownload() {
     document.body.appendChild(tempDownloadLink);
     tempDownloadLink.click();
     document.body.removeChild(tempDownloadLink);
-}
+};
 
-function handleLoadData() {
+export function handleLoadData() {
     if (topology_data !== null) {
         
         if (htmlElement.dataset.netboxColorMode == "dark") {
@@ -104,9 +107,9 @@ function handleLoadData() {
         }
 
         graph = null;
-        nodes = new vis.DataSet();
-        edges = new vis.DataSet();
-        graph = new vis.Network(container, { nodes: nodes, edges: edges }, options);
+        nodes = new DataSet();
+        edges = new DataSet();
+        graph = new Network(container, { nodes: nodes, edges: edges }, options);
         
         topology_data.edges.forEach(addEdge);
         topology_data.nodes.forEach(addNode);
@@ -149,13 +152,24 @@ function handleLoadData() {
         });
 
         graph.on("doubleClick", function (params) {
-            console.log(params.nodes);
-            selected_devices = params.nodes;
-            for (selected_device in selected_devices) {
-                url = "/dcim/devices/" + selected_devices[selected_device] + "/";
+            let selected_devices = params.nodes;
+            for (let selected_device in selected_devices) {
+                let url = "/dcim/devices/" + selected_devices[selected_device] + "/";
                 window.open(url, "_blank");
             }
 
         });
     }
-}
+};
+
+export function load_doc() {
+    if (document.readyState !== 'loading') {
+        console.log("test");
+        iniPlotboxIndex();
+      } else {
+        document.addEventListener('DOMContentLoaded', iniPlotboxIndex);
+    }
+};
+
+
+load_doc();
