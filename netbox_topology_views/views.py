@@ -33,6 +33,10 @@ def create_node(device):
         node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
     if device.site is not None:
         node_content += "<tr><th>Site: </th><td>" + device.site.name + "</td></tr>"
+    if device.location is not None:
+        node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
+    if device.rack is not None:
+        node_content += "<tr><th>Location: </th><td>" + device.rack.name + "</td></tr>"
 
     dev_title = "<table> %s </table>" % (node_content)
 

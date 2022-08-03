@@ -147,5 +147,9 @@ function handleLoadData() {
                 }
             }
         });
+
+        graph.on("doubleClick", function (params) {
+
+        });
     }
 }
