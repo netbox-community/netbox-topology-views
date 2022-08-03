@@ -147,5 +147,15 @@ function handleLoadData() {
                 }
             }
         });
+
+        graph.on("doubleClick", function (params) {
+            console.log(params.nodes);
+            selected_devices = params.nodes;
+            for (selected_device in selected_devices) {
+                url = "/dcim/devices/" + selected_devices[selected_device] + "/";
+                window.open(url, "_blank");
+            }
+
+        });
     }
 }
