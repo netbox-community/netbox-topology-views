@@ -36,7 +36,12 @@ def create_node(device):
     if device.location is not None:
         node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
     if device.rack is not None:
-        node_content += "<tr><th>Location: </th><td>" + device.rack.name + "</td></tr>"
+        node_content += "<tr><th>Rack: </th><td>" + device.rack.name + "</td></tr>"
+    if device.position is not None:
+        if device.face is not None:
+            node_content += "<tr><th>Position: </th><td> {} ({}) </td></tr>".format(device.position, device.face)
+        else:
+            node_content += "<tr><th>Position: </th><td>" + device.position + "</td></tr>"
 
     dev_title = "<table> %s </table>" % (node_content)
 
