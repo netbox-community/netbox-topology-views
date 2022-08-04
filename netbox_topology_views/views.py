@@ -352,9 +352,15 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
+<<<<<<< HEAD
                     topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, show_circuit, show_power)
             else:
                 topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords,  show_circuit, show_power)
+=======
+                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+            else:
+                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+>>>>>>> initial commit
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
