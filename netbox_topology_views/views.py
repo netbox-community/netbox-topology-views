@@ -1,5 +1,3 @@
-import ipaddress
-import slugify
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
@@ -61,18 +59,20 @@ def create_node(device, save_coords):
     if device.device_role.color != "":
         node["color.border"] = "#" + device.device_role.color
 
-    if save_coords:
-        # Load coordinates and disable physics
-        node["physics"] = False
-        if "coordinates" in device.custom_field_data:
-            if device.custom_field_data["coordinates"] is not None:
-                if ";" in device.custom_field_data["coordinates"]:
-                    cords =  device.custom_field_data["coordinates"].split(";")
-                    node["x"] = int(cords[0])
-                    node["y"] = int(cords[1])
-    else:
-        # Enable physics without loading coordinates
-        node["physics"] = True
+    node["physics"] = True
+
+    if "coordinates" in device.custom_field_data:
+        if device.custom_field_data["coordinates"] is not None:
+            if ";" in device.custom_field_data["coordinates"]:
+                cords =  device.custom_field_data["coordinates"].split(";")
+                node["x"] = int(cords[0])
+                node["y"] = int(cords[1])
+                node["physics"] = False
+        else:
+            if save_coords:
+                node["physics"] = False
+            else:
+                node["physics"] = True
     return node
 
 def create_edge(edge_id, cable, termination_a, termination_b, path = None, circuit = None):
