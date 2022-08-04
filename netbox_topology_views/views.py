@@ -1,5 +1,4 @@
 import ipaddress
-import slugify
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
@@ -8,12 +7,12 @@ from django.conf import settings
 from django.http import QueryDict
 from django.http import HttpResponseRedirect
 
-from .forms import DeviceFilterForm
-from .filters import DeviceFilterSet
+from .forms import L2DeviceFilterForm, L3DeviceFilterForm
+from .filters import DeviceFilterSet, InterfaceFilterSet
 
 import json
 
-from dcim.models import Device, Cable, DeviceRole, PathEndpoint
+from dcim.models import Device, Cable, DeviceRole, PathEndpoint, Interface
 from circuits.models import CircuitTermination, ProviderNetwork
 from extras.models import Tag
 
@@ -54,9 +53,9 @@ def create_node(device, save_coords):
     node["title"] = dev_title
     node["shape"] = "image"
     if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-        node["image"] = "../../static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
+        node["image"] = "../../../static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
     else:
-        node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
+        node["image"] = "../../../static/netbox_topology_views/img/role-unknown.png"
 
     if device.device_role.color != "":
         node["color.border"] = "#" + device.device_role.color
@@ -103,7 +102,7 @@ def create_edge(edge_id, cable, termination_a, termination_b, path = None, circu
     
     return edge
 
-def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections):
+def get_l2_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections):
     nodes_devices = {}
     edges = []
     edge_ids = 0
@@ -263,7 +262,8 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
     results["edges"] = edges
     return results
 
-class TopologyHomeView(PermissionRequiredMixin, View):
+
+class L2TopologyHomeView(PermissionRequiredMixin, View):
     permission_required = ("dcim.view_site", "dcim.view_device")
 
     """
@@ -298,9 +298,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
-                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+                    topo_data = get_l2_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
             else:
-                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+                topo_data = get_l2_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_intermediate_dev_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_intermediate_dev_roles"]
@@ -319,7 +319,184 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             return HttpResponseRedirect(request.path + "?" + query_string)
 
         return render(request, "netbox_topology_views/index.html" , {
-             "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
+             "filter_form": L2DeviceFilterForm(request.GET, label_suffix=""),
              "topology_data": json.dumps(topo_data)
+            }
+        )
+
+
+def get_l3_topology_data(queryset, hide_unconnected, save_coords):
+    links = {}
+    networks = {}
+    devices = {}
+    nodes = {}
+    edges = {}
+
+    # Filter out unconfigured interfaces
+    queryset = queryset.exclude(ip_addresses__isnull=True)
+
+    if not queryset:
+        return None
+
+    # For each interface
+    for qs_interface in queryset:
+        # Device data
+        qs_device = qs_interface.device
+        device_name = qs_interface.device.name
+        interface_vrf = qs_interface.vrf
+        if interface_vrf:
+            device_name += f'-{interface_vrf.name}'
+
+        # Device content (title)
+        device_content = "<table>"
+        if qs_device.device_type is not None:
+            device_content += "<tr><th>Type: </th><td>" + qs_device.device_type.model + "</td></tr>"
+        if qs_device.device_role.name is not None:
+            device_content +=  "<tr><th>Role: </th><td>" + qs_device.device_role.name + "</td></tr>"
+        if qs_device.serial != "":
+            device_content += "<tr><th>Serial: </th><td>" + qs_device.serial + "</td></tr>"
+        if qs_device.primary_ip is not None:
+            device_content += "<tr><th>IP Address: </th><td>" + str(qs_device.primary_ip.address) + "</td></tr>"
+        device_content += "</table>"
+
+        # Add device
+        device = {
+            "name": device_name,
+            "label": device_name,
+            "title": device_content,
+            "shape": 'image',
+            "image": "../../../static/netbox_topology_views/img/role-unknown.png"
+        }
+        if qs_device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
+            device["image"] = '../../../static/netbox_topology_views/img/'  + qs_device.device_role.slug + ".png"
+        devices[device_name] = device
+
+        # For each configured IP Address
+        for qs_address in qs_interface.ip_addresses.all():
+            network_o = ipaddress.ip_interface(qs_address.address).network
+            network_id = int(ipaddress.ip_address(network_o.network_address.compressed))
+
+            # Network content (title)
+            network_content = "<table>"
+            network_content += "<tr><th>Network: </th><td>" + network_o.compressed + "</td></tr>"
+            if qs_address.vrf:
+                network_content += "<tr><th>VRF: </th><td>" + str(qs_address.vrf) + "</td></tr>"
+            network_content += "</table>"
+
+            # Add network
+            network = {
+                "name": network_o.compressed,
+                "label": network_o.compressed,
+                "title": network_content,
+                "shape": 'box',
+                "borderWidth": 2,
+                "color": {
+                    "border": '#1B9BD0',
+                    "background": '#36C6F4',
+                    "highlight": {
+                        "border": '#1B9BD0',
+                        "background": '#36C6F4'
+                    },
+                    "hover": {
+                        "border": '#1B9BD0',
+                        "background": '#36C6F4'
+                    }
+                },
+                "font": {
+                    "color": '#FFFFFF',
+                    "size": 14,
+                },
+            }
+            networks[network_o.compressed] = network
+
+            # Add links
+            link_name = f'{device_name} -> {network_o.compressed}'
+            link_content = "<table>"
+            link_content += "<tr><th>Interface: </th><td>" + qs_interface.name + "</td></tr>"
+            link_content += "<tr><th>IP Address: </th><td>" + str(qs_address.address) + "</td></tr>"
+            if qs_interface.vrf:
+                link_content += "<tr><th>VRF: </th><td>" + qs_interface.vrf.name + "</td></tr>"
+            link_content += "</table>"
+            links[link_name] = link_content
+
+    # Remapping nodes
+    node_id = 1
+    for device_name, device in devices.items():
+        nodes[device_name] = device
+        nodes[device_name]['id'] = node_id
+        node_id = node_id + 1
+    
+    for network_name, network in networks.items():
+        nodes[network_name] = network
+        nodes[network_name]['id'] = node_id
+        node_id = node_id + 1
+    
+    # Remapping links
+    for link_name, link in links.items():
+        source = link_name.split(" -> ")[0]
+        destination = link_name.split(" -> ")[1]
+        edges[link_name] = {
+            "from": nodes[source]['id'],
+            "to": nodes[destination]['id'],
+            "title": link,
+        }
+
+    results = {
+        "nodes": list(nodes.values()),
+        "edges": list(edges.values()),
+    }
+    return results
+
+
+class L3TopologyHomeView(PermissionRequiredMixin, View):
+    permission_required = ('dcim.view_site', 'dcim.view_device')
+    # queryset = Interface.objects.all()
+    # filterset = InterfaceFilterSet
+    template_name = 'netbox_topology_views/index.html'
+
+    """
+    Show the L3 topology page
+    """
+    def get(self, request):
+        self.filterset = InterfaceFilterSet
+        self.queryset = Interface.objects.all()
+        self.queryset = self.filterset(request.GET, self.queryset).qs
+        topo_data = None
+
+        if request.GET:
+            # Passing attributes
+            save_coords = False
+            if 'save_coords' in request.GET:
+                if request.GET["save_coords"] == "on":
+                    save_coords = True
+
+            hide_unconnected = None
+            if 'hide_unconnected' in request.GET:
+                if request.GET["hide_unconnected"] == "on" :
+                    hide_unconnected = True
+
+            if 'draw_init' in request.GET:
+                if request.GET["draw_init"].lower() == 'true':
+                    topo_data = get_l3_topology_data(self.queryset, hide_unconnected, save_coords)
+            else:
+                topo_data = get_l3_topology_data(self.queryset, hide_unconnected, save_coords)
+        else:
+            # Accessing from navigation bar -> setting attributes and redirect
+            preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
+            preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
+
+            q_device_role_id = DeviceRole.objects.filter(name__in=preselected_device_roles).values_list('id', flat=True)
+            q_tags = Tag.objects.filter(name__in=preselected_tags).values_list('name', flat=True)
+
+            q = QueryDict(mutable=True)
+            q.setlist('device_role_id', list(q_device_role_id))
+            q.setlist('tag', list(q_tags))
+            q['draw_init'] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
+            query_string = q.urlencode()
+            return HttpResponseRedirect(request.path + "?" + query_string)
+
+        return render(request, self.template_name , {
+             'filter_form': L3DeviceFilterForm(request.GET, label_suffix='l3'),
+             'topology_data': json.dumps(topo_data)
             }
         )

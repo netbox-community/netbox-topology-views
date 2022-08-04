@@ -5,7 +5,8 @@ from django.conf import settings
 
 from django.utils.translation import gettext as _
 
-from dcim.models import Device, Site, Region, DeviceRole, Location
+from dcim.models import Device, Site, Region, DeviceRole, Location, Interface
+from ipam.models import VRF
 
 from django import forms
 from dcim.choices import DeviceStatusChoices
@@ -19,7 +20,7 @@ allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["all
 end2end = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
 
 
-class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
+class L2DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
         (None, ('q', 'hide_unconnected', 'save_coords', 'end2end_connections')),
@@ -83,4 +84,64 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         required=False,
         label=_("Device Status")
     )
+    tag = TagFilterField(model)
+
+
+
+class L3DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
+    model = Interface
+    fieldsets = (
+        (None, ('q', 'save_coords')),
+        (None, ('vrf_id', 'vrf_global')),
+        (None, ('tenant_group_id', 'tenant_id')),
+        (None, ('region_id', 'site_id', 'location_id')),
+        (None, ('device_role_id',)),
+        (None, ('tag',)),
+    )
+
+    region_id = DynamicModelMultipleChoiceField(
+        queryset=Region.objects.all(),
+        required=False,
+        label=_('Region')
+    )
+    device_role_id = DynamicModelMultipleChoiceField(
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        label=_('Device Role')
+    )
+    vrf_id = DynamicModelMultipleChoiceField(
+        queryset=VRF.objects.all(),
+        required=False,
+        query_params={
+            'vrf_name': '$vrf_name',
+        },
+        label=_('VRF')
+    )
+    vrf_global = forms.BooleanField(
+        label=_("Include global VRF"),
+        required=False,
+        initial=True)
+    site_id = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(),
+        required=False,
+        query_params={
+            'region_id': '$region_id',
+        },
+        label=_('Site')
+    )
+    location_id = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        required=False,
+        query_params={
+            'region_id': '$region_id',
+            'site_id': '$site_id',
+        },
+        label=_('Location')
+    )
+
+    save_coords = forms.BooleanField(
+        label=_("Save Coordinates"),
+        required=False,
+        disabled=(not allow_coordinates_saving),
+        initial=False)
     tag = TagFilterField(model)
