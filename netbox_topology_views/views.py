@@ -1,3 +1,5 @@
+import ipaddress
+import slugify
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
@@ -16,7 +18,7 @@ from circuits.models import CircuitTermination, ProviderNetwork
 from extras.models import Tag
 
 
-def create_node(device):
+def create_node(device, save_coords):
     dev_name = device.name
     if dev_name is None:
         dev_name = "device name unknown"
@@ -59,13 +61,18 @@ def create_node(device):
     if device.device_role.color != "":
         node["color.border"] = "#" + device.device_role.color
 
-    if "coordinates" in device.custom_field_data:
-        if device.custom_field_data["coordinates"] is not None:
-            if ";" in device.custom_field_data["coordinates"]:
-                cords =  device.custom_field_data["coordinates"].split(";")
-                node["x"] = int(cords[0])
-                node["y"] = int(cords[1])
-                node["physics"] = False
+    if save_coords:
+        # Load coordinates and disable physics
+        node["physics"] = False
+        if "coordinates" in device.custom_field_data:
+            if device.custom_field_data["coordinates"] is not None:
+                if ";" in device.custom_field_data["coordinates"]:
+                    cords =  device.custom_field_data["coordinates"].split(";")
+                    node["x"] = int(cords[0])
+                    node["y"] = int(cords[1])
+    else:
+        # Enable physics without loading coordinates
+        node["physics"] = True
     return node
 
 def create_edge(edge_id, cable, termination_a, termination_b, path = None, circuit = None):
@@ -96,7 +103,7 @@ def create_edge(edge_id, cable, termination_a, termination_b, path = None, circu
     
     return edge
 
-def get_topology_data(queryset, hide_unconnected, intermediate_dev_role_ids, end2end_connections):
+def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections):
     nodes_devices = {}
     edges = []
     edge_ids = 0
@@ -252,7 +259,7 @@ def get_topology_data(queryset, hide_unconnected, intermediate_dev_role_ids, end
             nodes_devices[qs_device.id] = qs_device
 
     results = {}
-    results["nodes"] = [create_node(d) for d in nodes_devices.values()]
+    results["nodes"] = [create_node(d, save_coords) for d in nodes_devices.values()]
     results["edges"] = edges
     return results
 
@@ -269,6 +276,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         topo_data = None
 
         if request.GET:
+            save_coords = False
+            if 'save_coords' in request.GET:
+                if request.GET["save_coords"] == "on":
+                    save_coords = True
+                    
             hide_unconnected = False
             if "hide_unconnected" in request.GET:
                 if request.GET["hide_unconnected"] == "on" :
@@ -286,9 +298,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
-                    topo_data = get_topology_data(self.queryset, hide_unconnected, intermediate_dev_role_ids, end2end_connections)
+                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
             else:
-                topo_data = get_topology_data(self.queryset, hide_unconnected, intermediate_dev_role_ids, end2end_connections)
+                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_intermediate_dev_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_intermediate_dev_roles"]
