@@ -7,7 +7,7 @@ with open(path.join(top_level_directory, 'README.md'), encoding='utf-8') as file
 
 setup(
     name='netbox-topology-views',
-    version='2.0.3',
+    version='2.0.4',
     description='An NetBox plugin to create Topology maps',
     long_description=long_description,
     long_description_content_type='text/markdown',
