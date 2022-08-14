@@ -14,6 +14,8 @@ import json
 from dcim.models import Device, Cable, DeviceRole, PathEndpoint
 from circuits.models import CircuitTermination, ProviderNetwork
 from extras.models import Tag
+if 'wireless' in settings.INSTALLED_APPS:
+    from wireless.models import WirelessLink
 
 
 def create_node(device, save_coords):
@@ -253,7 +255,26 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
                 nodes_devices[path_start.device.id] = path_start.device
 
     # endfor (link)
-    
+
+    # Add wireless links as edges
+    if 'wireless' in settings.INSTALLED_APPS and 'wireless-link' not in ignore_cable_type:
+        wireless_links = WirelessLink.objects.filter(
+            Q(_interface_a_device_id__in=device_ids) | Q(_interface_b_device_id__in=device_ids)
+        ).prefetch_related("interface_a", "interface_b")
+
+        for wireless_link in wireless_links:
+            edges.append(
+                create_edge(
+                    # Flag the wireless ID with a 'w' to avoid conflicts
+                    f"w{wireless_link.id}",
+                    None, # Cable (only used for the cable color)
+                    wireless_link.interface_a,
+                    wireless_link.interface_b,
+                    None, # path (should not be applicable here?)
+                    None, # circuit (should not be applicable here?)
+                )
+            )
+
     for qs_device in queryset:
         if qs_device.id not in nodes_devices and not hide_unconnected:
             nodes_devices[qs_device.id] = qs_device
