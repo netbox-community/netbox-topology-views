@@ -99,8 +99,11 @@ def create_edge(edge_id, cable, termination_a, termination_b, path = None, circu
     if path is not None:
         edge["title"] += "" if len(path) <= 0 else "<br>Through " + "/".join(path)
         
-    if cable is not None and cable.color != "":
-        edge["color"] = "#" + cable.color
+    if isinstance(cable, WirelessLink):
+        edge['dashes'] = True
+    else:
+        if cable is not None and cable.color != "":
+            edge["color"] = "#" + cable.color
 
     return edge
 
