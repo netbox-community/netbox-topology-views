@@ -269,7 +269,7 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
                 create_edge(
                     # Flag the wireless ID with a 'w' to avoid conflicts
                     f"w{wireless_link.id}",
-                    None, # Cable (only used for the cable color)
+                    wireless_link, # Cable (only used for the cable color)
                     wireless_link.interface_a,
                     wireless_link.interface_b,
                     None, # path (should not be applicable here?)
