@@ -101,6 +101,11 @@ def create_edge(edge_id, cable, termination_a, termination_b, path = None, circu
         
     if isinstance(cable, WirelessLink):
         edge['dashes'] = True
+        edge['title'] = f"""
+            Wireless link between<br>
+            {cable_a_dev_name} [{cable_a_name}]<br>
+            {cable_b_dev_name} [{cable_b_name}]
+        """
     else:
         if cable is not None and cable.color != "":
             edge["color"] = "#" + cable.color
