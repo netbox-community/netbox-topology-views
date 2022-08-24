@@ -15,7 +15,7 @@ from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm
 from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField, MultipleChoiceField)
 
-allow_coordinates_saving = settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
+allow_coordinates_saving = bool(settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"])
 end2end = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
 
 
@@ -75,8 +75,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     save_coords = forms.BooleanField(
         label=_("Save Coordinates"),
         required=False,
-        disabled=(not allow_coordinates_saving),
-        initial=False
+        disabled=(not allow_coordinates_saving)
     )
     status = MultipleChoiceField(
         choices=DeviceStatusChoices,
