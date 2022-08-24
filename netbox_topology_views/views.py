@@ -305,6 +305,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_intermediate_dev_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_intermediate_dev_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
+            always_save_coordinates = bool(settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"])
 
             q_device_role_id = DeviceRole.objects.filter(name__in=preselected_device_roles).values_list("id", flat=True)
             q_intermediate_dev_role_id = DeviceRole.objects.filter(name__in=preselected_intermediate_dev_roles).values_list("id", flat=True)
@@ -315,6 +316,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist("intermediate_dev_role_id", list(q_intermediate_dev_role_id))
             q.setlist("tag", list(q_tags))
             q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
+            if always_save_coordinates:
+                q["save_coords"] = "on"
             query_string = q.urlencode()
             return HttpResponseRedirect(request.path + "?" + query_string)
 

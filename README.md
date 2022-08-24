@@ -69,6 +69,7 @@ PLUGINS_CONFIG = {
 | preselected_device_roles      | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive|
 | preselected_intermediate_dev_roles      | ['Patch-panel'] | The full name of the device roles you want to display in the global view when using end-to-end connections mode.  Note that this is case sensitive|
 | allow_coordinates_saving      | False | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates |
+| always_save_coordinates       | False | (bool) Set if you want to enable the option to save coordinates by default |
 | ignore_cable_type      | ['power outlet', 'power port'] | The cable types that you want to ignore in the views  |
 | preselected_tags      | '[]' | The name of tags you want to preload  |
 | enable_circuit_terminations      | False  | (bool) Set to true if you want to see circuit terminations in the topology  |

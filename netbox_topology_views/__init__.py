@@ -16,6 +16,7 @@ class TopologyViewsConfig(PluginConfig):
         'ignore_cable_type': ['power outlet','power port'],
         'device_img': ['access-switch', 'core-switch', 'firewall', 'router', 'distribution-switch', 'backup', 'storage', 'wan-network', 'wireless-ap', 'server', 'internal-switch', 'isp-cpe-material', 'non-racked-devices', 'power-units'],
         'allow_coordinates_saving': False,
+        'always_save_coordinates': False,
         'preselected_tags' : [],
         'enable_circuit_terminations': False,
         'draw_default_layout': False
