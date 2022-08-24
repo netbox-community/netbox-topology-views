@@ -6,15 +6,18 @@ from django.conf import settings
 from django.http import QueryDict
 from django.http import HttpResponseRedirect
 
+
 from .forms import DeviceFilterForm
 from .filters import DeviceFilterSet
 
 import json
 
-from dcim.models import Device, Cable, DeviceRole, PathEndpoint
+from dcim.models import Device, Cable, CableTermination, DeviceRole, PathEndpoint, Interface
 from circuits.models import CircuitTermination, ProviderNetwork
+from wireless.models import WirelessLink
 from extras.models import Tag
 
+supported_termination_types = ["interface", "front port", "rear port"]
 
 def create_node(device, save_coords):
     dev_name = device.name
@@ -75,16 +78,16 @@ def create_node(device, save_coords):
                 node["physics"] = True
     return node
 
-def create_edge(edge_id, cable, termination_a, termination_b, path = None, circuit = None):
-    cable_a_dev_name = "device A name unknown" if termination_a.device.name is None else termination_a.device.name
-    cable_a_name = "device A name unknown" if termination_a.name is None else termination_a.name
-    cable_b_dev_name = "device A name unknown" if termination_b.device.name is None else termination_b.device.name
-    cable_b_name = "cable B name unknown" if termination_b.name is None else termination_b.name
+def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = None, wireless = None):
+    cable_a_name = "device A name unknown" if termination_a["termination_name"] is None else termination_a["termination_name"]
+    cable_a_dev_name = "device A name unknown" if termination_a["termination_device_name"] is None else termination_a["termination_device_name"]
+    cable_b_name= "device A name unknown" if termination_b["termination_name"] is None else termination_b["termination_name"]
+    cable_b_dev_name  = "cable B name unknown" if termination_b["termination_device_name"] is None else termination_b["termination_device_name"]
 
     edge = {}
     edge["id"] = edge_id
-    edge["from"] = termination_a.device.id
-    edge["to"] = termination_b.device.id
+    edge["from"] = termination_a["device_id"]
+    edge["to"] = termination_b["device_id"]
 
     if circuit is not None:
         edge["dashes"] = True
@@ -93,10 +96,11 @@ def create_edge(edge_id, cable, termination_a, termination_b, path = None, circu
         edge["title"] += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
         edge["title"] += cable_a_dev_name + " [" + cable_a_name +  "]"
     else:
-        edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-    
-    if path is not None:
-        edge["title"] += "" if len(path) <= 0 else "<br>Through " + "/".join(path)
+        if wireless is not None:
+            edge["dashes"] = [2, 10, 2, 10]
+            edge["title"] = "Wireless Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+        else:
+            edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
         
     if cable is not None and cable.color != "":
         edge["color"] = "#" + cable.color
@@ -107,7 +111,7 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
     nodes_devices = {}
     edges = []
     edge_ids = 0
-    cable_ids = []
+    cable_ids = {}
     circuit_ids = []
     if not queryset:
         return None
@@ -117,60 +121,54 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
 
     device_ids = [d.id for d in queryset]
 
-    links = Cable.objects.filter( Q(_termination_a_device_id__in=device_ids) | Q(_termination_b_device_id__in=device_ids) ) \
-                        .select_related("termination_a_type", "termination_b_type") \
-                        .prefetch_related("termination_a", "termination_b")
+    if not enable_circuit_terminations:
+        links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
+    else:
+        # todo fix the query so we can include circuits
+        links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
+    
+    wlan_links = WirelessLink.objects.filter( Q(_interface_a_device_id__in=device_ids) & Q(_interface_b_device_id__in=device_ids))
 
     for link in links:
-
-        if link.termination_a_type.name in ignore_cable_type or link.termination_b_type.name in ignore_cable_type \
-            or link.id in cable_ids:
+        if link.termination_type.name in ignore_cable_type :
             continue
         
-        a_is_path_endoint = isinstance(link.termination_a, PathEndpoint)
-        b_is_path_endoint = isinstance(link.termination_b, PathEndpoint)
+        #Normal device cables    
+        if link.termination_type.name in supported_termination_types:
+            if link._device_id not in nodes_devices:
+                nodes_devices[link._device_id] = link.termination.device
 
-        if not end2end_connections or (not a_is_path_endoint and not b_is_path_endoint):
+            complete_link = False
+            if link.cable_end == "A":
+                if link.cable.id not in cable_ids:
+                    cable_ids[link.cable.id] = {}
+                else:
+                    if cable_ids[link.cable.id]['B'] is not None:
+                        complete_link = True
 
-            if isinstance(link.termination_a, CircuitTermination):
-                if enable_circuit_terminations and link.termination_a.circuit.id not in circuit_ids:
-                    circuit = link.termination_a.circuit
-                    circuit_ids.append(circuit.id)
-                    cable_ids.append(link.id)
-                    
-                    path_destination = circuit.termination_z if link.termination_a.term_side == "A" else circuit.termination_a
+            elif link.cable_end == "B":
+                if link.cable.id not in cable_ids:
+                    cable_ids[link.cable.id] = {}
+                else:
+                    if cable_ids[link.cable.id]['A'] is not None:
+                        complete_link = True
+            else:
+                print("Unkown cable end")
+            cable_ids[link.cable.id][link.cable_end] = { "termination_name": link.termination.name, "termination_device_name": link.termination.device.name, "device_id": link._device_id }
 
-                    if path_destination is not None and path_destination.provider_network is None:
-                        # ProviderNetwork not supported at the moment
-                        # $path_destination.cable would be none : there is no cable between a CircuitTermination and ProviderNetwork
+            if complete_link:
+                edge_ids += 1
+                edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=cable_ids[link.cable.id]["A"], termination_b=cable_ids[link.cable.id]["B"]))
+           
 
-                        if not hasattr(link.termination_b, 'device'):
-                            #CircuitTermination B Missing Device
-                            continue
-
-                        origin_device = link.termination_b.device
-                        destination_device = path_destination.cable.termination_b.device
-
-                        if origin_device.id in device_ids and destination_device.id in device_ids:
-                            if origin_device.id not in nodes_devices:
-                                nodes_devices[origin_device.id] = origin_device
-                            if destination_device.id not in nodes_devices:
-                                nodes_devices[destination_device.id] = destination_device
-
-                            edge_ids += 1
-                            edges.append(create_edge(edge_ids, link, link.termination_b, path_destination.cable.termination_b, [circuit.cid], circuit))
-
-            elif link.termination_a.device.id in device_ids and link.termination_b.device.id in device_ids:
-
-                    if link.termination_a.device.id not in nodes_devices:
-                        nodes_devices[link.termination_a.device.id] = link.termination_a.device
-                    if link.termination_b.device.id not in nodes_devices:
-                        nodes_devices[link.termination_b.device.id] = link.termination_b.device
-
-                    cable_ids.append(link.id)
-                    edge_ids += 1
-                    edges.append(create_edge(edge_ids, link, link.termination_a, link.termination_b))
         else:
+            #todo circuits
+            print("todo") 
+            print(link.termination_type.name)
+
+
+
+        
             # termination_a can be a CircuitTermination (no trace()) while termination_b is a PathEndpoint
             # If so, we swap them so we can follow the path using PathEndpoint#trace()
             path_start = link.termination_a if a_is_path_endoint else link.termination_b
@@ -253,7 +251,21 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
                 nodes_devices[path_start.device.id] = path_start.device
 
     # endfor (link)
-    
+
+    for wlan_link in wlan_links:
+        if wlan_link.interface_a.device.id not in nodes_devices:
+                nodes_devices[wlan_link.interface_a.device.id] = wlan_link.interface_a.device
+        if wlan_link.interface_b.device.id not in nodes_devices:
+                nodes_devices[wlan_link.interface_b.device.id] = wlan_link.interface_b.device
+        
+        termination_a = {"termination_name": wlan_link.interface_a.name, "termination_device_name": wlan_link.interface_a.device.name, "device_id": wlan_link.interface_a.device.id}
+        termination_b = {"termination_name": wlan_link.interface_b.name, "termination_device_name": wlan_link.interface_b.device.name, "device_id": wlan_link.interface_b.device.id}
+        wireless = {"ssid": wlan_link.ssid }
+
+        edge_ids += 1
+        edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b,wireless=wireless))
+
+
     for qs_device in queryset:
         if qs_device.id not in nodes_devices and not hide_unconnected:
             nodes_devices[qs_device.id] = qs_device
