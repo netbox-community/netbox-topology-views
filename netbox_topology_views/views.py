@@ -115,7 +115,14 @@ def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = N
     
     return edge
 
-def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections):
+def create_circuit_termination(termination):
+    if isinstance(termination, CircuitTermination):
+        return { "termination_name": termination.circuit.provider.name, "termination_device_name": termination.circuit.cid, "device_id": "c{}".format(termination.circuit.id) }
+    if isinstance(termination, Interface):
+        return { "termination_name": termination.name, "termination_device_name": termination.device.name, "device_id": termination.device.id }
+
+
+def get_topology_data(queryset, hide_unconnected, save_coords):
     nodes_devices = {}
     edges = []
     nodes = []
@@ -141,14 +148,9 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
             termination_b = {}
             circuit_model = {}
             if circuit.cable is not None:
-                if isinstance(circuit.cable.a_terminations[0], CircuitTermination):
-                    termination_a = { "termination_name": circuit.cable.a_terminations[0].circuit.provider.name, "termination_device_name": circuit.cable.a_terminations[0].circuit.cid, "device_id": "c{}".format(circuit.cable.a_terminations[0].circuit.id) }
-                if isinstance(circuit.cable.b_terminations[0], Interface):
-                    termination_b = { "termination_name": circuit.cable.b_terminations[0].name, "termination_device_name": circuit.cable.b_terminations[0].device.name, "device_id": circuit.cable.b_terminations[0].device.id }
+                termination_a = create_circuit_termination(circuit.cable.a_terminations[0])
+                termination_b = create_circuit_termination(circuit.cable.b_terminations[0])
             if bool(termination_a) and bool(termination_b):
-                print("ok")
-                print(termination_a)
-                print(termination_b)
                 circuit_model = {"provider_name": circuit.circuit.provider.name}
                 edge_ids += 1
                 edges.append(create_edge(edge_id=edge_ids,circuit=circuit_model, termination_a=termination_a, termination_b=termination_b))
@@ -234,34 +236,21 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["hide_unconnected"] == "on" :
                     hide_unconnected = True
 
-            if "intermediate_dev_role_id" in request.GET:
-                intermediate_dev_role_ids = list(map(int, request.GET.getlist("intermediate_dev_role_id")))
-            else:
-                intermediate_dev_role_ids = []
-
-            end2end_connections = False
-            if "end2end_connections" in request.GET:
-                if request.GET["end2end_connections"] == "on" :
-                    end2end_connections = True
-            
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
-                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
             else:
-                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections)
+                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
-            preselected_intermediate_dev_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_intermediate_dev_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]
             always_save_coordinates = bool(settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"])
 
             q_device_role_id = DeviceRole.objects.filter(name__in=preselected_device_roles).values_list("id", flat=True)
-            q_intermediate_dev_role_id = DeviceRole.objects.filter(name__in=preselected_intermediate_dev_roles).values_list("id", flat=True)
             q_tags = Tag.objects.filter(name__in=preselected_tags).values_list("name", flat=True)
 
             q = QueryDict(mutable=True)
             q.setlist("device_role_id", list(q_device_role_id))
-            q.setlist("intermediate_dev_role_id", list(q_intermediate_dev_role_id))
             q.setlist("tag", list(q_tags))
             q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"]["draw_default_layout"]
             if always_save_coordinates:
