@@ -1,3 +1,4 @@
+from platform import node
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
@@ -19,51 +20,58 @@ from extras.models import Tag
 
 supported_termination_types = ["interface", "front port", "rear port"]
 
-def create_node(device, save_coords):
-    dev_name = device.name
-    if dev_name is None:
-        dev_name = "device name unknown"
-
-    node_content = ""
-
-    if device.device_type is not None:
-        node_content += "<tr><th>Type: </th><td>" + device.device_type.model + "</td></tr>"
-    if device.device_role.name is not None:
-        node_content +=  "<tr><th>Role: </th><td>" + device.device_role.name + "</td></tr>"
-    if device.serial != "":
-        node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
-    if device.primary_ip is not None:
-        node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
-    if device.site is not None:
-        node_content += "<tr><th>Site: </th><td>" + device.site.name + "</td></tr>"
-    if device.location is not None:
-        node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
-    if device.rack is not None:
-        node_content += "<tr><th>Rack: </th><td>" + device.rack.name + "</td></tr>"
-    if device.position is not None:
-        if device.face is not None:
-            node_content += "<tr><th>Position: </th><td> {} ({}) </td></tr>".format(device.position, device.face)
-        else:
-            node_content += "<tr><th>Position: </th><td>" + device.position + "</td></tr>"
-
-    dev_title = "<table> %s </table>" % (node_content)
+def create_node(device, save_coords, circuit = None):
 
     node = {}
-    node["id"] = device.id
+    if circuit is None:
+        dev_name = device.name
+        if dev_name is None:
+            dev_name = "device name unknown"
+
+        node_content = ""
+
+        if device.device_type is not None:
+            node_content += "<tr><th>Type: </th><td>" + device.device_type.model + "</td></tr>"
+        if device.device_role.name is not None:
+            node_content +=  "<tr><th>Role: </th><td>" + device.device_role.name + "</td></tr>"
+        if device.serial != "":
+            node_content += "<tr><th>Serial: </th><td>" + device.serial + "</td></tr>"
+        if device.primary_ip is not None:
+            node_content += "<tr><th>IP Address: </th><td>" + str(device.primary_ip.address) + "</td></tr>"
+        if device.site is not None:
+            node_content += "<tr><th>Site: </th><td>" + device.site.name + "</td></tr>"
+        if device.location is not None:
+            node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
+        if device.rack is not None:
+            node_content += "<tr><th>Rack: </th><td>" + device.rack.name + "</td></tr>"
+        if device.position is not None:
+            if device.face is not None:
+                node_content += "<tr><th>Position: </th><td> {} ({}) </td></tr>".format(device.position, device.face)
+            else:
+                node_content += "<tr><th>Position: </th><td>" + device.position + "</td></tr>"
+
+        dev_title = "<table> %s </table>" % (node_content)
+
+        node["title"] = dev_title
+        node["id"] = device.id
+        
+        if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
+            node["image"] = "../../static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
+        else:
+            node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
+
+        if device.device_role.color != "":
+            node["color.border"] = "#" + device.device_role.color
+    else:
+        dev_name = "Circuit " + str(device.cid)
+        node["image"] = "../../static/netbox_topology_views/img/circuit.png"
+        node["id"] = "c{}".format(device.id)
+    
     node["name"] = dev_name
     node["label"] = dev_name
-    node["title"] = dev_title
     node["shape"] = "image"
-    if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-        node["image"] = "../../static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
-    else:
-        node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
 
-    if device.device_role.color != "":
-        node["color.border"] = "#" + device.device_role.color
-
-    node["physics"] = True
-
+    node["physics"] = True        
     if "coordinates" in device.custom_field_data:
         if device.custom_field_data["coordinates"] is not None:
             if ";" in device.custom_field_data["coordinates"]:
@@ -110,9 +118,11 @@ def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = N
 def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_role_ids, end2end_connections):
     nodes_devices = {}
     edges = []
+    nodes = []
     edge_ids = 0
     cable_ids = {}
-    circuit_ids = []
+    circuit_ids = {}
+    nodes_circuits = {}
     if not queryset:
         return None
 
@@ -121,12 +131,38 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
 
     device_ids = [d.id for d in queryset]
 
-    if not enable_circuit_terminations:
-        links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
-    else:
-        # todo fix the query so we can include circuits
-        links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
-    
+    if enable_circuit_terminations:
+        site_ids = [d.site.id for d in queryset]
+        circuits = CircuitTermination.objects.filter( Q(site_id__in=site_ids) ).prefetch_related("provider_network", "circuit")
+        for circuit in circuits:
+            if circuit.circuit.id not in nodes_circuits:
+                nodes_circuits[circuit.circuit.id] = circuit.circuit
+
+            #if circuit.cable is not None:
+            #    print(circuit.cable)
+            #else:
+            #    print(circuit.__dict__)
+
+            if circuit.term_side == "Z":
+                if circuit.circuit.id not in circuit_ids:
+                    circuit_ids[circuit.circuit.id] = {}
+                else:
+                    if circuit_ids[circuit.circuit.id]['A'] is not None:
+                        complete_link = True
+            elif circuit.term_side == "A":
+                if circuit.circuit.id not in circuit_ids:
+                    circuit_ids[circuit.circuit.id] = {}
+                else:
+                    if circuit_ids[circuit.circuit.id]['Z'] is not None:
+                        complete_link = True
+            else:
+                print("Unkown cable end")
+            circuit_ids[circuit.circuit.id][circuit.term_side] = {"circuit_name": circuit.circuit.cid, "provider_name": circuit.circuit.provider.name, "custom_field_data":  circuit.custom_field_data}
+
+        nodes.append([create_node(d, save_coords, circuit=True) for d in nodes_circuits.values()])
+
+
+    links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
     wlan_links = WirelessLink.objects.filter( Q(_interface_a_device_id__in=device_ids) & Q(_interface_b_device_id__in=device_ids))
 
     for link in links:
@@ -145,7 +181,6 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
                 else:
                     if cable_ids[link.cable.id]['B'] is not None:
                         complete_link = True
-
             elif link.cable_end == "B":
                 if link.cable.id not in cable_ids:
                     cable_ids[link.cable.id] = {}
@@ -270,8 +305,10 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
         if qs_device.id not in nodes_devices and not hide_unconnected:
             nodes_devices[qs_device.id] = qs_device
 
+
     results = {}
-    results["nodes"] = [create_node(d, save_coords) for d in nodes_devices.values()]
+    nodes.append([create_node(d, save_coords) for d in nodes_devices.values()])
+    results["nodes"] = nodes #[create_node(d, save_coords) for d in nodes_devices.values()]
     results["edges"] = edges
     return results
 

@@ -37,8 +37,12 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
             if "y" in request.data:
                 if request.data["y"]:
                     y_coord = request.data["y"]
-
-            actual_device= Device.objects.get(id=device_id)
+            
+            if device_id.startswith("c"):
+                device_id = device_id.lstrip('c')
+                actual_device= Circuit.objects.get(id=device_id)
+            else:
+                actual_device= Device.objects.get(id=device_id)
 
             if "coordinates" in actual_device.custom_field_data:
                 actual_device.custom_field_data["coordinates"] = "%s;%s" % (x_coord,y_coord)
