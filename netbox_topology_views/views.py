@@ -99,7 +99,7 @@ def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = N
 
     if circuit is not None:
         edge["dashes"] = True
-        edge["title"] = "Circuit provider: "  + circuit.provider.name + "<br>"
+        edge["title"] = "Circuit provider: "  + circuit["provider_name"] + "<br>"
         edge["title"] += "Termination between <br>"
         edge["title"] += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
         edge["title"] += cable_a_dev_name + " [" + cable_a_name +  "]"
@@ -121,7 +121,6 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
     nodes = []
     edge_ids = 0
     cable_ids = {}
-    circuit_ids = {}
     nodes_circuits = {}
     if not queryset:
         return None
@@ -138,29 +137,23 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
             if circuit.circuit.id not in nodes_circuits:
                 nodes_circuits[circuit.circuit.id] = circuit.circuit
 
-            #if circuit.cable is not None:
-            #    print(circuit.cable)
-            #else:
-            #    print(circuit.__dict__)
-
-            if circuit.term_side == "Z":
-                if circuit.circuit.id not in circuit_ids:
-                    circuit_ids[circuit.circuit.id] = {}
-                else:
-                    if circuit_ids[circuit.circuit.id]['A'] is not None:
-                        complete_link = True
-            elif circuit.term_side == "A":
-                if circuit.circuit.id not in circuit_ids:
-                    circuit_ids[circuit.circuit.id] = {}
-                else:
-                    if circuit_ids[circuit.circuit.id]['Z'] is not None:
-                        complete_link = True
-            else:
-                print("Unkown cable end")
-            circuit_ids[circuit.circuit.id][circuit.term_side] = {"circuit_name": circuit.circuit.cid, "provider_name": circuit.circuit.provider.name, "custom_field_data":  circuit.custom_field_data}
+            termination_a = {}
+            termination_b = {}
+            circuit_model = {}
+            if circuit.cable is not None:
+                if isinstance(circuit.cable.a_terminations[0], CircuitTermination):
+                    termination_a = { "termination_name": circuit.cable.a_terminations[0].circuit.provider.name, "termination_device_name": circuit.cable.a_terminations[0].circuit.cid, "device_id": "c{}".format(circuit.cable.a_terminations[0].circuit.id) }
+                if isinstance(circuit.cable.b_terminations[0], Interface):
+                    termination_b = { "termination_name": circuit.cable.b_terminations[0].name, "termination_device_name": circuit.cable.b_terminations[0].device.name, "device_id": circuit.cable.b_terminations[0].device.id }
+            if bool(termination_a) and bool(termination_b):
+                print("ok")
+                print(termination_a)
+                print(termination_b)
+                circuit_model = {"provider_name": circuit.circuit.provider.name}
+                edge_ids += 1
+                edges.append(create_edge(edge_id=edge_ids,circuit=circuit_model, termination_a=termination_a, termination_b=termination_b))
 
         nodes.append([create_node(d, save_coords, circuit=True) for d in nodes_circuits.values()])
-
 
     links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
     wlan_links = WirelessLink.objects.filter( Q(_interface_a_device_id__in=device_ids) & Q(_interface_b_device_id__in=device_ids))
@@ -171,9 +164,7 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
         
         #Normal device cables    
         if link.termination_type.name in supported_termination_types:
-            if link._device_id not in nodes_devices:
-                nodes_devices[link._device_id] = link.termination.device
-
+            
             complete_link = False
             if link.cable_end == "A":
                 if link.cable.id not in cable_ids:
@@ -192,101 +183,11 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
             cable_ids[link.cable.id][link.cable_end] = { "termination_name": link.termination.name, "termination_device_name": link.termination.device.name, "device_id": link._device_id }
 
             if complete_link:
+                if link._device_id not in nodes_devices:
+                    nodes_devices[link._device_id] = link.termination.device
                 edge_ids += 1
                 edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=cable_ids[link.cable.id]["A"], termination_b=cable_ids[link.cable.id]["B"]))
            
-
-        else:
-            #todo circuits
-            print("todo") 
-            print(link.termination_type.name)
-
-
-
-        
-            # termination_a can be a CircuitTermination (no trace()) while termination_b is a PathEndpoint
-            # If so, we swap them so we can follow the path using PathEndpoint#trace()
-            path_start = link.termination_a if a_is_path_endoint else link.termination_b
-            if path_start.device is not None and path_start.device.id not in device_ids:
-                # device not in queryset, skip
-                continue
-
-            # Ignore incomplete path when in end-to-end connection mode
-            if path_start.path is not None:
-                if not path_start.path.is_active or path_start.path.is_split:
-                    continue
-            else:
-                continue
-
-            path_destination = path_start.path.destination
-            if hasattr(path_destination, "device") and path_destination.device is not None and path_destination.device.id not in device_ids:
-                # device not in queryset, skip
-                continue
-
-            valid_path = False
-
-            # variables needed for trace() browsing
-            origin = None
-            circuit = None
-            tmp_path = []
-
-            # trace() : Return the path as a list of three-tuples (A termination, cable, B termination)
-            # TODO device qui ne s"affichent pas si hide_unconnected
-            for (termination_a, cable, termination_b) in path_start.trace():
-                
-                if origin is None:
-                    # New part of the link
-                    origin = termination_a
-                    circuit = None
-                    tmp_path = []
-
-                if isinstance(termination_b, ProviderNetwork):
-                    # ProviderNetwork not supported at the moment
-                    # It would need to manage several kind of nodes (Device, ProviderNetwork)
-                    # and maps javascript nodes ID with Devices IDs and ProviderNetworks IDs
-                    # When $termination_b is a ProviderNetwork instance, $cable will be None
-                    break
-
-                if cable is not None and (cable.termination_a_type in ignore_cable_type or cable.termination_b_type in ignore_cable_type):
-                    # Ignore this path
-                    break
-
-                if isinstance(termination_b, CircuitTermination):
-                    if enable_circuit_terminations:
-                        circuit = termination_b.circuit
-                        tmp_path.append(circuit.cid)
-                        if circuit.id not in circuit_ids:
-                            circuit_ids.append(circuit.id)
-                    else:
-                        # Ignore this path
-                        break
-                elif end2end_connections and termination_b != path_destination \
-                        and termination_b.device.device_role.id not in intermediate_dev_role_ids \
-                        and termination_b.device.id not in device_ids:
-                    # Skip this intermediate device, origin device is keep in $origin for next iteration
-                    tmp_path.append(termination_b.device.name)
-                elif cable is not None and termination_b is not None:
-                    if cable.id not in cable_ids:
-                        # New part of the link we want to display
-                        cable_ids.append(cable.id)
-                        edge_ids += 1
-                        edges.append(create_edge(edge_ids, cable, origin, termination_b, tmp_path, circuit))
-
-                    if not valid_path:
-                        valid_path = True
-
-                    if termination_b.device.id not in nodes_devices and \
-                      (termination_b.device.device_role.id in intermediate_dev_role_ids or termination_b.device.id in device_ids) :
-                        nodes_devices[termination_b.device.id] = termination_b.device
-                    # Reset for next iteration
-                    origin = None
-            # endfor (trace)
-
-            if valid_path and path_start.device.id not in nodes_devices:
-                nodes_devices[path_start.device.id] = path_start.device
-
-    # endfor (link)
-
     for wlan_link in wlan_links:
         if wlan_link.interface_a.device.id not in nodes_devices:
                 nodes_devices[wlan_link.interface_a.device.id] = wlan_link.interface_a.device
@@ -300,15 +201,13 @@ def get_topology_data(queryset, hide_unconnected, save_coords, intermediate_dev_
         edge_ids += 1
         edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b,wireless=wireless))
 
-
     for qs_device in queryset:
         if qs_device.id not in nodes_devices and not hide_unconnected:
             nodes_devices[qs_device.id] = qs_device
 
-
     results = {}
     nodes.append([create_node(d, save_coords) for d in nodes_devices.values()])
-    results["nodes"] = nodes #[create_node(d, save_coords) for d in nodes_devices.values()]
+    results["nodes"] = nodes 
     results["edges"] = edges
     return results
 
