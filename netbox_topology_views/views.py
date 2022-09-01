@@ -24,24 +24,46 @@ supported_termination_types = ["interface", "front port", "rear port", "power ou
 def create_node(device, save_coords, circuit = None, powerpanel = None, powerfeed= None):
 
     node = {}
+    node_content = ""
     if circuit:
         dev_name = "Circuit " + str(device.cid)
         node["image"] = "../../static/netbox_topology_views/img/circuit.png"
         node["id"] = "c{}".format(device.id)
+
+        if device.provider is not None:
+            node_content += "<tr><th>Provider: </th><td>" + device.provider.name + "</td></tr>"
+        if device.type is not None:
+            node_content += "<tr><th>Type: </th><td>" + device.type.name + "</td></tr>"
     elif powerpanel:
         dev_name = "Power Panel " + str(device.id)
         node["image"] = "../../static/netbox_topology_views/img/power-panel.png"
         node["id"] = "p{}".format(device.id)
+
+        if device.site is not None:
+            node_content += "<tr><th>Site: </th><td>" + device.site.name + "</td></tr>"
+        if device.location is not None:
+            node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
     elif powerfeed:
         dev_name = "Power Feed " + str(device.id)
         node["image"] = "../../static/netbox_topology_views/img/power-feed.png"
         node["id"] = "f{}".format(device.id)
+
+        if device.power_panel is not None:
+            node_content += "<tr><th>Power Panel: </th><td>" + device.power_panel.name + "</td></tr>"
+        if device.type is not None:
+            node_content += "<tr><th>Type: </th><td>" + device.type + "</td></tr>"
+        if device.supply is not None:
+            node_content += "<tr><th>Supply: </th><td>" + device.supply + "</td></tr>"
+        if device.phase is not None:
+            node_content += "<tr><th>Phase: </th><td>" + device.phase + "</td></tr>"
+        if device.amperage is not None:
+            node_content += "<tr><th>Amperage: </th><td>" + str(device.amperage )+ "</td></tr>"
+        if device.voltage is not None:
+            node_content += "<tr><th>Voltage: </th><td>" + str(device.voltage) + "</td></tr>"
     else:
         dev_name = device.name
         if dev_name is None:
             dev_name = "device name unknown"
-
-        node_content = ""
 
         if device.device_type is not None:
             node_content += "<tr><th>Type: </th><td>" + device.device_type.model + "</td></tr>"
@@ -63,9 +85,6 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
             else:
                 node_content += "<tr><th>Position: </th><td>" + device.position + "</td></tr>"
 
-        dev_title = "<table> %s </table>" % (node_content)
-
-        node["title"] = dev_title
         node["id"] = device.id
         
         if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
@@ -76,6 +95,9 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
     
+    dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
+
+    node["title"] = dev_title
     node["name"] = dev_name
     node["label"] = dev_name
     node["shape"] = "image"
@@ -95,7 +117,7 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
                 node["physics"] = True
     return node
 
-def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = None, wireless = None):
+def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = None, wireless = None, power=None):
     cable_a_name = "device A name unknown" if termination_a["termination_name"] is None else termination_a["termination_name"]
     cable_a_dev_name = "device A name unknown" if termination_a["termination_device_name"] is None else termination_a["termination_device_name"]
     cable_b_name= "device A name unknown" if termination_b["termination_name"] is None else termination_b["termination_name"]
@@ -112,13 +134,15 @@ def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = N
         edge["title"] += "Termination between <br>"
         edge["title"] += cable_b_dev_name + " [" + cable_b_name +  "]<br>"
         edge["title"] += cable_a_dev_name + " [" + cable_a_name +  "]"
+    elif wireless is not None:
+        edge["dashes"] = [2, 10, 2, 10]
+        edge["title"] = "Wireless Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+    elif power is not None:
+        edge["dashes"] = [5, 5, 3, 3] 
+        edge["title"] = "Power Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
     else:
-        if wireless is not None:
-            edge["dashes"] = [2, 10, 2, 10]
-            edge["title"] = "Wireless Connection between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-        else:
-            edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
-        
+        edge["title"] = "Cable between <br> " + cable_a_dev_name + " [" + cable_a_name +  "]<br>" + cable_b_dev_name + " [" + cable_b_name + "]"
+    
     if cable is not None and cable.color != "":
         edge["color"] = "#" + cable.color
     
@@ -184,7 +208,9 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                     if circuit.circuit.id not in nodes_circuits:
                         nodes_circuits[circuit.circuit.id] = circuit.circuit
 
-        nodes.append([create_node(d, save_coords, circuit=True) for d in nodes_circuits.values()])
+       
+        for d in nodes_circuits.values():
+            nodes.append(create_node(d, save_coords, circuit=True))
 
     links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
     wlan_links = WirelessLink.objects.filter( Q(_interface_a_device_id__in=device_ids) & Q(_interface_b_device_id__in=device_ids))
@@ -209,15 +235,19 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                 edge_ids += 1
                 termination_a = { "termination_name": power_feed.power_panel.name, "termination_device_name": str(power_feed.power_panel.id), "device_id": "p{}".format(power_feed.power_panel.id) }
                 termination_b = { "termination_name": power_feed.name, "termination_device_name": str(termination.id), "device_id": "f{}".format(power_feed.id) }
-                edges.append(create_edge(edge_id=edge_ids,circuit=None, termination_a=termination_a, termination_b=termination_b))
+                edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, power=True))
 
                 if power_feed.cable_id is not None:
                     if power_feed.cable.id not in cable_ids:
                         cable_ids[power_feed.cable.id] = {}
                     cable_ids[power_feed.cable.id][power_feed.cable_end] = termination_b
                 
-        nodes.append([create_node(d, save_coords, powerfeed = True) for d in nodes_powerfeed.values()])
-        nodes.append([create_node(d, save_coords, powerpanel = True) for d in nodes_powerpanel.values()])               
+        
+        for d in nodes_powerfeed.values():
+            nodes.append(create_node(d, save_coords, powerfeed = True))
+        
+        for d in nodes_powerpanel.values():
+            nodes.append(create_node(d, save_coords, powerpanel = True))        
 
     for link in links:
         if link.termination_type.name in ignore_cable_type :
@@ -278,7 +308,10 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
             nodes_devices[qs_device.id] = qs_device
 
     results = {}
-    nodes.append([create_node(d, save_coords) for d in nodes_devices.values()])
+    
+    for d in nodes_devices.values():
+        nodes.append(create_node(d, save_coords))
+
     results["nodes"] = nodes 
     results["edges"] = edges
     return results

@@ -71,8 +71,6 @@ PLUGINS_CONFIG = {
 | always_save_coordinates       | False | (bool) Set if you want to enable the option to save coordinates by default |
 | ignore_cable_type      | [] | The cable types that you want to ignore in the views  |
 | preselected_tags      | '[]' | The name of tags you want to preload  |
-| enable_circuit_terminations      | False  | (bool) Set to true if you want to see circuit terminations in the topology  |
-| enable_power_terminations         | False | (bool) Set to True if you want to see power feeds/ power panels
 | draw_default_layout | False | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
 
 ### Custom Images

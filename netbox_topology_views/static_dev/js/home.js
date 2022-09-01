@@ -40,8 +40,6 @@ var options = {
         solver: 'forceAtlas2Based'
     }
 };
-var selected_regions = [];
-var selected_sites = [];
 var coord_save_checkbox = null;
 var htmlElement = null;
 
@@ -69,12 +67,12 @@ export function htmlTitle(html) {
 };
 
 export function addEdge(item) {
-    item.title = htmlTitle( item.title );
+    item.title = htmlTitle(item.title);
     edges.add(item);
 };
 
 export function addNode(item) {
-    item.title = htmlTitle( item.title );
+    item.title = htmlTitle(item.title);
     nodes.add(item);
 }
 
