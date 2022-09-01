@@ -101,3 +101,12 @@ To view `/plugins/topology-views/` you need the following permissions:
  + dcim | site | can view site
  + extras | tag | can view tag
  + dcim | device role | can view device role
+
+ ## Icons info
+
+Power icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/power).
+
+Power icons created by [Flat Icons - Flaticon](https://www.flaticon.com/free-icons/power)
+
+Provider icons created by [Good Ware - Flaticon](https://www.flaticon.com/free-icons/provider)
+
