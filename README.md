@@ -45,7 +45,7 @@ Then run `python3 manage.py collectstatic --no-input`
 
 There is also support for custom fields.
 
-If you create a custom field "coordinates" for "dcim > device" with type "text" and name "coordinates" you will see the same layout every time.
+If you create a custom field "coordinates" for "dcim > device" and "Circuits > circuit" with type "text" and name "coordinates" you will see the same layout every time.
 
 The coordinates can then be provided as: "X;Y"
 
@@ -67,12 +67,10 @@ PLUGINS_CONFIG = {
 | ------------- |-------------| -----|
 | device_img      |['access-switch', 'core-switch', 'firewall', 'router', 'distribution-switch', 'backup', 'storage,wan-network', 'wireless-ap', 'server', 'internal-switch', 'isp-cpe-material', 'non-racked-devices', 'power-units'] | The slug of the device roles that you have a image for. |
 | preselected_device_roles      | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive|
-| preselected_intermediate_dev_roles      | ['Patch-panel'] | The full name of the device roles you want to display in the global view when using end-to-end connections mode.  Note that this is case sensitive|
 | allow_coordinates_saving      | False | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates |
 | always_save_coordinates       | False | (bool) Set if you want to enable the option to save coordinates by default |
-| ignore_cable_type      | ['power outlet', 'power port'] | The cable types that you want to ignore in the views  |
+| ignore_cable_type      | [] | The cable types that you want to ignore in the views  |
 | preselected_tags      | '[]' | The name of tags you want to preload  |
-| enable_circuit_terminations      | False  | (bool) Set to true if you want to see circuit terminations in the topology  |
 | draw_default_layout | False | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
 
 ### Custom Images

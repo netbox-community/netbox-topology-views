@@ -16,16 +16,15 @@ from netbox.forms import NetBoxModelFilterSetForm
 from utilities.forms import (TagFilterField, DynamicModelMultipleChoiceField, MultipleChoiceField)
 
 allow_coordinates_saving = bool(settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"])
-end2end = settings.PLUGINS_CONFIG["netbox_topology_views"]["end2end_connections"]
 
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
-        (None, ('q', 'hide_unconnected', 'save_coords', 'end2end_connections')),
+        (None, ('q', 'hide_unconnected', 'save_coords', 'show_circuit', 'show_power' ,)),
         (None, ('tenant_group_id', 'tenant_id')),
         (None, ('region_id', 'site_id', 'location_id')),
-        (None, ('device_role_id', 'intermediate_dev_role_id')),
+        (None, ('device_role_id', )),
         (None, ('tag', 'status')),
     )
 
@@ -38,17 +37,6 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         queryset=DeviceRole.objects.all(),
         required=False,
         label=_('Device Role')
-    )
-    end2end_connections = forms.BooleanField(
-        label=_("Display end-to-end connections"),
-        required=False,
-        initial=end2end
-    )
-    intermediate_dev_role_id = DynamicModelMultipleChoiceField(
-        queryset=DeviceRole.objects.all(),
-        required=False,
-        label=_('Intermediate Devices Role'),
-        help_text='Intermediate devices to display when using end-to-end connections mode, even if they do not match the query'
     )
     site_id = DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(),
@@ -69,6 +57,16 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     )
     hide_unconnected = forms.BooleanField(
         label=_("Hide Unconnected"),
+        required=False,
+        initial=False
+    )
+    show_circuit = forms.BooleanField(
+        label=_("Show Circuit Terminations"),
+        required=False,
+        initial=False
+    )
+    show_power = forms.BooleanField(
+        label=_("Show Power panel/feed"),
         required=False,
         initial=False
     )

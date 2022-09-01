@@ -40,8 +40,6 @@ var options = {
         solver: 'forceAtlas2Based'
     }
 };
-var selected_regions = [];
-var selected_sites = [];
 var coord_save_checkbox = null;
 var htmlElement = null;
 
@@ -69,12 +67,12 @@ export function htmlTitle(html) {
 };
 
 export function addEdge(item) {
-    item.title = htmlTitle( item.title );
+    item.title = htmlTitle(item.title);
     edges.add(item);
 };
 
 export function addNode(item) {
-    item.title = htmlTitle( item.title );
+    item.title = htmlTitle(item.title);
     nodes.add(item);
 }
 
@@ -137,7 +135,6 @@ export function handleLoadData() {
                         xhr.onreadystatechange = function () {
                         if (xhr.readyState === 4) {
                             console.log(xhr.status);
-                            console.log(xhr.responseText);
                         }};
     
                         var data = JSON.stringify({
@@ -154,7 +151,23 @@ export function handleLoadData() {
         graph.on("doubleClick", function (params) {
             let selected_devices = params.nodes;
             for (let selected_device in selected_devices) {
-                let url = "/dcim/devices/" + selected_devices[selected_device] + "/";
+                let url = ""
+                if(String(selected_devices[selected_device]).startsWith("c")) {
+                    cid = selected_devices[selected_device].substring(1);
+                    url = "/circuits/circuits/" + cid + "/";
+                }
+                else if (String(selected_devices[selected_device]).startsWith("p")) {
+                    cid = selected_devices[selected_device].substring(1);
+                    url = "/dcim/power-panels/" + cid + "/";
+                }
+                else if (String(selected_devices[selected_device]).startsWith("f")) {
+                    cid = selected_devices[selected_device].substring(1);
+                    url = "/dcim/power-feeds/" + cid + "/";
+                }
+                else {
+                    url = "/dcim/devices/" + selected_devices[selected_device] + "/";
+                }
+                
                 window.open(url, "_blank");
             }
 
@@ -164,7 +177,6 @@ export function handleLoadData() {
 
 export function load_doc() {
     if (document.readyState !== 'loading') {
-        console.log("test");
         iniPlotboxIndex();
       } else {
         document.addEventListener('DOMContentLoaded', iniPlotboxIndex);
