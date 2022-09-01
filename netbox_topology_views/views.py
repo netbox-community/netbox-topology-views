@@ -1,4 +1,5 @@
 from platform import node
+from tkinter.messagebox import NO
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
@@ -13,17 +14,29 @@ from .filters import DeviceFilterSet
 
 import json
 
-from dcim.models import Device, Cable, CableTermination, DeviceRole, PathEndpoint, Interface
+from dcim.models import Device, Cable, CableTermination, DeviceRole, PathEndpoint, Interface, FrontPort, RearPort, PowerPanel,  PowerFeed
 from circuits.models import CircuitTermination, ProviderNetwork
 from wireless.models import WirelessLink
 from extras.models import Tag
 
-supported_termination_types = ["interface", "front port", "rear port"]
+supported_termination_types = ["interface", "front port", "rear port", "power outlet", "power port"]
 
-def create_node(device, save_coords, circuit = None):
+def create_node(device, save_coords, circuit = None, powerpanel = None, powerfeed= None):
 
     node = {}
-    if circuit is None:
+    if circuit:
+        dev_name = "Circuit " + str(device.cid)
+        node["image"] = "../../static/netbox_topology_views/img/circuit.png"
+        node["id"] = "c{}".format(device.id)
+    elif powerpanel:
+        dev_name = "Power Panel " + str(device.id)
+        node["image"] = "../../static/netbox_topology_views/img/power-panel.png"
+        node["id"] = "p{}".format(device.id)
+    elif powerfeed:
+        dev_name = "Power Feed " + str(device.id)
+        node["image"] = "../../static/netbox_topology_views/img/power-feed.png"
+        node["id"] = "f{}".format(device.id)
+    else:
         dev_name = device.name
         if dev_name is None:
             dev_name = "device name unknown"
@@ -62,10 +75,6 @@ def create_node(device, save_coords, circuit = None):
 
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
-    else:
-        dev_name = "Circuit " + str(device.cid)
-        node["image"] = "../../static/netbox_topology_views/img/circuit.png"
-        node["id"] = "c{}".format(device.id)
     
     node["name"] = dev_name
     node["label"] = dev_name
@@ -118,30 +127,32 @@ def create_edge(edge_id, termination_a, termination_b, circuit = None, cable = N
 def create_circuit_termination(termination):
     if isinstance(termination, CircuitTermination):
         return { "termination_name": termination.circuit.provider.name, "termination_device_name": termination.circuit.cid, "device_id": "c{}".format(termination.circuit.id) }
-    if isinstance(termination, Interface):
+    if isinstance(termination, Interface) or isinstance(termination, FrontPort) or isinstance(termination, RearPort):
         return { "termination_name": termination.name, "termination_device_name": termination.device.name, "device_id": termination.device.id }
+    return None
 
-
-def get_topology_data(queryset, hide_unconnected, save_coords):
+def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, show_power):
     nodes_devices = {}
     edges = []
     nodes = []
     edge_ids = 0
-    cable_ids = {}
     nodes_circuits = {}
+    nodes_powerpanel = {}
+    nodes_powerfeed = {}
+    nodes_provider_networks = {}
+    cable_ids = {}
     if not queryset:
         return None
 
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
-    enable_circuit_terminations = settings.PLUGINS_CONFIG["netbox_topology_views"]["enable_circuit_terminations"]
 
     device_ids = [d.id for d in queryset]
 
-    if enable_circuit_terminations:
+    if show_circuit:
         site_ids = [d.site.id for d in queryset]
-        circuits = CircuitTermination.objects.filter( Q(site_id__in=site_ids) ).prefetch_related("provider_network", "circuit")
+        circuits = CircuitTermination.objects.filter( Q(site_id__in=site_ids) | Q( provider_network__isnull=False) ).prefetch_related("provider_network", "circuit")
         for circuit in circuits:
-            if circuit.circuit.id not in nodes_circuits:
+            if not hide_unconnected and circuit.circuit.id not in nodes_circuits:
                 nodes_circuits[circuit.circuit.id] = circuit.circuit
 
             termination_a = {}
@@ -150,23 +161,70 @@ def get_topology_data(queryset, hide_unconnected, save_coords):
             if circuit.cable is not None:
                 termination_a = create_circuit_termination(circuit.cable.a_terminations[0])
                 termination_b = create_circuit_termination(circuit.cable.b_terminations[0])
+            elif circuit.provider_network is not None:
+                if circuit.provider_network.id not in nodes_provider_networks:
+                    nodes_provider_networks[circuit.provider_network.id] = circuit.provider_network
+
             if bool(termination_a) and bool(termination_b):
                 circuit_model = {"provider_name": circuit.circuit.provider.name}
                 edge_ids += 1
                 edges.append(create_edge(edge_id=edge_ids,circuit=circuit_model, termination_a=termination_a, termination_b=termination_b))
 
+                circuit_has_connections = False
+                for termination in [circuit.cable.a_terminations[0], circuit.cable.b_terminations[0]]:
+                    if not isinstance(termination, CircuitTermination):
+                        if termination.device.id not in nodes_devices and termination.device.id in device_ids:
+                            nodes_devices[termination.device.id] = termination.device
+                            circuit_has_connections = True
+                        else:
+                            if termination.device.id in device_ids:
+                                 circuit_has_connections = True
+      
+                if circuit_has_connections and hide_unconnected:
+                    if circuit.circuit.id not in nodes_circuits:
+                        nodes_circuits[circuit.circuit.id] = circuit.circuit
+
         nodes.append([create_node(d, save_coords, circuit=True) for d in nodes_circuits.values()])
 
     links = CableTermination.objects.filter( Q(_device_id__in=device_ids) ).select_related("termination_type")
     wlan_links = WirelessLink.objects.filter( Q(_interface_a_device_id__in=device_ids) & Q(_interface_b_device_id__in=device_ids))
+    
+    if show_power:
+        power_panels = PowerPanel.objects.filter( Q (site_id__in=site_ids))
+        power_panels_ids = [d.id for d in power_panels]
+        power_feeds = PowerFeed.objects.filter( Q (power_panel_id__in=power_panels_ids))
+        
+        for power_feed in power_feeds:
+            if not hide_unconnected  or (hide_unconnected and power_feed.cable_id is not None):
+                if power_feed.power_panel.id not in nodes_powerpanel:
+                    nodes_powerpanel[power_feed.power_panel.id] = power_feed.power_panel
+
+                if power_feed.id not in nodes_powerfeed:
+                    if hide_unconnected:
+                        if power_feed.link_peers[0].device.id in device_ids:
+                            nodes_powerfeed[power_feed.id] = power_feed
+                    else:
+                        nodes_powerfeed[power_feed.id] = power_feed
+
+                edge_ids += 1
+                termination_a = { "termination_name": power_feed.power_panel.name, "termination_device_name": str(power_feed.power_panel.id), "device_id": "p{}".format(power_feed.power_panel.id) }
+                termination_b = { "termination_name": power_feed.name, "termination_device_name": str(termination.id), "device_id": "f{}".format(power_feed.id) }
+                edges.append(create_edge(edge_id=edge_ids,circuit=None, termination_a=termination_a, termination_b=termination_b))
+
+                if power_feed.cable_id is not None:
+                    if power_feed.cable.id not in cable_ids:
+                        cable_ids[power_feed.cable.id] = {}
+                    cable_ids[power_feed.cable.id][power_feed.cable_end] = termination_b
+                
+        nodes.append([create_node(d, save_coords, powerfeed = True) for d in nodes_powerfeed.values()])
+        nodes.append([create_node(d, save_coords, powerpanel = True) for d in nodes_powerpanel.values()])               
 
     for link in links:
         if link.termination_type.name in ignore_cable_type :
             continue
         
-        #Normal device cables    
+        #Normal device cables
         if link.termination_type.name in supported_termination_types:
-            
             complete_link = False
             if link.cable_end == "A":
                 if link.cable.id not in cable_ids:
@@ -182,13 +240,25 @@ def get_topology_data(queryset, hide_unconnected, save_coords):
                         complete_link = True
             else:
                 print("Unkown cable end")
-            cable_ids[link.cable.id][link.cable_end] = { "termination_name": link.termination.name, "termination_device_name": link.termination.device.name, "device_id": link._device_id }
+            cable_ids[link.cable.id][link.cable_end] = link
 
             if complete_link:
-                if link._device_id not in nodes_devices:
-                    nodes_devices[link._device_id] = link.termination.device
                 edge_ids += 1
-                edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=cable_ids[link.cable.id]["A"], termination_b=cable_ids[link.cable.id]["B"]))
+                if isinstance(cable_ids[link.cable.id]["B"], CableTermination):
+                    if cable_ids[link.cable.id]["B"]._device_id not in nodes_devices:
+                        nodes_devices[cable_ids[link.cable.id]["B"]._device_id] = cable_ids[link.cable.id]["B"].termination.device
+                    termination_b = { "termination_name": cable_ids[link.cable.id]["B"].termination.name, "termination_device_name": cable_ids[link.cable.id]["B"].termination.device.name, "device_id": cable_ids[link.cable.id]["B"].termination.device.id }
+                else:
+                    termination_b = cable_ids[link.cable.id]["B"]
+
+                if isinstance(cable_ids[link.cable.id]["A"], CableTermination):
+                    if cable_ids[link.cable.id]["A"]._device_id not in nodes_devices:
+                        nodes_devices[cable_ids[link.cable.id]["A"]._device_id] = cable_ids[link.cable.id]["A"].termination.device
+                    termination_a = { "termination_name": cable_ids[link.cable.id]["A"].termination.name, "termination_device_name": cable_ids[link.cable.id]["A"].termination.device.name, "device_id": cable_ids[link.cable.id]["A"].termination.device.id }
+                else:
+                    termination_a = cable_ids[link.cable.id]["A"]
+               
+                edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=termination_a, termination_b=termination_b))
            
     for wlan_link in wlan_links:
         if wlan_link.interface_a.device.id not in nodes_devices:
@@ -236,11 +306,21 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["hide_unconnected"] == "on" :
                     hide_unconnected = True
 
+            show_power = False
+            if "show_power" in request.GET:
+                if request.GET["show_power"] == "on" :
+                    show_power = True
+
+            show_circuit = False
+            if "show_circuit" in request.GET:
+                if request.GET["show_circuit"] == "on" :
+                    show_circuit = True
+
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
-                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
+                    topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords, show_circuit, show_power)
             else:
-                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords)
+                topo_data = get_topology_data(self.queryset, hide_unconnected, save_coords,  show_circuit, show_power)
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_device_roles"]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"]["preselected_tags"]

@@ -158,6 +158,14 @@ export function handleLoadData() {
                     cid = selected_devices[selected_device].substring(1);
                     url = "/circuits/circuits/" + cid + "/";
                 }
+                else if (String(selected_devices[selected_device]).startsWith("p")) {
+                    cid = selected_devices[selected_device].substring(1);
+                    url = "/dcim/power-panels/" + cid + "/";
+                }
+                else if (String(selected_devices[selected_device]).startsWith("f")) {
+                    cid = selected_devices[selected_device].substring(1);
+                    url = "/dcim/power-feeds/" + cid + "/";
+                }
                 else {
                     url = "/dcim/devices/" + selected_devices[selected_device] + "/";
                 }
