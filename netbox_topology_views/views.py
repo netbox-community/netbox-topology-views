@@ -1,5 +1,4 @@
 from platform import node
-from tkinter.messagebox import NO
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.views.generic import View
