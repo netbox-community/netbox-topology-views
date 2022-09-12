@@ -35,6 +35,7 @@ First run `source /opt/netbox/venv/bin/activate` to enter the Python virtual env
 Then run 
 ```bash
 cd /opt/netbox/netbox
+pip3 install netbox-topology-views
 python3 manage.py collectstatic --no-input
 ```
 
