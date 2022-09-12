@@ -29,6 +29,8 @@ Once installed, the plugin needs to be enabled in your `configuration.py`
 PLUGINS = ["netbox_topology_views"]
 ```
 
+First run `source /opt/netbox/venv/bin/activate` to enter the Python virtual environment.
+
 Then run `python3 manage.py collectstatic --no-input`
 
 ### Versions
