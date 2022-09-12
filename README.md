@@ -31,7 +31,12 @@ PLUGINS = ["netbox_topology_views"]
 
 First run `source /opt/netbox/venv/bin/activate` to enter the Python virtual environment.
 
-Then run `python3 manage.py collectstatic --no-input`
+
+Then run 
+```bash
+cd /opt/netbox/netbox
+python3 manage.py collectstatic --no-input
+```
 
 ### Versions
 
