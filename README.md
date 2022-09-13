@@ -56,7 +56,10 @@ There is also support for custom fields.
 
 If you create a custom field "coordinates" for "dcim > device" and "Circuits > circuit" with type "text" and name "coordinates" you will see the same layout every time.
 
-The coordinates can then be provided as: "X;Y"
+The coordinates can then be provided as: "X;Y".
+
+Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
+You might also set the `always_save_coordinates` option to True.
 
 ## Configure
 
