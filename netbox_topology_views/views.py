@@ -1,5 +1,4 @@
-from platform import node
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.db.models import Q
 from django.views.generic import View
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -7,18 +6,17 @@ from django.conf import settings
 from django.http import QueryDict
 from django.http import HttpResponseRedirect
 
-
 from .forms import DeviceFilterForm
 from .filters import DeviceFilterSet
 
 import json
 
-from dcim.models import Device, Cable, CableTermination, DeviceRole, PathEndpoint, Interface, FrontPort, RearPort, PowerPanel,  PowerFeed
-from circuits.models import CircuitTermination, ProviderNetwork
+from dcim.models import Device, CableTermination, DeviceRole,  Interface, FrontPort, RearPort, PowerPanel,  PowerFeed
+from circuits.models import CircuitTermination
 from wireless.models import WirelessLink
 from extras.models import Tag
 
-supported_termination_types = ["interface", "front port", "rear port", "power outlet", "power port"]
+supported_termination_types = ["interface", "front port", "rear port", "power outlet", "power port", "console port", "console server port"]
 
 def create_node(device, save_coords, circuit = None, powerpanel = None, powerfeed= None):
 
@@ -288,7 +286,7 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                     termination_a = cable_ids[link.cable.id]["A"]
                
                 edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=termination_a, termination_b=termination_b))
-           
+
     for wlan_link in wlan_links:
         if wlan_link.interface_a.device.id not in nodes_devices:
                 nodes_devices[wlan_link.interface_a.device.id] = wlan_link.interface_a.device
