@@ -286,8 +286,7 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                     termination_a = cable_ids[link.cable.id]["A"]
                
                 edges.append(create_edge(edge_id=edge_ids, cable=link.cable, termination_a=termination_a, termination_b=termination_b))
-        else:
-            print(link.termination_type.name) 
+
     for wlan_link in wlan_links:
         if wlan_link.interface_a.device.id not in nodes_devices:
                 nodes_devices[wlan_link.interface_a.device.id] = wlan_link.interface_a.device
