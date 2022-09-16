@@ -168,9 +168,9 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"]["ignore_cable_type"]
 
     device_ids = [d.id for d in queryset]
+    site_ids = [d.site.id for d in queryset]
 
     if show_circuit:
-        site_ids = [d.site.id for d in queryset]
         circuits = CircuitTermination.objects.filter( Q(site_id__in=site_ids) | Q( provider_network__isnull=False) ).prefetch_related("provider_network", "circuit")
         for circuit in circuits:
             if not hide_unconnected and circuit.circuit.id not in nodes_circuits:
