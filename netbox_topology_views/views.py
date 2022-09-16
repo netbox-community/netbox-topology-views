@@ -259,14 +259,16 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                 if link.cable.id not in cable_ids:
                     cable_ids[link.cable.id] = {}
                 else:
-                    if cable_ids[link.cable.id]['B'] is not None:
-                        complete_link = True
+                    if 'B' in cable_ids[link.cable.id]:
+                        if cable_ids[link.cable.id]['B'] is not None:
+                            complete_link = True
             elif link.cable_end == "B":
                 if link.cable.id not in cable_ids:
                     cable_ids[link.cable.id] = {}
                 else:
-                    if cable_ids[link.cable.id]['A'] is not None:
-                        complete_link = True
+                    if 'A' in cable_ids[link.cable.id]:
+                        if cable_ids[link.cable.id]['A'] is not None:
+                            complete_link = True
             else:
                 print("Unkown cable end")
             cable_ids[link.cable.id][link.cable_end] = link
