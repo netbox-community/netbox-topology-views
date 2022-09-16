@@ -66,7 +66,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         initial=False
     )
     show_power = forms.BooleanField(
-        label=_("Show Power panel/feed"),
+        label=_("Show Power Feeds"),
         required=False,
         initial=False
     )

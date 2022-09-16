@@ -222,16 +222,20 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                 if power_feed.power_panel.id not in nodes_powerpanel:
                     nodes_powerpanel[power_feed.power_panel.id] = power_feed.power_panel
 
+                    print(power_feed.link_peers[0].__dict__)
+
+                power_link_name = ""
                 if power_feed.id not in nodes_powerfeed:
                     if hide_unconnected:
                         if power_feed.link_peers[0].device.id in device_ids:
                             nodes_powerfeed[power_feed.id] = power_feed
+                            power_link_name =power_feed.link_peers[0].name
                     else:
                         nodes_powerfeed[power_feed.id] = power_feed
 
                 edge_ids += 1
-                termination_a = { "termination_name": power_feed.power_panel.name, "termination_device_name": str(power_feed.power_panel.id), "device_id": "p{}".format(power_feed.power_panel.id) }
-                termination_b = { "termination_name": power_feed.name, "termination_device_name": str(termination.id), "device_id": "f{}".format(power_feed.id) }
+                termination_a = { "termination_name": power_feed.power_panel.name, "termination_device_name": "", "device_id": "p{}".format(power_feed.power_panel.id) }
+                termination_b = { "termination_name": power_feed.name, "termination_device_name": power_link_name, "device_id": "f{}".format(power_feed.id) }
                 edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, power=True))
 
                 if power_feed.cable_id is not None:
