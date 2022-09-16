@@ -41,10 +41,9 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     )
     status = django_filters.MultipleChoiceFilter(
         choices=DeviceStatusChoices,
-        null_value=None
+        null_value=None,
     )
-
-
+    
     class Meta:
         model = Device
         fields = ['id', 'name']

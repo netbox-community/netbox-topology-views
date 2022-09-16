@@ -22,10 +22,10 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
         (None, ('q', 'hide_unconnected', 'save_coords', 'show_circuit', 'show_power' ,)),
-        (None, ('tenant_group_id', 'tenant_id')),
-        (None, ('region_id', 'site_id', 'location_id')),
-        (None, ('device_role_id', )),
-        (None, ('tag', 'status')),
+        (None, ('tenant_group_id', 'tenant_id',)),
+        (None, ('region_id', 'site_id', 'location_id',)),
+        (None, ('device_role_id','id','status', )),
+        (None, ('tag', )),
     )
 
     region_id = DynamicModelMultipleChoiceField(
@@ -37,6 +37,17 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         queryset=DeviceRole.objects.all(),
         required=False,
         label=_('Device Role')
+    )
+    id = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        label=_('Device'),
+        query_params={
+            'location_id' : '$location_id',
+            'region_id': '$region_id',
+            'site_id': '$site_id',
+            'role_id': '$device_role_id',
+        },
     )
     site_id = DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(),
