@@ -222,8 +222,6 @@ def get_topology_data(queryset, hide_unconnected, save_coords, show_circuit, sho
                 if power_feed.power_panel.id not in nodes_powerpanel:
                     nodes_powerpanel[power_feed.power_panel.id] = power_feed.power_panel
 
-                    print(power_feed.link_peers[0].__dict__)
-
                 power_link_name = ""
                 if power_feed.id not in nodes_powerfeed:
                     if hide_unconnected:
