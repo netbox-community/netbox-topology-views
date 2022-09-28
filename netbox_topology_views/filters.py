@@ -105,3 +105,50 @@ class InterfaceFilterSet(NetBoxModelFilterSet):
              Q(name__icontains=value) 
         )
         return queryset.filter(qs_filter)
+
+
+class InterfaceFilterSet(NetBoxModelFilterSet):
+    q = django_filters.CharFilter(
+        method='search',
+        label='Search',
+    )
+    device_role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name='device__device_role_id',
+        queryset=DeviceRole.objects.all(),
+        label='Role (ID)',
+    )
+    region_id = TreeNodeMultipleChoiceFilter(
+        queryset=Region.objects.all(),
+        field_name='device__site__region',
+        lookup_expr='in',
+        label='Region (ID)',
+    )
+    site_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Site.objects.all(),
+        field_name='device__site',
+        label='Site (ID)',
+    )
+    location_id = TreeNodeMultipleChoiceFilter(
+        queryset=Location.objects.all(),
+        field_name='device__location',
+        lookup_expr='in',
+        label='Location (ID)',
+    )
+    vrf_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=VRF.objects.all(),
+        field_name='ip_addresses__vrf_id',
+        label='VRF (ID)'
+    )
+
+    class Meta:
+        model = Interface
+        fields = ['id', 'name']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        qs_filter = (
+             Q(name__icontains=value) 
+        )
+        return queryset.filter(qs_filter)
