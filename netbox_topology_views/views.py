@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from .forms import L2DeviceFilterForm, L3DeviceFilterForm
 from .filters import DeviceFilterSet, InterfaceFilterSet
 
+import ipaddress
 import json
 
 from dcim.models import Device, CableTermination, DeviceRole,  Interface, FrontPort, RearPort, PowerPanel,  PowerFeed
@@ -24,7 +25,7 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
     node_content = ""
     if circuit:
         dev_name = "Circuit " + str(device.cid)
-        node["image"] = "../../static/netbox_topology_views/img/circuit.png"
+        node["image"] = "/static/netbox_topology_views/img/circuit.png"
         node["id"] = "c{}".format(device.id)
 
         if device.provider is not None:
@@ -33,7 +34,7 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
             node_content += "<tr><th>Type: </th><td>" + device.type.name + "</td></tr>"
     elif powerpanel:
         dev_name = "Power Panel " + str(device.id)
-        node["image"] = "../../static/netbox_topology_views/img/power-panel.png"
+        node["image"] = "/static/netbox_topology_views/img/power-panel.png"
         node["id"] = "p{}".format(device.id)
 
         if device.site is not None:
@@ -42,7 +43,7 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
             node_content += "<tr><th>Location: </th><td>" + device.location.name + "</td></tr>"
     elif powerfeed:
         dev_name = "Power Feed " + str(device.id)
-        node["image"] = "../../static/netbox_topology_views/img/power-feed.png"
+        node["image"] = "/static/netbox_topology_views/img/power-feed.png"
         node["id"] = "f{}".format(device.id)
 
         if device.power_panel is not None:
@@ -85,9 +86,9 @@ def create_node(device, save_coords, circuit = None, powerpanel = None, powerfee
         node["id"] = device.id
         
         if device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-            node["image"] = "../../static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
+            node["image"] = "/static/netbox_topology_views/img/"  + device.device_role.slug + ".png"
         else:
-            node["image"] = "../../static/netbox_topology_views/img/role-unknown.png"
+            node["image"] = "/static/netbox_topology_views/img/role-unknown.png"
 
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
@@ -420,10 +421,10 @@ def get_l3_topology_data(queryset, hide_unconnected, save_coords):
             "label": device_name,
             "title": device_content,
             "shape": 'image',
-            "image": "../../../static/netbox_topology_views/img/role-unknown.png"
+            "image": "/static/netbox_topology_views/img/role-unknown.png"
         }
         if qs_device.device_role.slug in settings.PLUGINS_CONFIG["netbox_topology_views"]["device_img"]:
-            device["image"] = '../../../static/netbox_topology_views/img/'  + qs_device.device_role.slug + ".png"
+            device["image"] = '/static/netbox_topology_views/img/'  + qs_device.device_role.slug + ".png"
         devices[device_name] = device
 
         # For each configured IP Address
