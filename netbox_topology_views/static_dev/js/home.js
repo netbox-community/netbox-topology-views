@@ -15,7 +15,7 @@ var options = {
     interaction: {
         hover: true,
         hoverConnectedEdges: true,
-        multiselect: false
+        multiselect: true
     },
     nodes: {
         shape: 'image',
