@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.utils.translation import gettext as _
 
-from dcim.models import Device, Site, Region, DeviceRole, Location
+from dcim.models import Device, Site, Region, DeviceRole, Location, Rack
 
 from django import forms
 from dcim.choices import DeviceStatusChoices
@@ -23,7 +23,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     fieldsets = (
         (None, ('q', 'hide_unconnected', 'save_coords', 'show_circuit', 'show_power' ,)),
         (None, ('tenant_group_id', 'tenant_id',)),
-        (None, ('region_id', 'site_id', 'location_id',)),
+        (None, ('region_id', 'site_id', 'location_id', 'rack_id')),
         (None, ('device_role_id','id','status', )),
         (None, ('tag', )),
     )
@@ -65,6 +65,16 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             'site_id': '$site_id',
         },
         label=_('Location')
+    )
+    rack_id = DynamicModelMultipleChoiceField(
+        queryset=Rack.objects.all(),
+        required=False,
+        query_params={
+            'region_id': '$region_id',
+            'site_id': '$site_id',
+            'location_id': '$location_id',
+        },
+        label=_('Rack')
     )
     hide_unconnected = forms.BooleanField(
         label=_("Hide Unconnected"),
