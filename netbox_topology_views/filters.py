@@ -2,7 +2,7 @@ from cProfile import label
 import django_filters
 from django.db.models import Q
 
-from dcim.models import Device, DeviceRole, Region, Site, Location
+from dcim.models import Device, DeviceRole, Region, Site, Location, Rack
 from dcim.choices import DeviceStatusChoices
 
 from netbox.filtersets import NetBoxModelFilterSet
@@ -38,6 +38,11 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
         field_name='location',
         lookup_expr='in',
         label='Location (ID)',
+    )
+    rack_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Rack.objects.all(),
+        field_name='rack_id',
+        label='Rack (ID)',
     )
     status = django_filters.MultipleChoiceFilter(
         choices=DeviceStatusChoices,
