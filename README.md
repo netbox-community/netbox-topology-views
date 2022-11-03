@@ -54,9 +54,9 @@ python3 manage.py collectstatic --no-input
 
 There is also support for custom fields.
 
-If you create a custom field "coordinates" for "dcim > device" and "Circuits > circuit" with type "text" and name "coordinates" you will see the same layout every time.
+If you create a custom field "coordinates" for "dcim > device" and "Circuits > circuit" with type "text" and name "coordinates" you will see the same layout every time. It is recommended to set this field to "UI visibility" "Hidden" and let the plugin manage it in the background.
 
-The coordinates can then be provided as: "X;Y".
+The coordinates are stored as: "X;Y".
 
 Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
 You might also set the `always_save_coordinates` option to True.
