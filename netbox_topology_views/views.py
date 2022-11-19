@@ -7,6 +7,7 @@ from dcim.models import (
     Cable,
     CableTermination,
     Device,
+    device_components,
     DeviceRole,
     FrontPort,
     Interface,
@@ -175,6 +176,7 @@ def create_edge(
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
     power: Optional[bool] = None,
+    interface: Optional[bool] = None,
 ):
     cable_a_name = (
         "device A name unknown"
@@ -215,6 +217,9 @@ def create_edge(
         edge["dashes"] = [5, 5, 3, 3]
         title = "Power Connection"
 
+    elif interface is not None:
+        title = "Interface Connection"
+
     edge[
         "title"
     ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}]"
@@ -251,6 +256,9 @@ def get_topology_data(
     save_coords: bool,
     show_circuit: bool,
     show_power: bool,
+    show_interfaces: bool,
+    show_cables: bool,
+    show_wireless: bool,
 ):
     if not queryset:
         return None
@@ -264,6 +272,7 @@ def get_topology_data(
     nodes_powerfeed: Dict[int, PowerFeed] = {}
     nodes_provider_networks = {}
     cable_ids = DefaultDict(dict)
+    interface_ids = DefaultDict(dict)
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"][
         "ignore_cable_type"
     ]
@@ -343,15 +352,6 @@ def get_topology_data(
         for d in nodes_circuits.values():
             nodes.append(create_node(d, save_coords))
 
-    links: QuerySet[CableTermination] = CableTermination.objects.filter(
-        Q(_device_id__in=device_ids)
-    ).select_related("termination_type")
-
-    wlan_links: QuerySet[WirelessLink] = WirelessLink.objects.filter(
-        Q(_interface_a_device_id__in=device_ids)
-        & Q(_interface_b_device_id__in=device_ids)
-    )
-
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
             Q(site_id__in=site_ids)
@@ -405,111 +405,146 @@ def get_topology_data(
         for d in nodes_powerpanel.values():
             nodes.append(create_node(d, save_coords))
 
-    for link in links:
-        if link.termination_type.name in ignore_cable_type:
-            continue
-
-        # Normal device cables
-        if link.termination_type.name in supported_termination_types:
-            complete_link = False
-            if link.cable_end == "A":
-                if link.cable_id not in cable_ids:
-                    cable_ids[link.cable_id] = {}
-                else:
-                    if "B" in cable_ids[link.cable_id]:
-                        if cable_ids[link.cable_id]["B"] is not None:
-                            complete_link = True
-            elif link.cable_end == "B":
-                if link.cable_id not in cable_ids:
-                    cable_ids[link.cable_id] = {}
-                else:
-                    if "A" in cable_ids[link.cable_id]:
-                        if cable_ids[link.cable_id]["A"] is not None:
-                            complete_link = True
-            else:
-                print("Unkown cable end")
-            cable_ids[link.cable_id][link.cable_end] = link
-
-            if complete_link:
-                edge_ids += 1
-                if isinstance(cable_ids[link.cable_id]["B"], CableTermination):
-                    if cable_ids[link.cable_id]["B"]._device_id not in nodes_devices:
-                        nodes_devices[
-                            cable_ids[link.cable_id]["B"]._device_id
-                        ] = cable_ids[link.cable_id]["B"].termination.device
-                    termination_b = {
-                        "termination_name": cable_ids[link.cable_id][
-                            "B"
-                        ].termination.name,
-                        "termination_device_name": cable_ids[link.cable_id][
-                            "B"
-                        ].termination.device.name,
-                        "device_id": cable_ids[link.cable_id][
-                            "B"
-                        ].termination.device_id,
-                    }
-                else:
-                    termination_b = cable_ids[link.cable_id]["B"]
-
-                if isinstance(cable_ids[link.cable_id]["A"], CableTermination):
-                    if cable_ids[link.cable_id]["A"]._device_id not in nodes_devices:
-                        nodes_devices[
-                            cable_ids[link.cable_id]["A"]._device_id
-                        ] = cable_ids[link.cable_id]["A"].termination.device
-                    termination_a = {
-                        "termination_name": cable_ids[link.cable_id][
-                            "A"
-                        ].termination.name,
-                        "termination_device_name": cable_ids[link.cable_id][
-                            "A"
-                        ].termination.device.name,
-                        "device_id": cable_ids[link.cable_id][
-                            "A"
-                        ].termination.device_id,
-                    }
-                else:
-                    termination_a = cable_ids[link.cable_id]["A"]
-
-                edges.append(
-                    create_edge(
-                        edge_id=edge_ids,
-                        cable=link.cable,
-                        termination_a=termination_a,
-                        termination_b=termination_b,
-                    )
-                )
-
-    for wlan_link in wlan_links:
-        if wlan_link.interface_a.device_id not in nodes_devices:
-            nodes_devices[
-                wlan_link.interface_a.device.pk
-            ] = wlan_link.interface_a.device
-        if wlan_link.interface_b.device_id not in nodes_devices:
-            nodes_devices[
-                wlan_link.interface_b.device.pk
-            ] = wlan_link.interface_b.device
-
-        termination_a = {
-            "termination_name": wlan_link.interface_a.name,
-            "termination_device_name": wlan_link.interface_a.device.name,
-            "device_id": wlan_link.interface_a.device_id,
-        }
-        termination_b = {
-            "termination_name": wlan_link.interface_b.name,
-            "termination_device_name": wlan_link.interface_b.device.name,
-            "device_id": wlan_link.interface_b.device_id,
-        }
-        wireless = {"ssid": wlan_link.ssid}
-
-        edge_ids += 1
-        edges.append(
-            create_edge(
-                edge_id=edge_ids,
-                termination_a=termination_a,
-                termination_b=termination_b,
-                wireless=wireless,
-            )
+    if show_interfaces:
+        interfaces = Interface.objects.filter(
+            Q(_path__is_complete=True) & Q(device_id__in=device_ids)
         )
+
+        for interface in interfaces:
+            # print('{} {} {} {}'.format(interface.device.name, interface.name, interface._path.destinations[0].device.name, interface._path.destinations[0].name))
+            for destination in interface._path.destinations:
+                if isinstance(destination, device_components.Interface):
+                    if destination.device.id not in device_ids:
+                        # print('Destination interface not in device queryset, ignoring')
+                        continue
+
+                    if destination.id in interface_ids:
+                        # we've already captured the destination interface, ignore this connection
+                        # print('Destination interface already exists, ignoring')
+                        continue
+            
+                interface_ids[interface.id]=interface
+                edge_ids += 1
+                termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
+                termination_b = { "termination_name": interface._path.destinations[0].name, "termination_device_name": interface._path.destinations[0].device.name, "device_id": interface._path.destinations[0].device.id }
+                edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=True))
+
+    if show_cables:
+        links: QuerySet[CableTermination] = CableTermination.objects.filter(
+            Q(_device_id__in=device_ids)
+        ).select_related("termination_type")
+
+        for link in links:
+            if link.termination_type.name in ignore_cable_type:
+                continue
+
+            # Normal device cables
+            if link.termination_type.name in supported_termination_types:
+                complete_link = False
+                if link.cable_end == "A":
+                    if link.cable_id not in cable_ids:
+                        cable_ids[link.cable_id] = {}
+                    else:
+                        if "B" in cable_ids[link.cable_id]:
+                            if cable_ids[link.cable_id]["B"] is not None:
+                                complete_link = True
+                elif link.cable_end == "B":
+                    if link.cable_id not in cable_ids:
+                        cable_ids[link.cable_id] = {}
+                    else:
+                        if "A" in cable_ids[link.cable_id]:
+                            if cable_ids[link.cable_id]["A"] is not None:
+                                complete_link = True
+                else:
+                    print("Unkown cable end")
+                cable_ids[link.cable_id][link.cable_end] = link
+
+                if complete_link:
+                    edge_ids += 1
+                    if isinstance(cable_ids[link.cable_id]["B"], CableTermination):
+                        if cable_ids[link.cable_id]["B"]._device_id not in nodes_devices:
+                            nodes_devices[
+                                cable_ids[link.cable_id]["B"]._device_id
+                            ] = cable_ids[link.cable_id]["B"].termination.device
+                        termination_b = {
+                            "termination_name": cable_ids[link.cable_id][
+                                "B"
+                            ].termination.name,
+                            "termination_device_name": cable_ids[link.cable_id][
+                                "B"
+                            ].termination.device.name,
+                            "device_id": cable_ids[link.cable_id][
+                                "B"
+                            ].termination.device_id,
+                        }
+                    else:
+                        termination_b = cable_ids[link.cable_id]["B"]
+
+                    if isinstance(cable_ids[link.cable_id]["A"], CableTermination):
+                        if cable_ids[link.cable_id]["A"]._device_id not in nodes_devices:
+                            nodes_devices[
+                                cable_ids[link.cable_id]["A"]._device_id
+                            ] = cable_ids[link.cable_id]["A"].termination.device
+                        termination_a = {
+                            "termination_name": cable_ids[link.cable_id][
+                                "A"
+                            ].termination.name,
+                            "termination_device_name": cable_ids[link.cable_id][
+                                "A"
+                            ].termination.device.name,
+                            "device_id": cable_ids[link.cable_id][
+                                "A"
+                            ].termination.device_id,
+                        }
+                    else:
+                        termination_a = cable_ids[link.cable_id]["A"]
+
+                    edges.append(
+                        create_edge(
+                            edge_id=edge_ids,
+                            cable=link.cable,
+                            termination_a=termination_a,
+                            termination_b=termination_b,
+                        )
+                    )
+
+    if show_wireless:
+        wlan_links: QuerySet[WirelessLink] = WirelessLink.objects.filter(
+            Q(_interface_a_device_id__in=device_ids)
+            & Q(_interface_b_device_id__in=device_ids)
+        )
+
+        for wlan_link in wlan_links:
+            if wlan_link.interface_a.device_id not in nodes_devices:
+                nodes_devices[
+                    wlan_link.interface_a.device.pk
+                ] = wlan_link.interface_a.device
+            if wlan_link.interface_b.device_id not in nodes_devices:
+                nodes_devices[
+                    wlan_link.interface_b.device.pk
+                ] = wlan_link.interface_b.device
+
+            termination_a = {
+                "termination_name": wlan_link.interface_a.name,
+                "termination_device_name": wlan_link.interface_a.device.name,
+                "device_id": wlan_link.interface_a.device_id,
+            }
+            termination_b = {
+                "termination_name": wlan_link.interface_b.name,
+                "termination_device_name": wlan_link.interface_b.device.name,
+                "device_id": wlan_link.interface_b.device_id,
+            }
+            wireless = {"ssid": wlan_link.ssid}
+
+            edge_ids += 1
+            edges.append(
+                create_edge(
+                    edge_id=edge_ids,
+                    termination_a=termination_a,
+                    termination_b=termination_b,
+                    wireless=wireless,
+                )
+            )
 
     for qs_device in queryset:
         if qs_device.pk not in nodes_devices and not hide_unconnected:
@@ -560,6 +595,21 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if "show_circuit" in request.GET:
                 if request.GET["show_circuit"] == "on":
                     show_circuit = True
+
+            show_interfaces = False
+            if "show_interfaces" in request.GET:
+                if request.GET["show_interfaces"] == "on" :
+                    show_interfaces = True
+
+            show_cables = False
+            if "show_cables" in request.GET:
+                if request.GET["show_cables"] == "on" :
+                    show_cables = True
+
+            show_wireless = False
+            if "show_wireless" in request.GET:
+                if request.GET["show_wireless"] == "on" :
+                    show_wireless = True
 
             if "draw_init" in request.GET:
                 if request.GET["draw_init"].lower() == "true":
