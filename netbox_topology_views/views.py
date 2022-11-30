@@ -256,7 +256,7 @@ def get_topology_data(
     save_coords: bool,
     show_circuit: bool,
     show_power: bool,
-    show_interfaces: bool,
+    show_logical_connections: bool,
     show_cables: bool,
     show_wireless: bool,
 ):
@@ -405,7 +405,7 @@ def get_topology_data(
         for d in nodes_powerpanel.values():
             nodes.append(create_node(d, save_coords))
 
-    if show_interfaces:
+    if show_logical_connections and not show_cables:
         interfaces = Interface.objects.filter(
             Q(_path__is_complete=True) & Q(device_id__in=device_ids)
         )
@@ -431,7 +431,7 @@ def get_topology_data(
                 nodes_devices[interface.device.id] = interface.device
                 nodes_devices[destination.device.id] = destination.device
 
-    if show_cables:
+    if show_cables and not show_logical_connections:
         links: QuerySet[CableTermination] = CableTermination.objects.filter(
             Q(_device_id__in=device_ids)
         ).select_related("termination_type")
@@ -598,10 +598,10 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["show_circuit"] == "on":
                     show_circuit = True
 
-            show_interfaces = False
-            if "show_interfaces" in request.GET:
-                if request.GET["show_interfaces"] == "on" :
-                    show_interfaces = True
+            show_logical_connections = False
+            if "show_logical_connections" in request.GET:
+                if request.GET["show_logical_connections"] == "on" :
+                    show_logical_connections = True
 
             show_cables = False
             if "show_cables" in request.GET:
@@ -619,16 +619,22 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                         self.queryset,
                         hide_unconnected,
                         save_coords,
+                        show_cables,
                         show_circuit,
+                        show_logical_connections,
                         show_power,
+                        show_wireless,
                     )
             else:
                 topo_data = get_topology_data(
                     self.queryset,
                     hide_unconnected,
                     save_coords,
+                    show_cables,
                     show_circuit,
+                    show_logical_connections,
                     show_power,
+                    show_wireless,
                 )
         else:
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"][

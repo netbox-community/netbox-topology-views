@@ -35,7 +35,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
                 "save_coords",
                 "show_cables",
                 "show_circuit",
-                "show_interfaces",
+                "show_logical_connections",
                 "show_power",
                 "show_wireless",
             ),
@@ -106,8 +106,8 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     hide_unconnected = forms.BooleanField(
         label=_("Hide Unconnected"), required=False, initial=False
     )
-    show_interfaces = forms.BooleanField(
-        label =_("Show End-To-End Interface Connections"), required=False, initial=False
+    show_logical_connections = forms.BooleanField(
+        label =_("Show Logical Connections"), required=False, initial=False
     )
     show_cables = forms.BooleanField(
         label =_("Show Cables"), required=False, initial=False
