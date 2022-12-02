@@ -94,6 +94,31 @@ To change image with associated device use the `Images` page - it allows to map 
 
 Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/netbox_topology_views/` to view your topologies
 
+Select your options for the topology view:
+
+![preview image](doc/img/selection_options.png?raw=true "preview")
+
+<dl>
+    <dt>Hide Unconnected</dt>
+    <dd>Hide devices which have no connections.</dd>
+    <dt>Save Coordinates</dt>
+    <dd>Save the coordinates of devices in the topology view.</dd>
+    <dd>Please read the "Configure" chapter to set the allow_coordinates_saving option to True.</dd>
+    <dt>Show Cables</dt>
+    <dd>Show cable connections between devices, including cables connected to interfaces, front / rear ports, etc., in the topology view</dd> 
+    <dt>Show Logical Connections</dt>
+    <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
+        interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
+        intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. </dd>
+    <dd><i>Selecting both 'Show Cables' and 'Show Logical Interfaces' may result in a confusing topology view.</i></dd>
+    <dt>Show Circuit Terminations</dt>
+    <dd>Show connections which end at a circuit termination in the topology view.</dd>
+    <dt>Show Wireless Links</dt>
+    <dd>Show wireless connections in the topology view.</dd>
+    <dt>Show Power Feeds</dt>
+    <dd>Show power connections from power feeds in the topology view.</dd>
+</dl>
+    
 ### Update
 
 Run `pip install netbox-topology-views --upgrade` in your venv.
