@@ -5,6 +5,6 @@ from netbox_topology_views.api import views
 router = routers.DefaultRouter()
 
 router.register("save-coords", views.SaveCoordsViewSet, basename="save_coords")
-router.register("images", views.SaveRoleImageViewSet, basename="images")
+router.register("images", views.SaveRoleImageViewSet, basename="save_images")
 
 urlpatterns = router.urls

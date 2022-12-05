@@ -9,7 +9,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
 
-from netbox_topology_views.api.serializers import TopologyDummySerializer
+from netbox_topology_views.api.serializers import (
+    RoleImageSerializer,
+    TopologyDummySerializer,
+)
 from netbox_topology_views.models import RoleImage
 from netbox_topology_views.utils import get_image_from_url
 
@@ -20,26 +23,16 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["patch"])
     def save_coords(self, request):
-        results = {}
         if not settings.PLUGINS_CONFIG["netbox_topology_views"][
             "allow_coordinates_saving"
         ]:
-            results["status"] = "not allowed to save coords"
-            return Response(results, status=500)
+            return Response({"status": "not allowed to save coords"}, status=500)
 
-        device_id: str = None  # type: ignore
-        x_coord = None
-        y_coord = None
-        if "node_id" in request.data:
-            if request.data["node_id"]:
-                device_id = request.data["node_id"]
-        if "x" in request.data:
-            if request.data["x"]:
-                x_coord = request.data["x"]
-        if "y" in request.data:
-            if request.data["y"]:
-                y_coord = request.data["y"]
+        device_id: str = request.data.get("node_id", None)
+        x_coord = request.data.get("x", None)
+        y_coord = request.data.get("y", None)
 
+        actual_device = None
         if device_id.startswith("c"):
             device_id = device_id.lstrip("c")
             actual_device = Circuit.objects.get(id=device_id)
@@ -49,56 +42,47 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
         elif device_id.startswith("f"):
             device_id = device_id.lstrip("f")
             actual_device = PowerFeed.objects.get(id=device_id)
-        else:
+        elif device_id.isnumeric():
             actual_device = Device.objects.get(id=device_id)
 
-        if "coordinates" in actual_device.custom_field_data:
+        if not actual_device:
+            return Response({"status": "invalid node_id in body"}, status=400)
+
+        try:
             actual_device.custom_field_data["coordinates"] = "%s;%s" % (
                 x_coord,
                 y_coord,
             )
             actual_device.save()
-            results["status"] = "saved coords"
-        else:
-            try:
-                actual_device.custom_field_data["coordinates"] = "%s;%s" % (
-                    x_coord,
-                    y_coord,
-                )
-                actual_device.save()
-                results["status"] = "saved coords"
-            except:
-                results["status"] = "coords custom field not created"
-                return Response(status=500)
+        except:
+            return Response(
+                {"status": "coords custom field could not be saved"}, status=500
+            )
 
-        return Response(results)
+        return Response({"status": "saved coords"})
 
 
 class SaveRoleImageViewSet(ViewSet):
+    queryset = DeviceRole.objects.all()
+    serializer_class = RoleImageSerializer
     permission_required = (
         "dcim.add_device_role",
         "dcim.change_device_role",
     )
 
-    def post(self, request):
-        try:
-            request_body = json.loads(request.body)
-        except json.JSONDecodeError:
-            request_body = None
-
-        if not isinstance(request_body, dict):
+    def create(self, request):
+        if not isinstance(request.data, dict):
             return JsonResponse(
-                {"message": "Missing or malformed request body"}, status=400
+                {"status": "Missing or malformed request body"}, status=400
             )
 
-        body = {int(k): str(v) for k, v in request_body.items() if k.isnumeric()}
+        body = {int(k): str(v) for k, v in request.data.items() if k.isnumeric()}
         roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(body.keys())
 
         if len(roles) != len(body):
+            difference = set(body.keys()) - set(roles.keys())
             return JsonResponse(
-                {
-                    "message": f"Got unknown device role ids: {set(body.keys()) - set(roles.keys())}"
-                },
+                {"status": f"Got unknown device role ids: {difference}"},
                 status=400,
             )
 
@@ -111,4 +95,4 @@ class SaveRoleImageViewSet(ViewSet):
                 role_id=key,
             )
 
-        return JsonResponse({"message": "Ok"})
+        return JsonResponse({"status": "Ok"})
