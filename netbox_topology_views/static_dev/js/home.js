@@ -36,6 +36,10 @@ const options = {
     }
 }
 
+// Load CSRF token
+const csrftoken = getCookie('csrftoken')
+
+// Render vis graph
 let graph = null // vis graph instance
 
 const container = document.querySelector('#visgraph')
@@ -118,9 +122,6 @@ function performGraphDownload() {
     tempDownloadLink.click()
     document.body.removeChild(tempDownloadLink)
 }
-
-// Load CSRF token
-const csrftoken = getCookie('csrftoken')
 
 // Theme switching
 const observer = new MutationObserver((mutations) =>

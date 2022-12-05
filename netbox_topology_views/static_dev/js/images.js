@@ -2,11 +2,7 @@ import { getCookie } from './csrftoken.js'
 import { toast } from './toast.js'
 
 const mapping = {}
-let csrftoken = null
-
-document.addEventListener('DOMContentLoaded', () => {
-    csrftoken = getCookie('csrftoken')
-})
+const csrftoken = getCookie('csrftoken')
 
 document.querySelector('form#images').addEventListener('submit', async (e) => {
     e.preventDefault()
