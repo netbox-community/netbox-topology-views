@@ -1,0 +1,3 @@
+djangorestframework
+django-filter
+black

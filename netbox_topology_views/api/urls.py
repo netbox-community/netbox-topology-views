@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from . import views
+from netbox_topology_views.api import views
 
 router = routers.DefaultRouter()
 

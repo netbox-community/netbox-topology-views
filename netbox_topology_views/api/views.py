@@ -7,18 +7,11 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.routers import APIRootView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
 
+from netbox_topology_views.api.serializers import TopologyDummySerializer
 from netbox_topology_views.models import RoleImage
 from netbox_topology_views.utils import get_image_from_url
-
-from .serializers import TopologyDummySerializer
-
-
-class TopologyViewsRootView(APIRootView):
-    def get_view_name(self):
-        return "TopologyViews"
 
 
 class SaveCoordsViewSet(ReadOnlyModelViewSet):

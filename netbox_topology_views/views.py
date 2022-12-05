@@ -603,7 +603,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             {
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
-                "broken_image": find_image("role-unknown")
+                "broken_image": find_image("role-unknown"),
             },
         )
 
@@ -647,4 +647,3 @@ class TopologyImagesView(PermissionRequiredMixin, View):
             "netbox_topology_views/images.html",
             {"roles": list(roles.values()), "images": images},
         )
-
