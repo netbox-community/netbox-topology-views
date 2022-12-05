@@ -1,39 +1,6 @@
 import { DataSet } from 'vis-data/esnext'
 import { Network } from 'vis-network/esnext'
-
-let graph = null
-
-const observer = new MutationObserver((mutations) =>
-    mutations.forEach((mutation) => {
-        if (
-            !graph ||
-            mutation.type !== 'attributes' ||
-            mutation.attributeName !== 'data-netbox-color-mode' ||
-            !(mutation.target instanceof HTMLElement)
-        )
-            return
-        const { netboxColorMode } = mutation.target.dataset
-        options.nodes.font.color = netboxColorMode === 'dark' ? '#fff' : '#000'
-        graph.setOptions(options)
-    })
-)
-
-observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-netbox-color-mode']
-})
-
-const MIME_TYPE = 'image/png'
-
-const csrftoken = getCookie('csrftoken')
-const container = document.querySelector('#visgraph')
-const downloadButton = document.querySelector('#btnDownloadImage')
-const coordSaveCheckbox = document.querySelector('#id_save_coords')
-handleLoadData()
-
-downloadButton.addEventListener('click', (e) => {
-    performGraphDownload()
-})
+import { getCookie } from './csrftoken.js'
 
 const options = {
     interaction: {
@@ -69,44 +36,18 @@ const options = {
     }
 }
 
-function getCookie(name) {
-    let cookieValue = null
-    if (document.cookie && document.cookie !== '') {
-        let cookies = document.cookie.split(';')
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i].trim()
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === name + '=') {
-                cookieValue = decodeURIComponent(
-                    cookie.substring(name.length + 1)
-                )
-                break
-            }
-        }
-    }
-    return cookieValue
-}
+let graph = null // vis graph instance
 
-function htmlTitle(text) {
-    const container = document.createElement('div')
-    container.innerHTML = text
-    return container
-}
-
-function performGraphDownload() {
-    const canvas = container.querySelector('#visgraph canvas')
-    const tempDownloadLink = document.createElement('a')
-    const generatedImageUrl = canvas.toDataURL(MIME_TYPE)
-
-    tempDownloadLink.href = generatedImageUrl
-    tempDownloadLink.download = 'topology'
-    document.body.appendChild(tempDownloadLink)
-    tempDownloadLink.click()
-    document.body.removeChild(tempDownloadLink)
-}
-
-function handleLoadData() {
+const container = document.querySelector('#visgraph')
+const coordSaveCheckbox = document.querySelector('#id_save_coords')
+;(function handleLoadData() {
     if (!topologyData) return
+
+    function htmlTitle(text) {
+        const container = document.createElement('div')
+        container.innerHTML = text
+        return container
+    }
 
     const nodes = new DataSet(
         topologyData.nodes.map((node) => ({
@@ -156,4 +97,48 @@ function handleLoadData() {
             window.open(nodes.get(node).href, '_blank')
         })
     })
+})()
+
+// Download Graph
+const MIME_TYPE = 'image/png'
+
+const downloadButton = document.querySelector('#btnDownloadImage')
+downloadButton.addEventListener('click', (e) => {
+    performGraphDownload()
+})
+
+function performGraphDownload() {
+    const canvas = container.querySelector('canvas')
+    const tempDownloadLink = document.createElement('a')
+    const generatedImageUrl = canvas.toDataURL(MIME_TYPE)
+
+    tempDownloadLink.href = generatedImageUrl
+    tempDownloadLink.download = 'topology'
+    document.body.appendChild(tempDownloadLink)
+    tempDownloadLink.click()
+    document.body.removeChild(tempDownloadLink)
 }
+
+// Load CSRF token
+const csrftoken = getCookie('csrftoken')
+
+// Theme switching
+const observer = new MutationObserver((mutations) =>
+    mutations.forEach((mutation) => {
+        if (
+            !graph ||
+            mutation.type !== 'attributes' ||
+            mutation.attributeName !== 'data-netbox-color-mode' ||
+            !(mutation.target instanceof HTMLElement)
+        )
+            return
+        const { netboxColorMode } = mutation.target.dataset
+        options.nodes.font.color = netboxColorMode === 'dark' ? '#fff' : '#000'
+        graph.setOptions(options)
+    })
+)
+
+observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-netbox-color-mode']
+})

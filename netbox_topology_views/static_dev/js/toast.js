@@ -1,4 +1,4 @@
-const toast = {
+export const toast = {
     success: (message) => {
         const el = document.querySelector('#topology-plugin-success-toast')
         if (!el) return console.error('Could not find toast component!')
