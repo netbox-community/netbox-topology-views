@@ -36,19 +36,20 @@ Then run
 ```bash
 cd /opt/netbox/netbox
 pip3 install netbox-topology-views
+python3 manage.py migrate netbox-topology-views
 python3 manage.py collectstatic --no-input
 ```
 
 ### Versions
 
-| netbox version        | netbox-topology-views version          |
-| ------------- |-------------|
-| >= 3.3.0 | >= v3.0.0 |
-| >= 3.2.0 | >= v1.1.0 |
-| >= 3.1.8 | >= v1.0.0 |
-| >= 2.11.1 | >= v0.5.3 |
-| >= 2.10.0 | >= v0.5.0 |
-| < 2.10.0 | =< v0.4.10 |
+| netbox version | netbox-topology-views version |
+| -------------- | ----------------------------- |
+| >= 3.3.0       | >= v3.0.0                     |
+| >= 3.2.0       | >= v1.1.0                     |
+| >= 3.1.8       | >= v1.0.0                     |
+| >= 2.11.1      | >= v0.5.3                     |
+| >= 2.10.0      | >= v0.5.0                     |
+| < 2.10.0       | =< v0.4.10                    |
 
 ### Custom field: coordinates
 
@@ -69,27 +70,25 @@ Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'device_img': ['router','switch', 'firewall'],
-        'preselected_device_roles': ['Router', 'Firewall']
+        'preselected_device_roles': ['Router', 'Firewall'],
+        'enable_circuit_terminations': True
     }
 }
 ```
 
-| Setting        | Default value           | Description  |
-| ------------- |-------------| -----|
-| device_img      |['access-switch', 'core-switch', 'firewall', 'router', 'distribution-switch', 'backup', 'storage,wan-network', 'wireless-ap', 'server', 'internal-switch', 'isp-cpe-material', 'non-racked-devices', 'power-units'] | The slug of the device roles that you have a image for. |
-| preselected_device_roles      | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive|
-| allow_coordinates_saving      | False | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates |
-| always_save_coordinates       | False | (bool) Set if you want to enable the option to save coordinates by default |
-| ignore_cable_type      | [] | The cable types that you want to ignore in the views  |
-| preselected_tags      | '[]' | The name of tags you want to preload  |
-| draw_default_layout | False | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
+| Setting                  | Default value                                                                                                                                  | Description                                                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| static_image_directory   | netbox_topology_views/img                                                                                                                      | (str or pathlib.Path) Specifies the location that images will be loaded from by default. Must be within `STATIC_ROOT`  |
+| preselected_device_roles | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive         |
+| allow_coordinates_saving | False                                                                                                                                          | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates                           |
+| always_save_coordinates  | False                                                                                                                                          | (bool) Set if you want to enable the option to save coordinates by default                                             |
+| ignore_cable_type        | []                                                                                                                                             | The cable types that you want to ignore in the views                                                                   |
+| preselected_tags         | []                                                                                                                                             | The name of tags you want to preload                                                                                   |
+| draw_default_layout      | False                                                                                                                                          | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
 
 ### Custom Images
 
-You upload you own custom images to the netbox static dir (`static/netbox_topology_views/img/`).
-These images need to be named after de device role slug and have the .png format/extension.
-If you add your own image you also need to add the slug to the `device_img` setting.
+To change image with associated device use the `Images` page - it allows to map a device role with an image found in the netbox static directory (defined by the plugin config `static_image_directory` which defaults to `netbox_topology_views/img`). You can also upload you own custom images to there - these images will automatically be used for a device (if it does not already have a specified image in the settings) if their name is the device role slug.
 
 ## Use
 
@@ -98,6 +97,8 @@ Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plu
 ### Update
 
 Run `pip install netbox-topology-views --upgrade` in your venv.
+
+Run `python3 manage.py migrate netbox_topology_views`
 
 Run `python3 manage.py collectstatic --no-input`
 

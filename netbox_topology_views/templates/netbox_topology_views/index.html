@@ -50,12 +50,8 @@
 
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
         <div class="panel-body">
-          <div id="visgraph" class=""></div>
+          <div id="visgraph"></div>
         </div>
-
-        <script type="text/javascript">
-          var topology_data = {{ topology_data | safe }};
-        </script>
       </div>
 
       {% if filter_form %}
@@ -69,5 +65,9 @@
 {% endblock content-wrapper %}
 
 {% block javascript %}
-	<script src="{% static 'netbox_topology_views/js/app.js' %}"></script>
+  <script type="text/javascript">
+    const brokenImage = '{{ broken_image }}';
+    const topologyData = {{ topology_data | safe }};
+  </script>
+	<script src="{% static 'netbox_topology_views/js/app.js' %}" defer></script>
 {% endblock javascript %}
