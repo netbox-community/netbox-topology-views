@@ -16,9 +16,11 @@ from dcim.models import (
 )
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render
+from django.utils.text import slugify
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
@@ -26,7 +28,12 @@ from wireless.models import WirelessLink
 from netbox_topology_views.filters import DeviceFilterSet
 from netbox_topology_views.forms import DeviceFilterForm
 from netbox_topology_views.models import RoleImage
-from netbox_topology_views.utils import CONF_IMAGE_DIR, find_image, image_static_url
+from netbox_topology_views.utils import (
+    CONF_IMAGE_DIR,
+    find_image_url,
+    get_model_role,
+    image_static_url,
+)
 
 supported_termination_types = [
     "interface",
@@ -39,6 +46,20 @@ supported_termination_types = [
 ]
 
 
+def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
+    if isinstance(entity, Device):
+        query = {"object_id": entity.device_role.pk}
+        fallback_slug = entity.device_role.slug
+    else:
+        query = {"content_type_id": ContentType.objects.get_for_model(entity).pk}
+        fallback_slug = slugify(entity.__class__.__name__)
+
+    try:
+        return RoleImage.objects.get(**query).get_image_url()
+    except RoleImage.DoesNotExist:
+        return find_image_url(fallback_slug)
+
+
 def create_node(
     device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool
 ):
@@ -46,8 +67,8 @@ def create_node(
     node_content = ""
     if isinstance(device, Circuit):
         dev_name = f"Circuit {device.cid}"
-        node["image"] = find_image("circuit")
         node["id"] = f"c{device.pk}"
+        node["image"] = get_image_for_entity(device)
 
         if device.provider is not None:
             node_content += (
@@ -57,7 +78,7 @@ def create_node(
             node_content += f"<tr><th>Type: </th><td>{device.type.name}</td></tr>"
     elif isinstance(device, PowerPanel):
         dev_name = f"Power Panel {device.pk}"
-        node["image"] = find_image("power-panel")
+        node["image"] = get_image_for_entity(device)
         node["id"] = f"p{device.pk}"
 
         if device.site is not None:
@@ -68,7 +89,7 @@ def create_node(
             )
     elif isinstance(device, PowerFeed):
         dev_name = f"Power Feed {device.pk}"
-        node["image"] = find_image("power-feed")
+        node["image"] = get_image_for_entity(device)
         node["id"] = f"f{device.pk}"
 
         if device.power_panel is not None:
@@ -121,12 +142,7 @@ def create_node(
                 )
 
         node["id"] = device.pk
-        try:
-            node["image"] = RoleImage.objects.get(
-                role_id=device.device_role.pk
-            ).get_image_url()
-        except RoleImage.DoesNotExist:
-            node["image"] = find_image(device.device_role.slug)
+        node["image"] = get_image_for_entity(device)
 
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
@@ -603,12 +619,13 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             {
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
-                "broken_image": find_image("role-unknown"),
+                "broken_image": find_image_url("role-unknown"),
             },
         )
 
 
 CONFIG = settings.PLUGINS_CONFIG["netbox_topology_views"]
+ADDITIONAL_ROLES = (PowerPanel, PowerFeed, Circuit)
 
 
 class TopologyImagesView(PermissionRequiredMixin, View):
@@ -632,18 +649,34 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                     "id": cur.pk,
                     "name": cur.name,
                     "slug": cur.slug,
-                    "image": "",
+                    "image": find_image_url(cur.slug),
                 },
             },
             DeviceRole.objects.all(),
             dict(),
         )
 
-        for mapping in RoleImage.objects.all():
-            roles[mapping.role.name]["image"] = mapping.get_image_url()
+        for additional_role in ADDITIONAL_ROLES:
+            cur = get_model_role(additional_role)
+            ct = ContentType.objects.get_for_model(additional_role).pk
+
+            roles[cur.name] = {
+                "id": f"ct{ct}",
+                "name": cur.name,
+                "slug": cur.slug,
+                "image": find_image_url(cur.slug),
+            }
+
+        role_images = RoleImage.objects.all()
+
+        for role_image in role_images:
+            roles[role_image.role.name]["image"] = role_image.get_image_url()
 
         return render(
             request,
             "netbox_topology_views/images.html",
-            {"roles": list(roles.values()), "images": images},
+            {
+                "roles": sorted(list(roles.values()), key=lambda r: r["name"]),
+                "images": images,
+            },
         )

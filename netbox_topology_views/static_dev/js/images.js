@@ -31,7 +31,7 @@ document.querySelectorAll('form#images .dropdown-menu img').forEach((el) => {
             dataset: { role, image }
         } = e.currentTarget
 
-        mapping[parseInt(role)] = image
+        mapping[role] = image
 
         const button = e.currentTarget
             .closest('.dropdown')

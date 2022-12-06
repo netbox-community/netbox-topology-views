@@ -4,6 +4,7 @@ from typing import Dict
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -76,23 +77,52 @@ class SaveRoleImageViewSet(ViewSet):
                 {"status": "Missing or malformed request body"}, status=400
             )
 
-        body = {int(k): str(v) for k, v in request.data.items() if k.isnumeric()}
-        roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(body.keys())
+        device_roles = {k: v for k, v in request.data.items() if k.isnumeric()}
+        content_type_ids = {
+            k[2:]: v
+            for k, v in request.data.items()
+            if k.startswith("ct") and k[2:].isnumeric()
+        }
 
-        if len(roles) != len(body):
-            difference = set(body.keys()) - set(roles.keys())
+        roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(device_roles.keys())
+        content_types: Dict[int, ContentType] = ContentType.objects.in_bulk(
+            content_type_ids.keys()
+        )
+
+        if len(roles) != len(device_roles):
+            difference = set(device_roles) - set(roles.keys())
             return JsonResponse(
                 {"status": f"Got unknown device role ids: {difference}"},
                 status=400,
             )
 
-        for key, value in body.items():
+        if len(content_types) != len(content_type_ids):
+            difference = set(content_type_ids) - set(content_types.keys())
+            return JsonResponse(
+                {"status": f"Got unknown content type ids: {difference}"},
+                status=400,
+            )
+
+        if device_roles:
+            device_role_ct = ContentType.objects.get_for_model(DeviceRole)
+
+            for id, url in device_roles.items():
+                RoleImage.objects.update_or_create(
+                    {
+                        "content_type_id": device_role_ct.pk,
+                        "object_id": id,
+                        "image": str(get_image_from_url(url)),
+                    },
+                    object_id=id,
+                )
+
+        for content_type_id, url in content_type_ids.items():
             RoleImage.objects.update_or_create(
                 {
-                    "role_id": key,
-                    "image": str(get_image_from_url(value)),
+                    "content_type_id": content_type_id,
+                    "image": str(get_image_from_url(url)),
                 },
-                role_id=key,
+                content_type_id=content_type_id,
             )
 
         return JsonResponse({"status": "Ok"})
