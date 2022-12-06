@@ -36,7 +36,7 @@ Then run
 ```bash
 cd /opt/netbox/netbox
 pip3 install netbox-topology-views
-python3 manage.py migrate netbox-topology-views
+python3 manage.py migrate netbox_topology_views
 python3 manage.py collectstatic --no-input
 ```
 

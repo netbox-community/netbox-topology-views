@@ -47,17 +47,19 @@ supported_termination_types = [
 
 
 def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
-    if isinstance(entity, Device):
-        query = {"object_id": entity.device_role.pk}
-        fallback_slug = entity.device_role.slug
-    else:
-        query = {"content_type_id": ContentType.objects.get_for_model(entity).pk}
-        fallback_slug = slugify(entity.__class__.__name__)
+    is_device = isinstance(entity, Device)
+    query = (
+        {"object_id": entity.device_role_id}
+        if is_device
+        else {"content_type_id": ContentType.objects.get_for_model(entity).pk}
+    )
 
     try:
         return RoleImage.objects.get(**query).get_image_url()
     except RoleImage.DoesNotExist:
-        return find_image_url(fallback_slug)
+        return find_image_url(
+            entity.device_role.slug if is_device else slugify(entity.__class__.__name__)
+        )
 
 
 def create_node(
@@ -68,7 +70,6 @@ def create_node(
     if isinstance(device, Circuit):
         dev_name = f"Circuit {device.cid}"
         node["id"] = f"c{device.pk}"
-        node["image"] = get_image_for_entity(device)
 
         if device.provider is not None:
             node_content += (
@@ -78,7 +79,6 @@ def create_node(
             node_content += f"<tr><th>Type: </th><td>{device.type.name}</td></tr>"
     elif isinstance(device, PowerPanel):
         dev_name = f"Power Panel {device.pk}"
-        node["image"] = get_image_for_entity(device)
         node["id"] = f"p{device.pk}"
 
         if device.site is not None:
@@ -89,7 +89,6 @@ def create_node(
             )
     elif isinstance(device, PowerFeed):
         dev_name = f"Power Feed {device.pk}"
-        node["image"] = get_image_for_entity(device)
         node["id"] = f"f{device.pk}"
 
         if device.power_panel is not None:
@@ -142,7 +141,6 @@ def create_node(
                 )
 
         node["id"] = device.pk
-        node["image"] = get_image_for_entity(device)
 
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
@@ -154,6 +152,7 @@ def create_node(
     node["label"] = dev_name
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
+    node["image"] = get_image_for_entity(device)
 
     node["physics"] = True
     if "coordinates" in device.custom_field_data:
@@ -163,22 +162,19 @@ def create_node(
                 node["x"] = int(cords[0])
                 node["y"] = int(cords[1])
                 node["physics"] = False
-        else:
-            if save_coords:
-                node["physics"] = False
-            else:
-                node["physics"] = True
+        elif save_coords:
+            node["physics"] = False
     return node
 
 
 def create_edge(
     edge_id: int,
-    termination_a,
-    termination_b,
-    circuit=None,
+    termination_a: Dict,
+    termination_b: Dict,
+    circuit: Optional[Dict] = None,
     cable: Optional[Cable] = None,
-    wireless=None,
-    power=None,
+    wireless: Optional[Dict] = None,
+    power: Optional[bool] = None,
 ):
     cable_a_name = (
         "device A name unknown"
@@ -273,7 +269,7 @@ def get_topology_data(
     ]
 
     device_ids = [d.pk for d in queryset]
-    site_ids = [d.site.pk for d in queryset]
+    site_ids = [d.site_id for d in queryset]
 
     if show_circuit:
         circuit_terminations = CircuitTermination.objects.filter(
@@ -283,7 +279,7 @@ def get_topology_data(
             circuit_termination: CircuitTermination
             if (
                 not hide_unconnected
-                and circuit_termination.circuit.pk not in nodes_circuits
+                and circuit_termination.circuit_id not in nodes_circuits
             ):
                 nodes_circuits[
                     circuit_termination.circuit.pk
@@ -301,7 +297,7 @@ def get_topology_data(
                 )
             elif circuit_termination.provider_network is not None:
                 if (
-                    circuit_termination.provider_network.pk
+                    circuit_termination.provider_network_id
                     not in nodes_provider_networks
                 ):
                     nodes_provider_networks[
@@ -329,17 +325,17 @@ def get_topology_data(
                 ]:
                     if not isinstance(termination, CircuitTermination):
                         if (
-                            termination.device.pk not in nodes_devices
-                            and termination.device.pk in device_ids
+                            termination.device_id not in nodes_devices
+                            and termination.device_id in device_ids
                         ):
-                            nodes_devices[termination.device.pk] = termination.device
+                            nodes_devices[termination.device_id] = termination.device
                             circuit_has_connections = True
                         else:
-                            if termination.device.pk in device_ids:
+                            if termination.device_id in device_ids:
                                 circuit_has_connections = True
 
                 if circuit_has_connections and hide_unconnected:
-                    if circuit_termination.circuit.pk not in nodes_circuits:
+                    if circuit_termination.circuit_id not in nodes_circuits:
                         nodes_circuits[
                             circuit_termination.circuit.pk
                         ] = circuit_termination.circuit
@@ -368,13 +364,13 @@ def get_topology_data(
             if not hide_unconnected or (
                 hide_unconnected and power_feed.cable_id is not None
             ):
-                if power_feed.power_panel.pk not in nodes_powerpanel:
+                if power_feed.power_panel_id not in nodes_powerpanel:
                     nodes_powerpanel[power_feed.power_panel.pk] = power_feed.power_panel
 
                 power_link_name = ""
                 if power_feed.pk not in nodes_powerfeed:
                     if hide_unconnected:
-                        if power_feed.link_peers[0].device.pk in device_ids:
+                        if power_feed.link_peers[0].device_id in device_ids:
                             nodes_powerfeed[power_feed.pk] = power_feed
                             power_link_name = power_feed.link_peers[0].name
                     else:
@@ -384,12 +380,12 @@ def get_topology_data(
                 termination_a = {
                     "termination_name": power_feed.power_panel.name,
                     "termination_device_name": "",
-                    "device_id": "p{}".format(power_feed.power_panel.pk),
+                    "device_id": f"p{power_feed.power_panel_id}",
                 }
                 termination_b = {
                     "termination_name": power_feed.name,
                     "termination_device_name": power_link_name,
-                    "device_id": "f{}".format(power_feed.pk),
+                    "device_id": f"f{power_feed.pk}",
                 }
                 edges.append(
                     create_edge(
@@ -401,7 +397,7 @@ def get_topology_data(
                 )
 
                 if power_feed.cable_id is not None:
-                    cable_ids[power_feed.cable.pk][power_feed.cable_end] = termination_b
+                    cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
             nodes.append(create_node(d, save_coords))
@@ -417,62 +413,62 @@ def get_topology_data(
         if link.termination_type.name in supported_termination_types:
             complete_link = False
             if link.cable_end == "A":
-                if link.cable.pk not in cable_ids:
-                    cable_ids[link.cable.pk] = {}
+                if link.cable_id not in cable_ids:
+                    cable_ids[link.cable_id] = {}
                 else:
-                    if "B" in cable_ids[link.cable.pk]:
-                        if cable_ids[link.cable.pk]["B"] is not None:
+                    if "B" in cable_ids[link.cable_id]:
+                        if cable_ids[link.cable_id]["B"] is not None:
                             complete_link = True
             elif link.cable_end == "B":
-                if link.cable.pk not in cable_ids:
-                    cable_ids[link.cable.pk] = {}
+                if link.cable_id not in cable_ids:
+                    cable_ids[link.cable_id] = {}
                 else:
-                    if "A" in cable_ids[link.cable.pk]:
-                        if cable_ids[link.cable.pk]["A"] is not None:
+                    if "A" in cable_ids[link.cable_id]:
+                        if cable_ids[link.cable_id]["A"] is not None:
                             complete_link = True
             else:
                 print("Unkown cable end")
-            cable_ids[link.cable.pk][link.cable_end] = link
+            cable_ids[link.cable_id][link.cable_end] = link
 
             if complete_link:
                 edge_ids += 1
-                if isinstance(cable_ids[link.cable.pk]["B"], CableTermination):
-                    if cable_ids[link.cable.pk]["B"]._device_id not in nodes_devices:
+                if isinstance(cable_ids[link.cable_id]["B"], CableTermination):
+                    if cable_ids[link.cable_id]["B"]._device_id not in nodes_devices:
                         nodes_devices[
-                            cable_ids[link.cable.pk]["B"]._device_id
-                        ] = cable_ids[link.cable.pk]["B"].termination.device
+                            cable_ids[link.cable_id]["B"]._device_id
+                        ] = cable_ids[link.cable_id]["B"].termination.device
                     termination_b = {
-                        "termination_name": cable_ids[link.cable.pk][
+                        "termination_name": cable_ids[link.cable_id][
                             "B"
                         ].termination.name,
-                        "termination_device_name": cable_ids[link.cable.pk][
+                        "termination_device_name": cable_ids[link.cable_id][
                             "B"
                         ].termination.device.name,
-                        "device_id": cable_ids[link.cable.pk][
+                        "device_id": cable_ids[link.cable_id][
                             "B"
-                        ].termination.device.pk,
+                        ].termination.device_id,
                     }
                 else:
-                    termination_b = cable_ids[link.cable.pk]["B"]
+                    termination_b = cable_ids[link.cable_id]["B"]
 
-                if isinstance(cable_ids[link.cable.pk]["A"], CableTermination):
-                    if cable_ids[link.cable.pk]["A"]._device_id not in nodes_devices:
+                if isinstance(cable_ids[link.cable_id]["A"], CableTermination):
+                    if cable_ids[link.cable_id]["A"]._device_id not in nodes_devices:
                         nodes_devices[
-                            cable_ids[link.cable.pk]["A"]._device_id
-                        ] = cable_ids[link.cable.pk]["A"].termination.device
+                            cable_ids[link.cable_id]["A"]._device_id
+                        ] = cable_ids[link.cable_id]["A"].termination.device
                     termination_a = {
-                        "termination_name": cable_ids[link.cable.pk][
+                        "termination_name": cable_ids[link.cable_id][
                             "A"
                         ].termination.name,
-                        "termination_device_name": cable_ids[link.cable.pk][
+                        "termination_device_name": cable_ids[link.cable_id][
                             "A"
                         ].termination.device.name,
-                        "device_id": cable_ids[link.cable.pk][
+                        "device_id": cable_ids[link.cable_id][
                             "A"
-                        ].termination.device.pk,
+                        ].termination.device_id,
                     }
                 else:
-                    termination_a = cable_ids[link.cable.pk]["A"]
+                    termination_a = cable_ids[link.cable_id]["A"]
 
                 edges.append(
                     create_edge(
@@ -484,11 +480,11 @@ def get_topology_data(
                 )
 
     for wlan_link in wlan_links:
-        if wlan_link.interface_a.device.pk not in nodes_devices:
+        if wlan_link.interface_a.device_id not in nodes_devices:
             nodes_devices[
                 wlan_link.interface_a.device.pk
             ] = wlan_link.interface_a.device
-        if wlan_link.interface_b.device.pk not in nodes_devices:
+        if wlan_link.interface_b.device_id not in nodes_devices:
             nodes_devices[
                 wlan_link.interface_b.device.pk
             ] = wlan_link.interface_b.device
@@ -496,12 +492,12 @@ def get_topology_data(
         termination_a = {
             "termination_name": wlan_link.interface_a.name,
             "termination_device_name": wlan_link.interface_a.device.name,
-            "device_id": wlan_link.interface_a.device.pk,
+            "device_id": wlan_link.interface_a.device_id,
         }
         termination_b = {
             "termination_name": wlan_link.interface_b.name,
             "termination_device_name": wlan_link.interface_b.device.name,
-            "device_id": wlan_link.interface_b.device.pk,
+            "device_id": wlan_link.interface_b.device_id,
         }
         wireless = {"ssid": wlan_link.ssid}
 
