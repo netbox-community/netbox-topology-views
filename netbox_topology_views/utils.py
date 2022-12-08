@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from re import finditer
 from typing import Type
 
 from django.conf import settings
 from django.db.models import Model
 from django.templatetags.static import static
-from django.utils.text import slugify
+from django.utils.text import camel_case_to_spaces, re_camel_case
 
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
 CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / settings.PLUGINS_CONFIG[
@@ -76,16 +75,12 @@ class Role:
     name: str
 
 
-def camel_case_split(identifier: str):
-    matches = finditer(
-        ".+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)", identifier
-    )
-    return [m.group(0) for m in matches]
+def get_model_slug(model: Type[Model]):
+    return camel_case_to_spaces(model.__name__).replace(" ", "-")
 
 
 def get_model_role(model: Type[Model]) -> Role:
-
     return Role(
-        slug=slugify(model.__name__),
-        name=" ".join(camel_case_split(model.__name__)),
+        slug=get_model_slug(model),
+        name=re_camel_case.sub(r" \1", model.__name__),
     )

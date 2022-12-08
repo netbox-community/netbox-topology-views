@@ -20,7 +20,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render
-from django.utils.text import slugify
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
@@ -32,6 +31,7 @@ from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
     get_model_role,
+    get_model_slug,
     image_static_url,
 )
 
@@ -58,7 +58,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
         return RoleImage.objects.get(**query).get_image_url()
     except RoleImage.DoesNotExist:
         return find_image_url(
-            entity.device_role.slug if is_device else slugify(entity.__class__.__name__)
+            entity.device_role.slug if is_device else get_model_slug(entity.__class__)
         )
 
 
