@@ -1,0 +1,46 @@
+{% extends 'base/layout.html' %}
+{% load buttons %}
+{% load render_table from django_tables2 %}
+{% load helpers %}
+{% load static %}
+
+{% block title %}Topology Views Images{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+{% endblock %}
+
+{% block content-wrapper %}
+  <form id="images" class="container py-4">
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-2">
+      {% for role in roles %}
+        <div class="d-flex flex-column align-items-center">
+          <div class="image-dropdown dropdown">
+            <button class="btn btn-secondary" type="button" id="dropdownMenuButton{{ role.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+              {% if role.image %}
+                <img src="{{ role.image }}" />
+              {% else %}
+                Image
+              {% endif %}
+            </button>
+            <div class="dropdown-menu mt-2" aria-labelledby="dropdownMenuButton{{ role.id }}">
+              <div class="image-dropdown-content">
+              {% for image in images %}
+                <img src="{{ image.url }}" title="{{ image.title }}" width="64" data-role="{{ role.id }}" data-image="{{ image.url }}"/>
+              {% endfor %}
+              </div>
+            </div>
+          </div>
+          <span>{{ role.name }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+  {% include 'netbox_topology_views/toasts.html' %}
+{% endblock content-wrapper %}
+
+{% block javascript %}
+  <script src="{% static 'netbox_topology_views/js/images.js' %}" defer></script>
+{% endblock javascript %}
