@@ -76,7 +76,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
                     const res = await fetch(
-                        '/api/plugins/netbox_topology_views/save-coords/',
+                        '/api/plugins/netbox_topology_views/save-coords/save_coords/',
                         {
                             method: 'PATCH',
                             headers: {
