@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "netbox_topology_views",
-  "version": "3.0.0-beta.1",
+  "version": "3.1.0",
   "scripts": {
     "bundle": "node bundle.js",
     "bundle:styles": "node bundle.js --styles",
@@ -15,7 +15,6 @@
   "devDependencies": {
     "esbuild": "^0.12.24",
     "esbuild-sass-plugin": "^1.5.2",
-
     "@egjs/hammerjs": "^2.0.0",
     "component-emitter": "^1.3.0",
     "keycharm": "^0.4.0",
