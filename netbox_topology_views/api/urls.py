@@ -1,10 +1,10 @@
-from rest_framework import routers
+from netbox.api.routers import NetBoxRouter
 
 from netbox_topology_views.api import views
 
-router = routers.DefaultRouter()
+router = NetBoxRouter()
 
-router.register("save-coords", views.SaveCoordsViewSet, basename="save_coords")
-router.register("images", views.SaveRoleImageViewSet, basename="save_images")
+router.register("save-coords", views.SaveCoordsViewSet)
+router.register("images", views.SaveRoleImageViewSet)
 
 urlpatterns = router.urls

@@ -69,34 +69,36 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
 
-    graph.on('dragEnd', function (params) {
+    graph.on('dragEnd', (params) => {
         if (!coordSaveCheckbox.checked) return
 
         Promise.allSettled(
-            this.getPositions(params.nodes).map(async (node) => {
-                const res = await fetch(
-                    '/api/plugins/netbox_topology_views/save-coords/',
-                    {
-                        method: 'PATCH',
-                        headers: {
-                            'X-CSRFToken': csrftoken,
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            node_id: node,
-                            x: node.x,
-                            y: node.y
-                        })
-                    }
-                )
+            Object.entries(graph.getPositions(params.nodes)).map(
+                async ([nodeId, nodePosition]) => {
+                    const res = await fetch(
+                        '/api/plugins/netbox_topology_views/save-coords/',
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                                Accept: 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                node_id: nodeId,
+                                x: nodePosition.x,
+                                y: nodePosition.y
+                            })
+                        }
+                    )
 
-                console.log(node, res.status, res.statusText)
-            })
+                    console.log(nodeId, res.status, res.statusText)
+                }
+            )
         )
     })
 
-    graph.on('doubleClick', function (params) {
+    graph.on('doubleClick', (params) => {
         params.nodes.forEach((node) => {
             window.open(nodes.get(node).href, '_blank')
         })

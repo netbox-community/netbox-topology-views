@@ -1,9 +1,9 @@
-import json
 from typing import Dict
 
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
 from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from rest_framework.decorators import action
@@ -19,7 +19,7 @@ from netbox_topology_views.utils import get_image_from_url
 
 
 class SaveCoordsViewSet(ReadOnlyModelViewSet):
-    queryset = Device.objects.all()
+    queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 
     @action(detail=False, methods=["patch"])
@@ -63,8 +63,8 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
         return Response({"status": "saved coords"})
 
 
-class SaveRoleImageViewSet(ViewSet):
-    queryset = DeviceRole.objects.all()
+class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):
+    queryset = DeviceRole.objects.none()
     serializer_class = RoleImageSerializer
     permission_required = (
         "dcim.add_device_role",
