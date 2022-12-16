@@ -423,13 +423,13 @@ def get_topology_data(
                         # print('Destination interface already exists, ignoring')
                         continue
             
-                interface_ids[interface.id]=interface
-                edge_ids += 1
-                termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
-                termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
-                edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=True))
-                nodes_devices[interface.device.id] = interface.device
-                nodes_devices[destination.device.id] = destination.device
+                    interface_ids[interface.id]=interface
+                    edge_ids += 1
+                    termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
+                    termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
+                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=True))
+                    nodes_devices[interface.device.id] = interface.device
+                    nodes_devices[destination.device.id] = destination.device
 
     if show_cables and not show_logical_connections:
         links: QuerySet[CableTermination] = CableTermination.objects.filter(
