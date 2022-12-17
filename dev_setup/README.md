@@ -97,7 +97,7 @@ cd netbox/netbox/
 python3 manage.py migrate
 python3 manage.py runserver
 ```
-You might need to create a superuser: `python3 manage.py createsuperuser`
+You might need to create a superuser if you want to start with an empty database: `python3 manage.py createsuperuser`
 
 # Build
 
