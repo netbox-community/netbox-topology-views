@@ -2,6 +2,24 @@
 
 We will assume that you work in the folder `~/code/netbox_plugin/`, change this if you use another folder for your projects/code.
 
+## Setup prerequisites
+Make sure that you have already installed Postgresql and Redis. Also make sure that the database has already been created and privileges has been granted as described in the NetBox installation instructions at https://docs.netbox.dev/en/stable/installation/.
+
+In short:
+```
+sudo apt update
+sudo apt install -y postgresql
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+sudo -u postgres psql
+CREATE DATABASE netbox;
+CREATE USER netbox WITH PASSWORD 'J5brHrAXFLQSif0K';
+GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
+
+sudo apt install -y redis-server
+```
+
 ## Create the base folder
 ```
 mkdir ~/code/netbox_plugin/
