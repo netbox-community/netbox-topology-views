@@ -2,7 +2,9 @@
 
 We will assume that you work in the folder `~/code/netbox_plugin/`, change this if you use another folder for your projects/code.
 
-## Setup prerequisites
+## Setup native prerequisites
+**_NOTE:_**  these requirements are needed if you want install Postgresql & Redis navive. Check the steps for docker & docker-compose if you don't want this.
+
 Make sure that you have already installed Postgresql and Redis. Also make sure that the database has already been created and privileges has been granted as described in the NetBox installation instructions at https://docs.netbox.dev/en/stable/installation/.
 
 In short:
@@ -20,6 +22,18 @@ GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
 sudo apt install -y redis-server
 ```
 
+## Setup docker prerequisites
+
+**_NOTE:_** if you used the 'native' prerequisites you can skip these steps below
+
+### Docker
+This depends on your OS or how you want to install docker.  
+See https://docs.docker.com/engine/install/ to find the install steps.
+
+### Docker compose
+This also depends on your OS, see the link below:  
+https://docs.docker.com/compose/install/linux/
+
 ## Create the base folder
 ```
 mkdir ~/code/netbox_plugin/
@@ -34,13 +48,6 @@ You will need the following packages installed:
 
 Install them with your OS package manager (apt, yum, ...)
 
-### Docker
-This depends on your OS or how you want to install docker.  
-See https://docs.docker.com/engine/install/ to find the install steps.
-
-### Docker compose
-This also depends on your OS, see the link below:  
-https://docs.docker.com/compose/install/linux/
 
 ### NPM (with nvm)
 Follow the steps on the repo below to install npm:  
@@ -84,6 +91,7 @@ cp plugin/dev_setup/configuration.py netbox/netbox/netbox/configuration.py
 
 ## Start netbox
 ### Start docker compose
+**_NOTE:_** if you used the 'native' prerequisites you can skip to 'Start netbox'
 ```
 cd ~/code/netbox_plugin/
 cd plugin/dev_setup
