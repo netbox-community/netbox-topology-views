@@ -120,3 +120,16 @@ npm run bundle
 ### Test
 You can now browse to http://localhost:8000.  
 The plugin should be available in the menu.
+
+# Import demo data
+If you want to add demo data instead of your own data, there's an official Repository you can use. The following example shows how to add demo data for NetBox v3.4. You have to use the json file according to the version you are working on.
+
+```
+~/code/netbox_plugin/
+git clone git@github.com:netbox-community/netbox-demo-data.git demodata
+source ~/code/netbox_plugin/.venvs/netbox/bin/activate
+cd netbox/netbox/
+python3 manage.py loaddata -v 3 ~/src/netbox-demo-data/netbox-demo-v3.4.json
+```
+
+Please note that the demo data adds a superuser with credentials admin/admin.
