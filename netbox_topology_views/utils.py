@@ -3,15 +3,26 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Type
 
+import sys
+
 from django.conf import settings
 from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
 
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
-CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / settings.PLUGINS_CONFIG[
-    "netbox_topology_views"
-]["static_image_directory"].removeprefix("/")
+if sys.version_info >= (3,9,0):
+    CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / settings.PLUGINS_CONFIG[
+        "netbox_topology_views"
+    ]["static_image_directory"].removeprefix("/")
+else:
+    prefix = "/"
+    plugin_path = settings.PLUGINS_CONFIG["netbox_topology_views"]["static_image_directory"]
+    if plugin_path.startswith(prefix):
+        plugin_path_new = plugin_path[len(prefix):]
+        CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / plugin_path_new
+    else:
+        CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / plugin_path
 
 
 def image_static_url(path: Path) -> str:
@@ -21,7 +32,15 @@ def image_static_url(path: Path) -> str:
 
 
 def get_image_from_url(url: str) -> str:
-    return url.removeprefix(settings.BASE_PATH + settings.STATIC_URL)
+    url_path = settings.BASE_PATH + settings.STATIC_URL
+    if sys.version_info >= (3,9,0):
+        return url.removeprefix(url_path)
+    else:
+        if url.startswith(url_path):
+            url_new = url[len(url_path):]
+            return url_new
+        else:
+            return url
 
 
 IMAGE_FILETYPES = (
