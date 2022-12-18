@@ -410,7 +410,7 @@ def get_topology_data(
         for d in nodes_powerpanel.values():
             nodes.append(create_node(d, save_coords))
 
-    if show_logical_connections and not show_cables:
+    if show_logical_connections:
         interfaces = Interface.objects.filter(
             Q(_path__is_complete=True) & Q(device_id__in=device_ids)
         )
@@ -436,7 +436,7 @@ def get_topology_data(
                     nodes_devices[interface.device.id] = interface.device
                     nodes_devices[destination.device.id] = destination.device
 
-    if show_cables and not show_logical_connections:
+    if show_cables:
         links: QuerySet[CableTermination] = CableTermination.objects.filter(
             Q(_device_id__in=device_ids)
         ).select_related("termination_type")
