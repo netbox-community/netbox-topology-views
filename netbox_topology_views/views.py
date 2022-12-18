@@ -254,10 +254,10 @@ def get_topology_data(
     queryset: QuerySet,
     hide_unconnected: bool,
     save_coords: bool,
-    show_circuit: bool,
-    show_power: bool,
-    show_logical_connections: bool,
     show_cables: bool,
+    show_circuit: bool,
+    show_logical_connections: bool,
+    show_power: bool,
     show_wireless: bool,
 ):
     if not queryset:
