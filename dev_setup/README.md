@@ -3,7 +3,7 @@
 We will assume that you work in the folder `~/code/netbox_plugin/`, change this if you use another folder for your projects/code.
 
 ## Setup native prerequisites
-**_NOTE:_**  these requirements are needed if you want install Postgresql & Redis navive. Check the steps for docker & docker-compose if you don't want this.
+**_NOTE:_**  these requirements are needed if you want install Postgresql & Redis native. Check the steps for docker & docker-compose if you don't want this.
 
 Make sure that you have already installed Postgresql and Redis. Also make sure that the database has already been created and privileges has been granted as described in the NetBox installation instructions at https://docs.netbox.dev/en/stable/installation/.
 
