@@ -219,7 +219,10 @@ def create_edge(
 
     elif interface is not None:
         title = "Interface Connection"
-
+        edge["width"] = 3
+        edge["arrows"] = {"to": {"enabled": True, "scaleFactor": 0.5}, "from": {"enabled": True, "scaleFactor": 0.5}}
+        edge["color"] = '#f1c232'
+        
     edge[
         "title"
     ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}]"
