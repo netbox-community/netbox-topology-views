@@ -1,7 +1,9 @@
 import json
 from functools import reduce
 from typing import DefaultDict, Dict, Optional, Union
+import time
 
+from utilities.htmx import is_htmx
 from circuits.models import Circuit, CircuitTermination
 from dcim.models import (
     Cable,
@@ -608,6 +610,18 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 q["save_coords"] = "on"
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
+
+        if is_htmx(request): 
+            return render(
+                request,
+                "netbox_topology_views/htmx_topology.html",
+                {
+                    "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
+                    "topology_data": json.dumps(topo_data),
+                    "broken_image": find_image_url("role-unknown"),
+                    "epoch": int(time.time()),
+                },
+            )
 
         return render(
             request,

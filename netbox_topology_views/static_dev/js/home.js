@@ -70,8 +70,9 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     graph.fit()
 
     graph.on('dragEnd', (params) => {
+        if (coordSaveCheckbox == null) return
         if (!coordSaveCheckbox.checked) return
-
+        
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
