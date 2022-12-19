@@ -221,8 +221,10 @@ def create_edge(
         "title"
     ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}]"
 
-    if cable is not None and cable.color != "":
-        edge["color"] = "#" + cable.color
+    if cable is not None:
+        edge["href"] = cable.get_absolute_url()
+        if hasattr(cable, 'color') and cable.color != "":
+            edge["color"] = "#" + cable.color
 
     return edge
 
@@ -314,6 +316,7 @@ def get_topology_data(
                 edges.append(
                     create_edge(
                         edge_id=edge_ids,
+                        cable=circuit_termination.cable,
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
@@ -507,6 +510,7 @@ def get_topology_data(
         edges.append(
             create_edge(
                 edge_id=edge_ids,
+                cable=wlan_link,
                 termination_a=termination_a,
                 termination_b=termination_b,
                 wireless=wireless,
