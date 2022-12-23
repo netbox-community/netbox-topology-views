@@ -621,7 +621,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     "topology_data": json.dumps(topo_data),
                     "broken_image": find_image_url("role-unknown"),
                     "epoch": int(time.time()),
-                    "model": self.model,
                 },
             )
 
@@ -632,6 +631,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
+                "model": self.model,
             },
         )
 
