@@ -12,6 +12,8 @@ Support to filter on name, site, tag and device role.
 
 ## Install
 
+**_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
+
 The plugin is available as a Python package and can be installed with pip.
 
 Run `pip install netbox-topology-views` in your virtual env.
