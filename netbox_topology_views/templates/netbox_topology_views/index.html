@@ -48,6 +48,12 @@
   {% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
     <div class="tab-content">
 
+      {# Applied filters #}
+      {% if filter_form %}
+        {% applied_filters model filter_form request.GET %}
+        <hr>
+      {% endif %}
+
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
         <div class="panel-body">
           <div id="visgraph"></div>
