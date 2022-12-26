@@ -540,6 +540,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             "device_type", "device_role"
         )
         self.queryset = self.filterset(request.GET, self.queryset).qs
+        self.model = self.queryset.model
         topo_data = None
 
         if request.GET:
@@ -630,6 +631,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
+                "model": self.model,
             },
         )
 

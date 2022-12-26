@@ -31,6 +31,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             None,
             (
                 "q",
+                "filter_id",
                 "hide_unconnected",
                 "save_coords",
                 "show_circuit",
