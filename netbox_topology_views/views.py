@@ -180,9 +180,6 @@ def create_edge(
     power: Optional[bool] = None,
     interface: Optional[bool] = None,
 ):
-    logical_conn_dashes = settings.PLUGINS_CONFIG["netbox_topology_views"][
-        "logical_conn_dashes"
-    ]
     cable_a_name = (
         "device A name unknown"
         if termination_a["termination_name"] is None
@@ -225,7 +222,7 @@ def create_edge(
     elif interface is not None:
         title = "Interface Connection"
         edge["width"] = 3
-        edge["dashes"] = logical_conn_dashes
+        edge["dashes"] = [1, 10, 1, 10]
         edge["arrows"] = {"to": {"enabled": True, "scaleFactor": 0.5}, "from": {"enabled": True, "scaleFactor": 0.5}}
         edge["color"] = '#f1c232'
         

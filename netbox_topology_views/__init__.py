@@ -30,7 +30,6 @@ class TopologyViewsConfig(PluginConfig):
         "preselected_tags": [],
         "draw_default_layout": False,
         "hide_single_cable_logical_conns": False,
-        "logical_conn_dashes": [1, 10, 1, 10],
     }
 
 
