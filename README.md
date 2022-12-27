@@ -113,8 +113,7 @@ Select your options for the topology view:
     <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
         interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
         intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. </dd>
-    <dd><i>Selecting both 'Show Cables' and 'Show Logical Interfaces' will result in an empty topology view as these are not intended to both be
-        selected at the same time.</i></dd>
+    <dd><i>Selecting both 'Show Cables' and 'Show Logical Interfaces' will sometimes result in a topology view with 2 cables per connection as these devices are diretly connected. Select only one of the options or set `hide_single_cable_logical_conns` to True.</i></dd>
     <dt>Show Circuit Terminations</dt>
     <dd>Show connections which end at a circuit termination in the topology view.</dd>
     <dt>Show Wireless Links</dt>
