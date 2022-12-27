@@ -100,9 +100,16 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     })
 
     graph.on('doubleClick', (params) => {
-        params.nodes.forEach((node) => {
-            window.open(nodes.get(node).href, '_blank')
-        })
+        if (params.nodes.length > 0) {
+            params.nodes.forEach((node) => {
+                window.open(nodes.get(node).href, '_blank')
+            })
+        }
+        else {
+            params.edges.forEach((edge) => {
+                window.open(edges.get(edge).href, '_blank')
+            })
+        }
     })
 })()
 
