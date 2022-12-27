@@ -85,7 +85,7 @@ PLUGINS_CONFIG = {
 | ignore_cable_type        | []                                                                                                                                             | The cable types that you want to ignore in the views                                                                   |
 | preselected_tags         | []                                                                                                                                             | The name of tags you want to preload                                                                                   |
 | draw_default_layout      | False                                                                                                                                          | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
-| hide_single_cable_logical_conns      | False                                                                                                                                          | (bool) Set to True if you want to hide duplicate cables & interface connections |
+| hide_single_cable_logical_conns      | False                                                                                                                                          | (bool) Set to True if you want to hide duplicate cables & logical connections |
 
 
 
