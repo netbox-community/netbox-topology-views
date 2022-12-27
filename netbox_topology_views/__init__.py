@@ -29,6 +29,7 @@ class TopologyViewsConfig(PluginConfig):
         "always_save_coordinates": False,
         "preselected_tags": [],
         "draw_default_layout": False,
+        "hide_single_cable_logical_conns": False,
     }
 
 
