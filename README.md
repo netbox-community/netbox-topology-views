@@ -12,6 +12,8 @@ Support to filter on name, site, tag and device role.
 
 ## Install
 
+**_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
+
 The plugin is available as a Python package and can be installed with pip.
 
 Run `pip install netbox-topology-views` in your virtual env.
@@ -44,6 +46,7 @@ python3 manage.py collectstatic --no-input
 
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
+| >= 3.4.0       | >= v3.X.X                     |
 | >= 3.3.0       | >= v3.0.0                     |
 | >= 3.2.0       | >= v1.1.0                     |
 | >= 3.1.8       | >= v1.0.0                     |
@@ -85,6 +88,9 @@ PLUGINS_CONFIG = {
 | ignore_cable_type        | []                                                                                                                                             | The cable types that you want to ignore in the views                                                                   |
 | preselected_tags         | []                                                                                                                                             | The name of tags you want to preload                                                                                   |
 | draw_default_layout      | False                                                                                                                                          | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
+| hide_single_cable_logical_conns      | False                                                                                                                                          | (bool) Set to True if you want to hide duplicate cables & logical connections |
+
+
 
 ### Custom Images
 
@@ -94,6 +100,31 @@ To change image with associated device use the `Images` page - it allows to map 
 
 Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/netbox_topology_views/` to view your topologies
 
+Select your options for the topology view:
+
+![preview image](doc/img/selection_options.png?raw=true "preview")
+
+<dl>
+    <dt>Hide Unconnected</dt>
+    <dd>Hide devices which have no connections.</dd>
+    <dt>Save Coordinates</dt>
+    <dd>Save the coordinates of devices in the topology view.</dd>
+    <dd>Please read the "Configure" chapter to set the allow_coordinates_saving option to True.</dd>
+    <dt>Show Cables</dt>
+    <dd>Show cable connections between devices, including cables connected to interfaces, front / rear ports, etc., in the topology view</dd> 
+    <dt>Show Logical Connections</dt>
+    <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
+        interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
+        intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. </dd>
+    <dd><i>Selecting both 'Show Cables' and 'Show Logical Interfaces' will sometimes result in a topology view with 2 cables per connection as these devices are diretly connected. Select only one of the options or set `hide_single_cable_logical_conns` to True.</i></dd>
+    <dt>Show Circuit Terminations</dt>
+    <dd>Show connections which end at a circuit termination in the topology view.</dd>
+    <dt>Show Wireless Links</dt>
+    <dd>Show wireless connections in the topology view.</dd>
+    <dt>Show Power Feeds</dt>
+    <dd>Show power connections from power feeds in the topology view.</dd>
+</dl>
+    
 ### Update
 
 Run `pip install netbox-topology-views --upgrade` in your venv.
