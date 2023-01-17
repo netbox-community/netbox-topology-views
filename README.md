@@ -74,7 +74,7 @@ Example:
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
         'preselected_device_roles': ['Router', 'Firewall'],
-        'enable_circuit_terminations': True
+        'hide_single_cable_logical_conns': True
     }
 }
 ```
