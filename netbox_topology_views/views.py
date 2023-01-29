@@ -225,7 +225,7 @@ def create_edge(
         edge["dashes"] = [1, 10, 1, 10]
         edge["arrows"] = {"to": {"enabled": True, "scaleFactor": 0.5}, "from": {"enabled": True, "scaleFactor": 0.5}}
         edge["color"] = '#f1c232'
-        edge["href"] = interface.get_absolute_url() + "/trace"
+        edge["href"] = interface.get_absolute_url() + "trace"
         
     edge[
         "title"
