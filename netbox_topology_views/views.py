@@ -178,7 +178,7 @@ def create_edge(
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
     power: Optional[bool] = None,
-    interface: Optional[bool] = None,
+    interface: Optional[Interface] = None,
 ):
     cable_a_name = (
         "device A name unknown"
@@ -225,6 +225,7 @@ def create_edge(
         edge["dashes"] = [1, 10, 1, 10]
         edge["arrows"] = {"to": {"enabled": True, "scaleFactor": 0.5}, "from": {"enabled": True, "scaleFactor": 0.5}}
         edge["color"] = '#f1c232'
+        edge["href"] = interface.get_absolute_url() + "trace"
         
     edge[
         "title"
@@ -445,7 +446,7 @@ def get_topology_data(
                     edge_ids += 1
                     termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
                     termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
-                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=True))
+                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface))
                     nodes_devices[interface.device.id] = interface.device
                     nodes_devices[destination.device.id] = destination.device
 
