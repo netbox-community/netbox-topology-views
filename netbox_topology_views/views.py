@@ -18,6 +18,7 @@ from dcim.models import (
     RearPort,
 )
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
@@ -28,8 +29,8 @@ from extras.models import Tag
 from wireless.models import WirelessLink
 
 from netbox_topology_views.filters import DeviceFilterSet
-from netbox_topology_views.forms import DeviceFilterForm
-from netbox_topology_views.models import RoleImage
+from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm
+from netbox_topology_views.models import RoleImage, IndividualOptions
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -260,7 +261,7 @@ def create_circuit_termination(termination):
 
 def get_topology_data(
     queryset: QuerySet,
-    hide_unconnected: bool,
+    show_unconnected: bool,
     save_coords: bool,
     show_cables: bool,
     show_circuit: bool,
@@ -300,7 +301,7 @@ def get_topology_data(
         for circuit_termination in circuit_terminations:
             circuit_termination: CircuitTermination
             if (
-                not hide_unconnected
+                show_unconnected
                 and circuit_termination.circuit_id not in nodes_circuits
             ):
                 nodes_circuits[
@@ -357,7 +358,7 @@ def get_topology_data(
                             if termination.device_id in device_ids:
                                 circuit_has_connections = True
 
-                if circuit_has_connections and hide_unconnected:
+                if circuit_has_connections and not show_unconnected:
                     if circuit_termination.circuit_id not in nodes_circuits:
                         nodes_circuits[
                             circuit_termination.circuit.pk
@@ -375,15 +376,15 @@ def get_topology_data(
         )
 
         for power_feed in power_feeds:
-            if not hide_unconnected or (
-                hide_unconnected and power_feed.cable_id is not None
+            if show_unconnected or (
+                not show_unconnected and power_feed.cable_id is not None
             ):
                 if power_feed.power_panel_id not in nodes_powerpanel:
                     nodes_powerpanel[power_feed.power_panel.pk] = power_feed.power_panel
 
                 power_link_name = ""
                 if power_feed.pk not in nodes_powerfeed:
-                    if hide_unconnected:
+                    if not show_unconnected:
                         if power_feed.link_peers[0].device_id in device_ids:
                             nodes_powerfeed[power_feed.pk] = power_feed
                             power_link_name = power_feed.link_peers[0].name
@@ -568,7 +569,7 @@ def get_topology_data(
             )
 
     for qs_device in queryset:
-        if qs_device.pk not in nodes_devices and not hide_unconnected:
+        if qs_device.pk not in nodes_devices and show_unconnected:
             nodes_devices[qs_device.pk] = qs_device
 
     results = {}
@@ -603,10 +604,10 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["save_coords"] == "on":
                     save_coords = True
 
-            hide_unconnected = False
-            if "hide_unconnected" in request.GET:
-                if request.GET["hide_unconnected"] == "on":
-                    hide_unconnected = True
+            show_unconnected = False
+            if "show_unconnected" in request.GET:
+                if request.GET["show_unconnected"] == "on":
+                    show_unconnected = True
 
             show_power = False
             if "show_power" in request.GET:
@@ -637,7 +638,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["draw_init"].lower() == "true":
                     topo_data = get_topology_data(
                         self.queryset,
-                        hide_unconnected,
+                        show_unconnected,
                         save_coords,
                         show_cables,
                         show_circuit,
@@ -648,7 +649,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             else:
                 topo_data = get_topology_data(
                     self.queryset,
-                    hide_unconnected,
+                    show_unconnected,
                     save_coords,
                     show_cables,
                     show_circuit,
@@ -682,6 +683,15 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "draw_default_layout"
             ]
+            individualOptions, created = IndividualOptions.objects.get_or_create(
+                user_id=request.user.id,
+            )
+            q['show_unconnected'] = individualOptions.show_unconnected
+            q['show_cables'] = individualOptions.show_cables
+            q['show_logical_connections'] = individualOptions.show_logical_connections
+            q['show_circuit'] = individualOptions.show_circuit
+            q['show_power'] = individualOptions.show_power
+            q['show_wireless'] = individualOptions.show_wireless
             if always_save_coordinates:
                 q["save_coords"] = "on"
             query_string = q.urlencode()
@@ -765,5 +775,43 @@ class TopologyImagesView(PermissionRequiredMixin, View):
             {
                 "roles": sorted(list(roles.values()), key=lambda r: r["name"]),
                 "images": images,
+            },
+        )
+
+class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
+    permission_required = 'netbox_topology_views.view_topologyviewsoptions'
+
+    def post(self, request):
+        instance = IndividualOptions.objects.get(user_id=request.user.id)
+        form = IndividualOptionsForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+
+        messages.success(request, "Options have been sucessfully saved")
+        return HttpResponseRedirect("./")
+
+    def get(self, request):
+        queryset, created = IndividualOptions.objects.get_or_create(
+            user_id=request.user.id,
+        )
+
+        form = IndividualOptionsForm(
+            initial={
+                'user_id': request.user.id,
+                'show_unconnected': queryset.show_unconnected,
+                'show_cables': queryset.show_cables, 
+                'show_logical_connections': queryset.show_logical_connections,
+                'show_circuit': queryset.show_circuit,
+                'show_power': queryset.show_power,
+                'show_wireless': queryset.show_wireless,
+            }
+        )
+
+        return render(
+            request,
+            "netbox_topology_views/individual_options.html",
+            {
+                "form": form,
+                "object": queryset,
             },
         )

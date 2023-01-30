@@ -12,12 +12,13 @@ from dcim.choices import DeviceStatusChoices
 from tenancy.models import TenantGroup, Tenant
 from tenancy.forms import TenancyFilterForm
 from django.conf import settings
-from netbox.forms import NetBoxModelFilterSetForm
+from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
 from utilities.forms import (
     TagFilterField,
     DynamicModelMultipleChoiceField,
     MultipleChoiceField,
 )
+from .models import IndividualOptions
 
 allow_coordinates_saving = bool(
     settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
@@ -32,8 +33,8 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             (
                 "q",
                 "filter_id",
-                "hide_unconnected",
                 "save_coords",
+                "show_unconnected",
                 "show_cables",
                 "show_circuit",
                 "show_logical_connections",
@@ -104,8 +105,8 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         },
         label=_("Rack"),
     )
-    hide_unconnected = forms.BooleanField(
-        label=_("Hide Unconnected"), required=False, initial=False
+    show_unconnected = forms.BooleanField(
+        label=_("Show Unconnected"), required=False, initial=False
     )
     show_logical_connections = forms.BooleanField(
         label =_("Show Logical Connections"), required=False, initial=False
@@ -131,3 +132,79 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         choices=DeviceStatusChoices, required=False, label=_("Device Status")
     )
     tag = TagFilterField(model)
+
+class IndividualOptionsForm(NetBoxModelForm):
+    fieldsets = (
+        (
+            None,
+            (
+                "user_id",
+                "show_unconnected",
+                "show_cables",
+                "show_circuit",
+                "show_logical_connections",
+                "show_power",
+                "show_wireless",
+            ),
+        ),
+    )
+
+    user_id = forms.CharField(widget=forms.HiddenInput())
+
+    show_unconnected = forms.BooleanField(
+        label=_("Show Unconnected"), 
+        required=False, 
+        initial=False,
+        help_text=_("Draws devices that have no connections or for which no "
+            "connection is displayed. This depends on other parameters "
+            "like 'Show Cables' and 'Show Logical Connections'")
+    )
+    show_cables = forms.BooleanField(
+        label =_("Show Cables"), 
+        required=False, 
+        initial=False,
+        help_text=_("Displays connections between interfaces that are connected "
+            "with one or more cables. These connections are displayed as solid "
+            "lines in the color of the cable")
+    )
+    show_logical_connections = forms.BooleanField(
+        label =_("Show Logical Connections"), 
+        required=False, 
+        initial=False,
+        help_text=_("Displays connections between devices that are not "
+            "directly connected (e.g. via patch panels). These connections "
+            "are displayed as yellow dotted lines with arrows at the ends")
+    )
+    show_circuit = forms.BooleanField(
+        label=_("Show Circuit Terminations"), 
+        required=False, 
+        initial=False,
+        help_text=_("Displays connections between circuit terminations. "
+            "These connections are displayed as blue dashed lines")
+    )
+    show_power = forms.BooleanField(
+        label=_("Show Power Feeds"), 
+        required=False, 
+        initial=False,
+        help_text=_("Displays connections between power outlets and power "
+            "ports. These connections are displayed as solid lines in the "
+            "color of the cable. This option depends on 'Show Cables'")
+    )
+    show_wireless = forms.BooleanField(
+        label =_("Show Wireless Links"), 
+        required=False, 
+        initial=False,
+        help_text=_("Displays wireless connections. These connections are "
+            "displayed as blue dotted lines")
+    )
+    save_coords = forms.BooleanField(
+        label=_("Save Coordinates"),
+        required=False,
+        disabled=(not allow_coordinates_saving),
+    )
+
+    class Meta:
+        model = IndividualOptions
+        fields = [
+            'user_id', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_circuit', 'show_power', 'show_wireless'
+        ]

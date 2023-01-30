@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.templatetags.static import static
+from netbox.models import NetBoxModel
 from netbox.models.features import (
     ChangeLoggingMixin,
     ExportTemplatesMixin,
@@ -91,3 +92,30 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
         except ValueError:
             return self.get_default_image(dir)
         return static(f"/{self.image}")
+
+class IndividualOptions(NetBoxModel):
+    user_id = models.IntegerField(
+        null=True,
+        unique=True
+    )
+    show_unconnected = models.BooleanField(
+        default=False
+    )
+    show_cables = models.BooleanField(
+        default=False
+    )
+    show_logical_connections = models.BooleanField(
+        default=False
+    )
+    show_circuit = models.BooleanField(
+        default=False
+    )
+    show_power = models.BooleanField(
+        default=False
+    )
+    show_wireless = models.BooleanField(
+        default=False
+    )
+
+    def __str___(self):
+        return f"{self.user_id}"
