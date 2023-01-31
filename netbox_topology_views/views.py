@@ -29,8 +29,8 @@ from extras.models import Tag
 from wireless.models import WirelessLink
 
 from netbox_topology_views.filters import DeviceFilterSet
-from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm
-from netbox_topology_views.models import RoleImage, IndividualOptions
+from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, GeneralOptionsForm
+from netbox_topology_views.models import RoleImage, IndividualOptions, GeneralOptions
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -659,17 +659,26 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_wireless,
                 )
         else:
+            individualOptions, created = IndividualOptions.objects.get_or_create(
+                user_id=request.user.id,
+            )
+            generalOptions, created = GeneralOptions.objects.get_or_create(
+                unique_row="general_options"
+            )
+
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "preselected_device_roles"
             ]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "preselected_tags"
             ]
-            always_save_coordinates = bool(
-                settings.PLUGINS_CONFIG["netbox_topology_views"][
-                    "always_save_coordinates"
-                ]
-            )
+
+#            always_save_coordinates = generalOptions.always_save_coordinates
+#            always_save_coordinates = bool(
+#                settings.PLUGINS_CONFIG["netbox_topology_views"][
+#                    "always_save_coordinates"
+#                ]
+#            )
 
             q_device_role_id = DeviceRole.objects.filter(
                 name__in=preselected_device_roles
@@ -684,17 +693,14 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "draw_default_layout"
             ]
-            individualOptions, created = IndividualOptions.objects.get_or_create(
-                user_id=request.user.id,
-            )
-            q['show_unconnected'] = individualOptions.show_unconnected
-            q['show_cables'] = individualOptions.show_cables
-            q['show_logical_connections'] = individualOptions.show_logical_connections
-            q['show_circuit'] = individualOptions.show_circuit
-            q['show_power'] = individualOptions.show_power
-            q['show_wireless'] = individualOptions.show_wireless
-            if always_save_coordinates:
-                q["save_coords"] = "on"
+            if individualOptions.show_unconnected: q['show_unconnected'] = individualOptions.show_unconnected
+            if individualOptions.show_cables: q['show_cables'] = individualOptions.show_cables
+            if individualOptions.show_logical_connections: q['show_logical_connections'] = individualOptions.show_logical_connections
+            if individualOptions.show_circuit: q['show_circuit'] = individualOptions.show_circuit
+            if individualOptions.show_power: q['show_power'] = individualOptions.show_power
+            if individualOptions.show_wireless: q['show_wireless'] = individualOptions.show_wireless
+            if generalOptions.always_save_coordinates: q["save_coords"] = "on"
+
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
 
@@ -811,6 +817,40 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         return render(
             request,
             "netbox_topology_views/individual_options.html",
+            {
+                "form": form,
+                "object": queryset,
+            },
+        )
+
+class TopologyGeneralOptionsView(PermissionRequiredMixin, View):
+    permission_required = 'netbox_topology_views.view_topologyviewsoptions'
+
+    def post(self, request):
+        instance = GeneralOptions.objects.get(unique_row="general_options")
+        form = GeneralOptionsForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+
+        messages.success(request, "Options have been sucessfully saved")
+        return HttpResponseRedirect("./")
+
+    def get(self, request):
+        queryset, created = GeneralOptions.objects.get_or_create(
+            unique_row='general_options',
+        )
+
+        form = GeneralOptionsForm(
+            initial={
+                'static_image_directory': queryset.static_image_directory,
+                'allow_coordinates_saving': queryset.allow_coordinates_saving, 
+                'always_save_coordinates': queryset.always_save_coordinates,
+            }
+        )
+
+        return render(
+            request,
+            "netbox_topology_views/general_options.html",
             {
                 "form": form,
                 "object": queryset,

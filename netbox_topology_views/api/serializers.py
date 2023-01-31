@@ -1,7 +1,7 @@
 from dcim.models import Device, DeviceRole
 from rest_framework.serializers import ModelSerializer
 
-from netbox_topology_views.models import RoleImage, IndividualOptions
+from netbox_topology_views.models import RoleImage, IndividualOptions, GeneralOptions
 
 
 class TopologyDummySerializer(ModelSerializer):
@@ -25,3 +25,8 @@ class IndividualOptionsSerializer(ModelSerializer):
     class Meta:
         model = IndividualOptions
         fields = ("show_unconnected", "show_cables", "show_logical_connections", "show_circuit", "show_power", "show_wireless")
+
+class GeneralOptionsSerializer(ModelSerializer):
+    class Meta:
+        model = GeneralOptions
+        fields = ("static_image_directory", "allow_coordinates_saving", "always_save_coordinates")

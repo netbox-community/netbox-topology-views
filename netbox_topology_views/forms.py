@@ -18,11 +18,16 @@ from utilities.forms import (
     DynamicModelMultipleChoiceField,
     MultipleChoiceField,
 )
-from .models import IndividualOptions
+from .models import IndividualOptions, GeneralOptions
 
-allow_coordinates_saving = bool(
-    settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
+generalOptions, created = GeneralOptions.objects.get_or_create(
+    unique_row="general_options"
 )
+
+allow_coordinates_saving = generalOptions.allow_coordinates_saving
+#allow_coordinates_saving = bool(
+#    settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
+#)
 
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
@@ -197,14 +202,45 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_("Displays wireless connections. These connections are "
             "displayed as blue dotted lines")
     )
-    save_coords = forms.BooleanField(
-        label=_("Save Coordinates"),
-        required=False,
-        disabled=(not allow_coordinates_saving),
-    )
 
     class Meta:
         model = IndividualOptions
         fields = [
             'user_id', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_circuit', 'show_power', 'show_wireless'
+        ]
+
+class GeneralOptionsForm(NetBoxModelForm):
+    fieldsets = (
+        (
+            None,
+            (
+                "static_image_directory",
+                "allow_coordinates_saving",
+                "always_save_coordinates",
+            ),
+        ),
+    )
+
+    static_image_directory = forms.CharField(
+        label=_("Static Image Directoy"), 
+        help_text=_("")
+    )
+
+    allow_coordinates_saving = forms.BooleanField(
+        label=_("Allow Coordinates Saving"), 
+        required=False, 
+        initial=False,
+        help_text=_("")
+    )
+    always_save_coordinates = forms.BooleanField(
+        label =_("Always Save Coordinates"), 
+        required=False, 
+        initial=False,
+        help_text=_("")
+    )
+
+    class Meta:
+        model = GeneralOptions
+        fields = [
+            'static_image_directory', 'allow_coordinates_saving', 'always_save_coordinates'
         ]

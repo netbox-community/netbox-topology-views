@@ -10,4 +10,5 @@ urlpatterns = (
     path("topology/", views.TopologyHomeView.as_view(), name="home"),
     path("images/", views.TopologyImagesView.as_view(), name="images"),
     path("individualoptions/", views.TopologyIndividualOptionsView.as_view(), name="individualoptions"),
+    path("generaloptions/", views.TopologyGeneralOptionsView.as_view(), name="generaloptions"),
 )

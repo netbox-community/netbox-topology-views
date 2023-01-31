@@ -119,3 +119,26 @@ class IndividualOptions(NetBoxModel):
 
     def __str___(self):
         return f"{self.user_id}"
+
+class GeneralOptions(NetBoxModel):
+    unique_row = models.CharField(
+        null=False,
+        default="general_options",
+        max_length=15
+    )
+
+    static_image_directory = models.CharField(
+        null=False,
+        blank=True,
+        default="netbox_topology_views/img",
+        max_length=100
+    )
+    allow_coordinates_saving = models.BooleanField(
+        default=False
+    )
+    always_save_coordinates = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+        return self.unique_row
