@@ -262,11 +262,13 @@ def create_circuit_termination(termination):
 
 def get_topology_data(
     queryset: QuerySet,
+    individualOptions: IndividualOptions,
     show_unconnected: bool,
     save_coords: bool,
     show_cables: bool,
     show_circuit: bool,
     show_logical_connections: bool,
+    show_single_cable_logical_conns: bool,
     show_power: bool,
     show_wireless: bool,
 ):
@@ -283,14 +285,15 @@ def get_topology_data(
     nodes_provider_networks = {}
     cable_ids = DefaultDict(dict)
     interface_ids = DefaultDict(dict)
+
+    # Intitialize individual settings
+#    individualOptions, created = IndividualOptions.objects.get_or_create(
+#        user_id=userid,
+#    )
+
     ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"][
         "ignore_cable_type"
     ]
-    hide_single_cable_logical_conns = bool(
-        settings.PLUGINS_CONFIG["netbox_topology_views"][
-            "hide_single_cable_logical_conns"
-        ]
-    )
 
     device_ids = [d.pk for d in queryset]
     site_ids = [d.site_id for d in queryset]
@@ -439,7 +442,7 @@ def get_topology_data(
                         # print('Destination interface already exists, ignoring')
                         continue
 
-                    if hide_single_cable_logical_conns and interface.cable_id==destination.cable_id and show_cables:
+                    if not show_single_cable_logical_conns and interface.cable_id==destination.cable_id and show_cables:
                         # interface connection is the same as the cable connection, ignore this connection
                         continue
             
@@ -599,11 +602,25 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         self.model = self.queryset.model
         topo_data = None
 
+        individualOptions, created = IndividualOptions.objects.get_or_create(
+            user_id=request.user.id,
+        )
+
+        generalOptions, created = GeneralOptions.objects.get_or_create(
+            unique_row="general_options"
+        )
+
         if request.GET:
             save_coords = False
             if "save_coords" in request.GET:
                 if request.GET["save_coords"] == "on":
                     save_coords = True
+            # General options overrides
+            if save_coords == True and generalOptions.allow_coordinates_saving == False:
+                save_coords = False
+                messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
+            elif generalOptions.always_save_coordinates == True:
+                save_coords = True
 
             show_unconnected = False
             if "show_unconnected" in request.GET:
@@ -625,6 +642,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["show_logical_connections"] == "on" :
                     show_logical_connections = True
 
+            show_single_cable_logical_conns = False
+            if "show_single_cable_logical_conns" in request.GET:
+                if request.GET["show_single_cable_logical_conns"] == "on" :
+                    show_single_cable_logical_conns = True
+
             show_cables = False
             if "show_cables" in request.GET:
                 if request.GET["show_cables"] == "on" :
@@ -635,50 +657,28 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 if request.GET["show_wireless"] == "on" :
                     show_wireless = True
 
-            if "draw_init" in request.GET:
-                if request.GET["draw_init"].lower() == "true":
-                    topo_data = get_topology_data(
-                        self.queryset,
-                        show_unconnected,
-                        save_coords,
-                        show_cables,
-                        show_circuit,
-                        show_logical_connections,
-                        show_power,
-                        show_wireless,
-                    )
-            else:
+            if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
                     self.queryset,
+                    individualOptions,
                     show_unconnected,
                     save_coords,
                     show_cables,
                     show_circuit,
                     show_logical_connections,
+                    show_single_cable_logical_conns,
                     show_power,
                     show_wireless,
                 )
+            
         else:
-            individualOptions, created = IndividualOptions.objects.get_or_create(
-                user_id=request.user.id,
-            )
-            generalOptions, created = GeneralOptions.objects.get_or_create(
-                unique_row="general_options"
-            )
-
+            # No GET-Request in URL. We most likely came here from the navigation menu.
             preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "preselected_device_roles"
             ]
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "preselected_tags"
             ]
-
-#            always_save_coordinates = generalOptions.always_save_coordinates
-#            always_save_coordinates = bool(
-#                settings.PLUGINS_CONFIG["netbox_topology_views"][
-#                    "always_save_coordinates"
-#                ]
-#            )
 
             q_device_role_id = DeviceRole.objects.filter(
                 name__in=preselected_device_roles
@@ -690,16 +690,18 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q = QueryDict(mutable=True)
             q.setlist("device_role_id", list(q_device_role_id))
             q.setlist("tag", list(q_tags))
-            q["draw_init"] = settings.PLUGINS_CONFIG["netbox_topology_views"][
-                "draw_default_layout"
-            ]
-            if individualOptions.show_unconnected: q['show_unconnected'] = individualOptions.show_unconnected
-            if individualOptions.show_cables: q['show_cables'] = individualOptions.show_cables
-            if individualOptions.show_logical_connections: q['show_logical_connections'] = individualOptions.show_logical_connections
-            if individualOptions.show_circuit: q['show_circuit'] = individualOptions.show_circuit
-            if individualOptions.show_power: q['show_power'] = individualOptions.show_power
-            if individualOptions.show_wireless: q['show_wireless'] = individualOptions.show_wireless
-            if generalOptions.always_save_coordinates: q["save_coords"] = "on"
+
+            if individualOptions.show_unconnected: q['show_unconnected'] = "on"
+            if individualOptions.show_cables: q['show_cables'] = "on"
+            if individualOptions.show_logical_connections: q['show_logical_connections'] = "on"
+            if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "on"
+            if individualOptions.show_circuit: q['show_circuit'] = "on"
+            if individualOptions.show_power: q['show_power'] = "on"
+            if individualOptions.show_wireless: q['show_wireless'] = "on"
+            if individualOptions.draw_default_layout: 
+                q['draw_init'] = "true"
+            else:
+                q['draw_init'] = "false"
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
@@ -724,6 +726,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
                 "model": self.model,
+                "additional_forms": { 'always_save_coordinates': generalOptions.always_save_coordinates, },
             },
         )
 
@@ -808,10 +811,12 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'show_unconnected': queryset.show_unconnected,
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,
+                'show_single_cable_logical_conns': queryset.show_single_cable_logical_conns,
                 'show_circuit': queryset.show_circuit,
                 'show_power': queryset.show_power,
                 'show_wireless': queryset.show_wireless,
-            }
+                'draw_default_layout': queryset.draw_default_layout,
+            },
         )
 
         return render(

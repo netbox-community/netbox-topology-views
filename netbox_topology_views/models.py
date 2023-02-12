@@ -107,6 +107,9 @@ class IndividualOptions(NetBoxModel):
     show_logical_connections = models.BooleanField(
         default=False
     )
+    show_single_cable_logical_conns = models.BooleanField(
+        default=False
+    )
     show_circuit = models.BooleanField(
         default=False
     )
@@ -114,6 +117,9 @@ class IndividualOptions(NetBoxModel):
         default=False
     )
     show_wireless = models.BooleanField(
+        default=False
+    )
+    draw_default_layout = models.BooleanField(
         default=False
     )
 

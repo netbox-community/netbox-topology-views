@@ -24,12 +24,6 @@ generalOptions, created = GeneralOptions.objects.get_or_create(
     unique_row="general_options"
 )
 
-allow_coordinates_saving = generalOptions.allow_coordinates_saving
-#allow_coordinates_saving = bool(
-#    settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]
-#)
-
-
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
     fieldsets = (
@@ -43,6 +37,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
                 "show_cables",
                 "show_circuit",
                 "show_logical_connections",
+                "show_single_cable_logical_conns",
                 "show_power",
                 "show_wireless",
             ),
@@ -110,11 +105,26 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         },
         label=_("Rack"),
     )
+    status = MultipleChoiceField(
+        choices=DeviceStatusChoices, required=False, label=_("Device Status")
+    )
+    tag = TagFilterField(model)
+
+    # options
+    save_coords = forms.BooleanField(
+        label=_("Save Coordinates"),
+        required=False,
+        disabled=(not generalOptions.allow_coordinates_saving or generalOptions.always_save_coordinates),
+        initial=(generalOptions.always_save_coordinates)
+    )
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), required=False, initial=False
     )
     show_logical_connections = forms.BooleanField(
         label =_("Show Logical Connections"), required=False, initial=False
+    )
+    show_single_cable_logical_conns = forms.BooleanField(
+        label =_("Show redundant Cable and Locigal Connection"), required=False, initial=False
     )
     show_cables = forms.BooleanField(
         label =_("Show Cables"), required=False, initial=False
@@ -128,15 +138,6 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     show_power = forms.BooleanField(
         label=_("Show Power Feeds"), required=False, initial=False
     )
-    save_coords = forms.BooleanField(
-        label=_("Save Coordinates"),
-        required=False,
-        disabled=(not allow_coordinates_saving),
-    )
-    status = MultipleChoiceField(
-        choices=DeviceStatusChoices, required=False, label=_("Device Status")
-    )
-    tag = TagFilterField(model)
 
 class IndividualOptionsForm(NetBoxModelForm):
     fieldsets = (
@@ -148,8 +149,10 @@ class IndividualOptionsForm(NetBoxModelForm):
                 "show_cables",
                 "show_circuit",
                 "show_logical_connections",
+                "show_single_cable_logical_conns",
                 "show_power",
                 "show_wireless",
+                "draw_default_layout",
             ),
         ),
     )
@@ -161,8 +164,8 @@ class IndividualOptionsForm(NetBoxModelForm):
         required=False, 
         initial=False,
         help_text=_("Draws devices that have no connections or for which no "
-            "connection is displayed. This depends on other parameters "
-            "like 'Show Cables' and 'Show Logical Connections'")
+            "connection is displayed. This option depends on other parameters "
+            "like 'Show Cables' and 'Show Logical Connections'.")
     )
     show_cables = forms.BooleanField(
         label =_("Show Cables"), 
@@ -170,7 +173,7 @@ class IndividualOptionsForm(NetBoxModelForm):
         initial=False,
         help_text=_("Displays connections between interfaces that are connected "
             "with one or more cables. These connections are displayed as solid "
-            "lines in the color of the cable")
+            "lines in the color of the cable.")
     )
     show_logical_connections = forms.BooleanField(
         label =_("Show Logical Connections"), 
@@ -178,14 +181,23 @@ class IndividualOptionsForm(NetBoxModelForm):
         initial=False,
         help_text=_("Displays connections between devices that are not "
             "directly connected (e.g. via patch panels). These connections "
-            "are displayed as yellow dotted lines with arrows at the ends")
+            "are displayed as yellow dotted lines.")
+    )
+    show_single_cable_logical_conns = forms.BooleanField(
+        label = ("Show redundant Cable and Locigal Connection"),
+        required = False,
+        initial=False,
+        help_text=_("Shows a logical connection (in addition to a cable), "
+            "even if a cable is directly connected. Leaving this option "
+            "disabled prevents that redundant display. This option only "
+            "has an effect if 'Show Logical Connections' is activated")
     )
     show_circuit = forms.BooleanField(
         label=_("Show Circuit Terminations"), 
         required=False, 
         initial=False,
         help_text=_("Displays connections between circuit terminations. "
-            "These connections are displayed as blue dashed lines")
+            "These connections are displayed as blue dashed lines.")
     )
     show_power = forms.BooleanField(
         label=_("Show Power Feeds"), 
@@ -193,20 +205,27 @@ class IndividualOptionsForm(NetBoxModelForm):
         initial=False,
         help_text=_("Displays connections between power outlets and power "
             "ports. These connections are displayed as solid lines in the "
-            "color of the cable. This option depends on 'Show Cables'")
+            "color of the cable. This option depends on 'Show Cables'.")
     )
     show_wireless = forms.BooleanField(
         label =_("Show Wireless Links"), 
         required=False, 
         initial=False,
         help_text=_("Displays wireless connections. These connections are "
-            "displayed as blue dotted lines")
+            "displayed as blue dotted lines.")
+    )
+    draw_default_layout = forms.BooleanField(
+        label = ("Draw Default Layout"),
+        required=False,
+        initial=False,
+        help_text=_("Enable this option if you want to draw the topology on "
+            "the initial load (when you go to the topology plugin page).")
     )
 
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_circuit', 'show_power', 'show_wireless'
+            'user_id', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
 
 class GeneralOptionsForm(NetBoxModelForm):
@@ -214,7 +233,7 @@ class GeneralOptionsForm(NetBoxModelForm):
         (
             None,
             (
-                "static_image_directory",
+#                "static_image_directory",
                 "allow_coordinates_saving",
                 "always_save_coordinates",
             ),
@@ -223,24 +242,33 @@ class GeneralOptionsForm(NetBoxModelForm):
 
     static_image_directory = forms.CharField(
         label=_("Static Image Directoy"), 
-        help_text=_("")
+        help_text=_("Specifies the location that images will be loaded from "
+            "by default. Must be within 'STATIC_ROOT'. Be careful! Wrong "
+            "settings will break display of images. "
+            "Default: netbox_topology_views/img")
     )
 
     allow_coordinates_saving = forms.BooleanField(
         label=_("Allow Coordinates Saving"), 
         required=False, 
         initial=False,
-        help_text=_("")
+        help_text=_("Must be enabled in order to allow saving the position "
+            "of nodes. This setting overrides an individual setting. A custom "
+            "field 'Coordinates' is mandatory.")
     )
     always_save_coordinates = forms.BooleanField(
         label =_("Always Save Coordinates"), 
         required=False, 
         initial=False,
-        help_text=_("")
+        help_text=_("Overrides an individual setting if enabled and forces "
+        "saving the position of nodes. This setting requires that "
+        "'Allow Coordinates Saving' is enabled and otherwise has no effect.")
     )
 
     class Meta:
         model = GeneralOptions
         fields = [
-            'static_image_directory', 'allow_coordinates_saving', 'always_save_coordinates'
+#            'static_image_directory',
+            'allow_coordinates_saving', 
+            'always_save_coordinates'
         ]

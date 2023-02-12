@@ -24,7 +24,7 @@ class DeviceRoleSerializer(ModelSerializer):
 class IndividualOptionsSerializer(ModelSerializer):
     class Meta:
         model = IndividualOptions
-        fields = ("show_unconnected", "show_cables", "show_logical_connections", "show_circuit", "show_power", "show_wireless")
+        fields = ("show_unconnected", "show_cables", "show_logical_connections", "show_single_cable_logical_conns", "show_circuit", "show_power", "show_wireless", "draw_default_layout")
 
 class GeneralOptionsSerializer(ModelSerializer):
     class Meta:

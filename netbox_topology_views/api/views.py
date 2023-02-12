@@ -14,7 +14,7 @@ from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
 )
-from netbox_topology_views.models import RoleImage
+from netbox_topology_views.models import RoleImage, GeneralOptions
 from netbox_topology_views.utils import get_image_from_url
 
 
@@ -24,9 +24,11 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["patch"])
     def save_coords(self, request):
-        if not settings.PLUGINS_CONFIG["netbox_topology_views"][
-            "allow_coordinates_saving"
-        ]:
+        generalOptions, created = GeneralOptions.objects.get_or_create(
+            unique_row="general_options"
+        )
+
+        if not generalOptions.allow_coordinates_saving:
             return Response({"status": "not allowed to save coords"}, status=500)
 
         device_id: str = request.data.get("node_id", None)

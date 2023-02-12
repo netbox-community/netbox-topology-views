@@ -25,11 +25,7 @@ class TopologyViewsConfig(PluginConfig):
         ],
         "ignore_cable_type": [],
         "static_image_directory": "netbox_topology_views/img",
-        "allow_coordinates_saving": False,
-        "always_save_coordinates": False,
         "preselected_tags": [],
-        "draw_default_layout": False,
-        "hide_single_cable_logical_conns": False,
     }
 
 
