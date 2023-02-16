@@ -39,16 +39,9 @@ from netbox_topology_views.utils import (
     image_static_url,
 )
 
-supported_termination_types = [
-    "interface",
-    "front port",
-    "rear port",
-    "power outlet",
-    "power port",
-    "console port",
-    "console server port",
-]
-
+supported_termination_types = []
+for t in IndividualOptions.CHOICES:
+    supported_termination_types.append(t[1])
 
 def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
     is_device = isinstance(entity, Device)
@@ -286,14 +279,7 @@ def get_topology_data(
     cable_ids = DefaultDict(dict)
     interface_ids = DefaultDict(dict)
 
-    # Intitialize individual settings
-#    individualOptions, created = IndividualOptions.objects.get_or_create(
-#        user_id=userid,
-#    )
-
-    ignore_cable_type = settings.PLUGINS_CONFIG["netbox_topology_views"][
-        "ignore_cable_type"
-    ]
+    ignore_cable_type = individualOptions.ignore_cable_type
 
     device_ids = [d.pk for d in queryset]
     site_ids = [d.site_id for d in queryset]
@@ -796,8 +782,10 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         form = IndividualOptionsForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-
-        messages.success(request, "Options have been sucessfully saved")
+            messages.success(request, "Options have been sucessfully saved")
+        else:
+            messages.error(request, form.errors)
+            
         return HttpResponseRedirect("./")
 
     def get(self, request):
@@ -808,6 +796,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         form = IndividualOptionsForm(
             initial={
                 'user_id': request.user.id,
+                'ignore_cable_type': tuple(queryset.ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')),
                 'show_unconnected': queryset.show_unconnected,
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,

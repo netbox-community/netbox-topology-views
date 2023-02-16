@@ -145,6 +145,7 @@ class IndividualOptionsForm(NetBoxModelForm):
             None,
             (
                 "user_id",
+                "ignore_cable_type",
                 "show_unconnected",
                 "show_cables",
                 "show_circuit",
@@ -159,6 +160,14 @@ class IndividualOptionsForm(NetBoxModelForm):
 
     user_id = forms.CharField(widget=forms.HiddenInput())
 
+    ignore_cable_type = MultipleChoiceField(
+        label=_("Ignore Termination Types"), 
+        required=False, 
+        choices=IndividualOptions.CHOICES,
+        help_text=_("Choose Termination Types that you want to be ignored. "
+            "If any ignored Termination Type is part of a connection, the "
+            "cable is not displayed.")
+    )
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), 
         required=False, 
@@ -225,7 +234,7 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+            'user_id', 'ignore_cable_type', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
 
 class GeneralOptionsForm(NetBoxModelForm):

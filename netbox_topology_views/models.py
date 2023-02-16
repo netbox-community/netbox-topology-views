@@ -94,9 +94,23 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
         return static(f"/{self.image}")
 
 class IndividualOptions(NetBoxModel):
+    CHOICES = (
+        ('interface', 'interface'),
+        ('front port', 'front port'),
+        ('rear port', 'rear port'),
+        ('power outlet', 'power outlet'),
+        ('power port', 'power port'),
+        ('console port', 'console port'),
+        ('console server port', 'console server port'),
+    )
+
     user_id = models.IntegerField(
         null=True,
         unique=True
+    )
+    ignore_cable_type = models.CharField(
+        max_length = 255,
+        blank = True,
     )
     show_unconnected = models.BooleanField(
         default=False
