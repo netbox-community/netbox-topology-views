@@ -146,6 +146,7 @@ class IndividualOptionsForm(NetBoxModelForm):
             (
                 "user_id",
                 "ignore_cable_type",
+                "preselected_device_roles",
                 "show_unconnected",
                 "show_cables",
                 "show_circuit",
@@ -167,6 +168,13 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_("Choose Termination Types that you want to be ignored. "
             "If any ignored Termination Type is part of a connection, the "
             "cable is not displayed.")
+    )
+    preselected_device_roles = DynamicModelMultipleChoiceField(
+        label=_("Preselected Device Role"),
+        queryset=DeviceRole.objects.all(),
+        required=False,
+        help_text=_("Select Device Roles that you want to have "
+            "preselected in the filter tab.")
     )
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), 
@@ -234,7 +242,7 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
 
 class GeneralOptionsForm(NetBoxModelForm):

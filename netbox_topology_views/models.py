@@ -112,6 +112,12 @@ class IndividualOptions(NetBoxModel):
         max_length = 255,
         blank = True,
     )
+    preselected_device_roles = models.ManyToManyField(
+        to='dcim.DeviceRole',
+        related_name='individualoptions',
+        blank=True,
+        db_table='netbox_topology_views_individualoptions_preselected_device',
+    )
     show_unconnected = models.BooleanField(
         default=False
     )

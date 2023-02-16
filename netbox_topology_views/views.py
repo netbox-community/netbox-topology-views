@@ -659,22 +659,17 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
-            preselected_device_roles = settings.PLUGINS_CONFIG["netbox_topology_views"][
-                "preselected_device_roles"
-            ]
+            preselected_device_roles = IndividualOptions.objects.get(id=individualOptions.id).preselected_device_roles.all().values_list('id', flat=True)
             preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"][
                 "preselected_tags"
             ]
 
-            q_device_role_id = DeviceRole.objects.filter(
-                name__in=preselected_device_roles
-            ).values_list("id", flat=True)
             q_tags = Tag.objects.filter(name__in=preselected_tags).values_list(
                 "name", flat=True
             )
 
             q = QueryDict(mutable=True)
-            q.setlist("device_role_id", list(q_device_role_id))
+            q.setlist("device_role_id", list(preselected_device_roles))
             q.setlist("tag", list(q_tags))
 
             if individualOptions.show_unconnected: q['show_unconnected'] = "on"
@@ -797,6 +792,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
             initial={
                 'user_id': request.user.id,
                 'ignore_cable_type': tuple(queryset.ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')),
+                'preselected_device_roles': IndividualOptions.objects.get(id=queryset.id).preselected_device_roles.all(),
                 'show_unconnected': queryset.show_unconnected,
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,
