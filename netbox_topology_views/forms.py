@@ -242,7 +242,7 @@ class GeneralOptionsForm(NetBoxModelForm):
         (
             None,
             (
-#                "static_image_directory",
+                "static_image_directory",
                 "allow_coordinates_saving",
                 "always_save_coordinates",
             ),
@@ -251,7 +251,9 @@ class GeneralOptionsForm(NetBoxModelForm):
 
     static_image_directory = forms.CharField(
         label=_("Static Image Directoy"), 
-        help_text=_("Specifies the location that images will be loaded from "
+        disabled=True,
+        help_text=_("NOT IMPLEMENTED YET! PLEASE USE CONFIGURATION.PY.</br> "
+            "Specifies the location that images will be loaded from "
             "by default. Must be within 'STATIC_ROOT'. Be careful! Wrong "
             "settings will break display of images. "
             "Default: netbox_topology_views/img")
@@ -277,7 +279,7 @@ class GeneralOptionsForm(NetBoxModelForm):
     class Meta:
         model = GeneralOptions
         fields = [
-#            'static_image_directory',
+            'static_image_directory',
             'allow_coordinates_saving', 
             'always_save_coordinates'
         ]

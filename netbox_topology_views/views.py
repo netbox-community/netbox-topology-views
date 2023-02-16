@@ -775,7 +775,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
         )
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
-    permission_required = 'netbox_topology_views.view_topologyviewsoptions'
+    permission_required = 'netbox_topology_views.change_individualoptions'
 
     def post(self, request):
         instance = IndividualOptions.objects.get(user_id=request.user.id)
@@ -818,15 +818,17 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         )
 
 class TopologyGeneralOptionsView(PermissionRequiredMixin, View):
-    permission_required = 'netbox_topology_views.view_topologyviewsoptions'
+    permission_required = 'netbox_topology_views.change_generaloptions'
 
     def post(self, request):
         instance = GeneralOptions.objects.get(unique_row="general_options")
         form = GeneralOptionsForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
+            messages.success(request, "Options have been sucessfully saved")
+        else:
+            messages.error(request, form.errors)
 
-        messages.success(request, "Options have been sucessfully saved")
         return HttpResponseRedirect("./")
 
     def get(self, request):
