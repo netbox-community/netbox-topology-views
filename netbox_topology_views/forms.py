@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dcim.models import Device, Site, Region, DeviceRole, Location, Rack
+#from extras.models import Tag
 
 from django import forms
 from dcim.choices import DeviceStatusChoices
@@ -147,6 +148,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 "user_id",
                 "ignore_cable_type",
                 "preselected_device_roles",
+                "preselected_tags",
                 "show_unconnected",
                 "show_cables",
                 "show_circuit",
@@ -174,6 +176,14 @@ class IndividualOptionsForm(NetBoxModelForm):
         queryset=DeviceRole.objects.all(),
         required=False,
         help_text=_("Select Device Roles that you want to have "
+            "preselected in the filter tab.")
+    )
+    preselected_tags = DynamicModelMultipleChoiceField(
+        label=_("Preselected Tags"),
+#        queryset=Tag.objects.all(),
+        queryset=Device.tags.all(),
+        required=False,
+        help_text=_("Select Tags that you want to have "
             "preselected in the filter tab.")
     )
     show_unconnected = forms.BooleanField(
@@ -242,7 +252,7 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
 
 class GeneralOptionsForm(NetBoxModelForm):

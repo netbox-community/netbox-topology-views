@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from dcim.models import DeviceRole
+from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -114,9 +115,15 @@ class IndividualOptions(NetBoxModel):
     )
     preselected_device_roles = models.ManyToManyField(
         to='dcim.DeviceRole',
-        related_name='individualoptions',
+        related_name='+',
         blank=True,
         db_table='netbox_topology_views_individualoptions_preselected_device',
+    )
+    preselected_tags = models.ManyToManyField(
+        to='extras.Tag',
+        related_name='+',
+        blank=True,
+        db_table='netbox_topology_views_individualoptions_preselected_tag',
     )
     show_unconnected = models.BooleanField(
         default=False

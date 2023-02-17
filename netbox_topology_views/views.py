@@ -22,6 +22,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
+from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render
 from django.views.generic import View
@@ -608,6 +609,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             elif generalOptions.always_save_coordinates == True:
                 save_coords = True
 
+            # Individual options
             show_unconnected = False
             if "show_unconnected" in request.GET:
                 if request.GET["show_unconnected"] == "on":
@@ -660,17 +662,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
             preselected_device_roles = IndividualOptions.objects.get(id=individualOptions.id).preselected_device_roles.all().values_list('id', flat=True)
-            preselected_tags = settings.PLUGINS_CONFIG["netbox_topology_views"][
-                "preselected_tags"
-            ]
-
-            q_tags = Tag.objects.filter(name__in=preselected_tags).values_list(
-                "name", flat=True
-            )
+            preselected_tags = IndividualOptions.objects.get(id=individualOptions.id).preselected_tags.all().values_list(Lower('name'), flat=True)
 
             q = QueryDict(mutable=True)
             q.setlist("device_role_id", list(preselected_device_roles))
-            q.setlist("tag", list(q_tags))
+            q.setlist("tag", list(preselected_tags))
 
             if individualOptions.show_unconnected: q['show_unconnected'] = "on"
             if individualOptions.show_cables: q['show_cables'] = "on"
@@ -793,6 +789,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'user_id': request.user.id,
                 'ignore_cable_type': tuple(queryset.ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')),
                 'preselected_device_roles': IndividualOptions.objects.get(id=queryset.id).preselected_device_roles.all(),
+                'preselected_tags': IndividualOptions.objects.get(id=queryset.id).preselected_tags.all(),
                 'show_unconnected': queryset.show_unconnected,
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,
