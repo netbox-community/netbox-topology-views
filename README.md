@@ -62,19 +62,21 @@ If you create a custom field "coordinates" for "dcim > device" and "Circuits > c
 
 The coordinates are stored as: "X;Y".
 
-Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
-You might also set the `always_save_coordinates` option to True.
+Please navigate to `General Options` page and set the `Allow Coordinates Saving` option to True.
+You might also set the `Always Save Coordinates` option to True.
 
 ## Configure
 
-If you want to override the default values configure the `PLUGINS_CONFIG` in your `netbox configuration.py`.
+Almost all options can be assigned a default value per user directly in the plugin. The default value can be overridden on the filter page.
+
+The remaining options must be configured in the `PLUGINS_CONFIG` section of your `netbox/configuration.py`.
 
 Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'preselected_device_roles': ['Router', 'Firewall'],
-        'hide_single_cable_logical_conns': True
+        'static_image_directory': 'netbox_topology_views/img',
+        'preselected_tags': ['IPS', 'ADC']
     }
 }
 ```
@@ -82,14 +84,7 @@ PLUGINS_CONFIG = {
 | Setting                  | Default value                                                                                                                                  | Description                                                                                                            |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | static_image_directory   | netbox_topology_views/img                                                                                                                      | (str or pathlib.Path) Specifies the location that images will be loaded from by default. Must be within `STATIC_ROOT`  |
-| preselected_device_roles | ['Firewall', 'Router', 'Distribution Switch', 'Core Switch', 'Internal Switch', 'Access Switch', 'Server', 'Storage', 'Backup', 'Wireless AP'] | The full name of the device roles you want to pre select in the global view.  Note that this is case sensitive         |
-| allow_coordinates_saving | False                                                                                                                                          | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates                           |
-| always_save_coordinates  | False                                                                                                                                          | (bool) Set if you want to enable the option to save coordinates by default                                             |
-| ignore_cable_type        | []                                                                                                                                             | The cable types that you want to ignore in the views                                                                   |
 | preselected_tags         | []                                                                                                                                             | The name of tags you want to preload                                                                                   |
-| draw_default_layout      | False                                                                                                                                          | (bool) Set to True if you want to load draw the topology on the initial load (when you go to the topology plugin page) |
-| hide_single_cable_logical_conns      | False                                                                                                                                          | (bool) Set to True if you want to hide duplicate cables & logical connections |
-
 
 
 ### Custom Images
@@ -105,24 +100,24 @@ Select your options for the topology view:
 ![preview image](doc/img/selection_options.png?raw=true "preview")
 
 <dl>
-    <dt>Hide Unconnected</dt>
-    <dd>Hide devices which have no connections.</dd>
     <dt>Save Coordinates</dt>
     <dd>Save the coordinates of devices in the topology view.</dd>
-    <dd>Please read the "Configure" chapter to set the allow_coordinates_saving option to True.</dd>
+    <dt>Show Unconnected</dt>
+    <dd>Show devices that have no connections or for which no connection is displayed. This option depends on other parameters like 'Show Cables' and 'Show Logical Connections'.</dd>
+    <dt>Show Circuit Terminations</dt>
+    <dd>Show connections which end at a circuit termination in the topology view. These connections are displayed as blue dashed lines.</dd>
     <dt>Show Cables</dt>
-    <dd>Show cable connections between devices, including cables connected to interfaces, front / rear ports, etc., in the topology view</dd> 
+    <dd>Show connections between interfaces, front / rear ports, etc., that are connected with one or more cables. These connections are displayed as solid lines in the color of the cable.</dd> 
     <dt>Show Logical Connections</dt>
     <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
         interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
-        intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. </dd>
-    <dd><i>Selecting both 'Show Cables' and 'Show Logical Interfaces' will sometimes result in a topology view with 2 cables per connection as these devices are diretly connected. Select only one of the options or set `hide_single_cable_logical_conns` to True.</i></dd>
-    <dt>Show Circuit Terminations</dt>
-    <dd>Show connections which end at a circuit termination in the topology view.</dd>
-    <dt>Show Wireless Links</dt>
-    <dd>Show wireless connections in the topology view.</dd>
+        intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. These connections are displayed as yellow dotted lines.</dd>
+    <dt>Show redundant Cable and Locigal Connection</dt>
+    <dd>Shows a logical connection (in addition to a cable), even if a cable is directly connected. Leaving this option disabled prevents that redundant display. This option only has an effect if 'Show Logical Connections' is activated.</dd>
     <dt>Show Power Feeds</dt>
-    <dd>Show power connections from power feeds in the topology view.</dd>
+    <dd>Displays connections between power outlets and power ports. These connections are displayed as solid lines in the color of the cable. This option depends on 'Show Cables'.</dd>
+    <dt>Show Wireless Links</dt>
+    <dd>Displays wireless connections. These connections are displayed as blue dotted lines.</dd>
 </dl>
     
 ### Update
@@ -139,11 +134,23 @@ Clear you browser cache.
 
 ### Permissions
 
-To view `/plugins/topology-views/` you need the following permissions:
+To view `/plugins/netbox_topology-views/topology` you need the following permissions:
  + dcim | device | can view device
  + dcim | site | can view site
  + extras | tag | can view tag
  + dcim | device role | can view device role
+
+To view `/plugins/netbox_topology-views/image`:
+ + dcim | site | view
+ + dcim | device role | view
+ + dcim | device role | add
+ + dcim | device role | change
+
+ To view `/plugins/netbox_topology-views/individualoptions`:
+ + netbox topology views | individualoptions | change
+
+ To view `/plugins/netbox_topology-views/generaloptions`:
+ + netbox topology views | generaloptions | change
 
  ## Icons info
 

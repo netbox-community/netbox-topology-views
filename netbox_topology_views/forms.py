@@ -217,7 +217,7 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_("Shows a logical connection (in addition to a cable), "
             "even if a cable is directly connected. Leaving this option "
             "disabled prevents that redundant display. This option only "
-            "has an effect if 'Show Logical Connections' is activated")
+            "has an effect if 'Show Logical Connections' is activated.")
     )
     show_circuit = forms.BooleanField(
         label=_("Show Circuit Terminations"), 
