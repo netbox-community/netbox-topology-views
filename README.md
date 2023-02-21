@@ -97,7 +97,7 @@ Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plu
 
 Select your options for the topology view:
 
-![preview image](doc/img/selection_options.png?raw=true "preview")
+![selection_options](https://user-images.githubusercontent.com/20901110/220410144-5633d24c-6383-4cba-8d6d-ba77ef3d3cdd.png)
 
 <dl>
     <dt>Save Coordinates</dt>
