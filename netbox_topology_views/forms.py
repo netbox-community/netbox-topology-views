@@ -6,7 +6,6 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dcim.models import Device, Site, Region, DeviceRole, Location, Rack
-#from extras.models import Tag
 
 from django import forms
 from dcim.choices import DeviceStatusChoices
@@ -18,6 +17,7 @@ from utilities.forms import (
     TagFilterField,
     DynamicModelMultipleChoiceField,
     MultipleChoiceField,
+    widgets,
 )
 from .models import IndividualOptions, GeneralOptions
 
@@ -178,11 +178,11 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_("Select Device Roles that you want to have "
             "preselected in the filter tab.")
     )
-    preselected_tags = DynamicModelMultipleChoiceField(
+    preselected_tags = forms.ModelMultipleChoiceField(
         label=_("Preselected Tags"),
-#        queryset=Tag.objects.all(),
         queryset=Device.tags.all(),
         required=False,
+        widget=widgets.StaticSelectMultiple,
         help_text=_("Select Tags that you want to have "
             "preselected in the filter tab.")
     )
