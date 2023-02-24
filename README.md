@@ -75,8 +75,7 @@ Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'static_image_directory': 'netbox_topology_views/img',
-        'preselected_tags': ['IPS', 'ADC']
+        'static_image_directory': 'netbox_topology_views/img'
     }
 }
 ```
@@ -84,8 +83,6 @@ PLUGINS_CONFIG = {
 | Setting                  | Default value                                                                                                                                  | Description                                                                                                            |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | static_image_directory   | netbox_topology_views/img                                                                                                                      | (str or pathlib.Path) Specifies the location that images will be loaded from by default. Must be within `STATIC_ROOT`  |
-| preselected_tags         | []                                                                                                                                             | The name of tags you want to preload                                                                                   |
-
 
 ### Custom Images
 
