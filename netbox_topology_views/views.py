@@ -40,9 +40,7 @@ from netbox_topology_views.utils import (
     image_static_url,
 )
 
-supported_termination_types = []
-for t in IndividualOptions.CHOICES:
-    supported_termination_types.append(t[1])
+
 
 def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
     is_device = isinstance(entity, Device)
@@ -266,6 +264,11 @@ def get_topology_data(
     show_power: bool,
     show_wireless: bool,
 ):
+    
+    supported_termination_types = []
+    for t in IndividualOptions.CHOICES:
+        supported_termination_types.append(t[1])
+
     if not queryset:
         return None
 
@@ -682,6 +685,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
+
 
         if is_htmx(request): 
             return render(
