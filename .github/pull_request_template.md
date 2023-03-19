@@ -5,7 +5,10 @@
     note that our contribution guidelines require a feature 
     request or bug report to be labeled "status: accepted". This 
     helps avoid waste time and effort on a proposed change that 
-    we might not be able to accept.
+    we might not be able to accept. If a feature request or bug 
+    report is labeled "status: needs owner", feel free to raise 
+    your hand if you'd like to take work on it and we will 
+    happily assign you to the issue.
 
     Please prefix the title of your pull request according to 
     it's type. You should use "Closes #FEATURE_ID: ..." for feature 
