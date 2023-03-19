@@ -9,7 +9,6 @@ menu = PluginMenu(
             (
                 PluginMenuItem(link="plugins:netbox_topology_views:images", link_text="Images"),
                 PluginMenuItem(link="plugins:netbox_topology_views:individualoptions", link_text="Individual Options"),
-                PluginMenuItem(link="plugins:netbox_topology_views:generaloptions", link_text="General Options"),
             ),
         ),
     ),

@@ -62,12 +62,12 @@ If you create a custom field "coordinates" for "dcim > device" and "Circuits > c
 
 The coordinates are stored as: "X;Y".
 
-Please navigate to `General Options` page and set the `Allow Coordinates Saving` option to True.
-You might also set the `Always Save Coordinates` option to True.
+Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
+You might also set the `always_save_coordinates` option to True.
 
 ## Configure
 
-Almost all options can be assigned a default value per user directly in the plugin. The default value can be overridden on the filter page.
+All individual options can be assigned a default value per user directly in the plugin. The default value can be overridden on the filter page.
 
 The remaining options must be configured in the `PLUGINS_CONFIG` section of your `netbox/configuration.py`.
 
@@ -75,7 +75,9 @@ Example:
 ```
 PLUGINS_CONFIG = {
     'netbox_topology_views': {
-        'static_image_directory': 'netbox_topology_views/img'
+        'static_image_directory': 'netbox_topology_views/img',
+        'allow_coordinates_saving': True,
+        'always_save_coordinates': True
     }
 }
 ```
@@ -83,6 +85,8 @@ PLUGINS_CONFIG = {
 | Setting                  | Default value                                                                                                                                  | Description                                                                                                            |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | static_image_directory   | netbox_topology_views/img                                                                                                                      | (str or pathlib.Path) Specifies the location that images will be loaded from by default. Must be within `STATIC_ROOT`  |
+| allow_coordinates_saving | False                                                                                                                                          | (bool) Set to true if you use the custom coordinates fields and want to save the coordinates                           |
+| always_save_coordinates  | False                                                                                                                                          | (bool) Set if you want to enable the option to save coordinates by default                                             |
 
 ### Custom Images
 
@@ -145,9 +149,6 @@ To view `/plugins/netbox_topology-views/image`:
 
  To view `/plugins/netbox_topology-views/individualoptions`:
  + netbox topology views | individualoptions | change
-
- To view `/plugins/netbox_topology-views/generaloptions`:
- + netbox topology views | generaloptions | change
 
  ## Icons info
 

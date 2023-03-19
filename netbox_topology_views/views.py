@@ -30,8 +30,8 @@ from extras.models import Tag
 from wireless.models import WirelessLink
 
 from netbox_topology_views.filters import DeviceFilterSet
-from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, GeneralOptionsForm
-from netbox_topology_views.models import RoleImage, IndividualOptions, GeneralOptions
+from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm
+from netbox_topology_views.models import RoleImage, IndividualOptions
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -596,20 +596,16 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             user_id=request.user.id,
         )
 
-        generalOptions, created = GeneralOptions.objects.get_or_create(
-            unique_row="general_options"
-        )
-
         if request.GET:
             save_coords = False
             if "save_coords" in request.GET:
                 if request.GET["save_coords"] == "on":
                     save_coords = True
             # General options overrides
-            if save_coords == True and generalOptions.allow_coordinates_saving == False:
+            if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
                 save_coords = False
                 messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
-            elif generalOptions.always_save_coordinates == True:
+            elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
                 save_coords = True
 
             # Individual options
@@ -707,7 +703,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
                 "model": self.model,
-                "additional_forms": { 'always_save_coordinates': generalOptions.always_save_coordinates, },
             },
         )
 
@@ -808,42 +803,6 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         return render(
             request,
             "netbox_topology_views/individual_options.html",
-            {
-                "form": form,
-                "object": queryset,
-            },
-        )
-
-class TopologyGeneralOptionsView(PermissionRequiredMixin, View):
-    permission_required = 'netbox_topology_views.change_generaloptions'
-
-    def post(self, request):
-        instance = GeneralOptions.objects.get(unique_row="general_options")
-        form = GeneralOptionsForm(request.POST, instance=instance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Options have been sucessfully saved")
-        else:
-            messages.error(request, form.errors)
-
-        return HttpResponseRedirect("./")
-
-    def get(self, request):
-        queryset, created = GeneralOptions.objects.get_or_create(
-            unique_row='general_options',
-        )
-
-        form = GeneralOptionsForm(
-            initial={
-                'static_image_directory': queryset.static_image_directory,
-                'allow_coordinates_saving': queryset.allow_coordinates_saving, 
-                'always_save_coordinates': queryset.always_save_coordinates,
-            }
-        )
-
-        return render(
-            request,
-            "netbox_topology_views/general_options.html",
             {
                 "form": form,
                 "object": queryset,

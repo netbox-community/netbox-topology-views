@@ -19,11 +19,7 @@ from utilities.forms import (
     MultipleChoiceField,
     widgets,
 )
-from .models import IndividualOptions, GeneralOptions
-
-generalOptions, created = GeneralOptions.objects.get_or_create(
-    unique_row="general_options"
-)
+from .models import IndividualOptions
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
@@ -115,8 +111,8 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     save_coords = forms.BooleanField(
         label=_("Save Coordinates"),
         required=False,
-        disabled=(not generalOptions.allow_coordinates_saving or generalOptions.always_save_coordinates),
-        initial=(generalOptions.always_save_coordinates)
+        disabled=(not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] or settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"]),
+        initial=(settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"])
     )
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), required=False, initial=False
@@ -253,51 +249,4 @@ class IndividualOptionsForm(NetBoxModelForm):
         model = IndividualOptions
         fields = [
             'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
-        ]
-
-class GeneralOptionsForm(NetBoxModelForm):
-    fieldsets = (
-        (
-            None,
-            (
-                "static_image_directory",
-                "allow_coordinates_saving",
-                "always_save_coordinates",
-            ),
-        ),
-    )
-
-    static_image_directory = forms.CharField(
-        label=_("Static Image Directoy"), 
-        disabled=True,
-        help_text=_("NOT IMPLEMENTED YET! PLEASE USE CONFIGURATION.PY.</br> "
-            "Specifies the location that images will be loaded from "
-            "by default. Must be within 'STATIC_ROOT'. Be careful! Wrong "
-            "settings will break display of images. "
-            "Default: netbox_topology_views/img")
-    )
-
-    allow_coordinates_saving = forms.BooleanField(
-        label=_("Allow Coordinates Saving"), 
-        required=False, 
-        initial=False,
-        help_text=_("Must be enabled in order to allow saving the position "
-            "of nodes. This setting overrides an individual setting. A custom "
-            "field 'Coordinates' is mandatory.")
-    )
-    always_save_coordinates = forms.BooleanField(
-        label =_("Always Save Coordinates"), 
-        required=False, 
-        initial=False,
-        help_text=_("Overrides an individual setting if enabled and forces "
-        "saving the position of nodes. This setting requires that "
-        "'Allow Coordinates Saving' is enabled and otherwise has no effect.")
-    )
-
-    class Meta:
-        model = GeneralOptions
-        fields = [
-            'static_image_directory',
-            'allow_coordinates_saving', 
-            'always_save_coordinates'
         ]

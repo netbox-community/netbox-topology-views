@@ -11,21 +11,10 @@ class TopologyViewsConfig(PluginConfig):
     base_url = "netbox_topology_views"
     required_settings = []
     default_settings = {
-        "preselected_device_roles": [
-            "Firewall",
-            "Router",
-            "Distribution Switch",
-            "Core Switch",
-            "Internal Switch",
-            "Access Switch",
-            "Server",
-            "Storage",
-            "Backup",
-            "Wireless AP",
-        ],
-        "ignore_cable_type": [],
         "static_image_directory": "netbox_topology_views/img",
-        "preselected_tags": [],
+        "allow_coordinates_saving": False,
+        "always_save_coordinates": False,
+
     }
 
 
