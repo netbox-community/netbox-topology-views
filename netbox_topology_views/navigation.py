@@ -2,6 +2,7 @@ from extras.plugins import PluginMenu, PluginMenuItem
 
 menu = PluginMenu(
     label='Topology Views',
+    icon_class="mdi mdi-sitemap",
     groups=(
         ('TOPOLOGY', (PluginMenuItem(link="plugins:netbox_topology_views:home", link_text="Topology"),),),
         ('PREFERENCES', 
