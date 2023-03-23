@@ -2,10 +2,12 @@ from pathlib import Path
 from typing import Optional
 
 from dcim.models import DeviceRole
+from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.templatetags.static import static
+from netbox.models import NetBoxModel
 from netbox.models.features import (
     ChangeLoggingMixin,
     ExportTemplatesMixin,
@@ -91,3 +93,62 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
         except ValueError:
             return self.get_default_image(dir)
         return static(f"/{self.image}")
+
+class IndividualOptions(NetBoxModel):
+    CHOICES = (
+        ('interface', 'interface'),
+        ('front port', 'front port'),
+        ('rear port', 'rear port'),
+        ('power outlet', 'power outlet'),
+        ('power port', 'power port'),
+        ('console port', 'console port'),
+        ('console server port', 'console server port'),
+    )
+
+    user_id = models.IntegerField(
+        null=True,
+        unique=True
+    )
+    ignore_cable_type = models.CharField(
+        max_length = 255,
+        blank = True,
+    )
+    preselected_device_roles = models.ManyToManyField(
+        to='dcim.DeviceRole',
+        related_name='+',
+        blank=True,
+        db_table='netbox_topology_views_individualoptions_preselected_device',
+    )
+    preselected_tags = models.ManyToManyField(
+        to='extras.Tag',
+        related_name='+',
+        blank=True,
+        db_table='netbox_topology_views_individualoptions_preselected_tag',
+    )
+    show_unconnected = models.BooleanField(
+        default=False
+    )
+    show_cables = models.BooleanField(
+        default=False
+    )
+    show_logical_connections = models.BooleanField(
+        default=False
+    )
+    show_single_cable_logical_conns = models.BooleanField(
+        default=False
+    )
+    show_circuit = models.BooleanField(
+        default=False
+    )
+    show_power = models.BooleanField(
+        default=False
+    )
+    show_wireless = models.BooleanField(
+        default=False
+    )
+    draw_default_layout = models.BooleanField(
+        default=False
+    )
+
+    def __str___(self):
+        return f"{self.user_id}"
