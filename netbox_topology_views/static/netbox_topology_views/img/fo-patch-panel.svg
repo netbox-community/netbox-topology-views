@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="35.465557mm"
+   height="35.465557mm"
+   viewBox="0 0 35.465557 35.465557"
+   version="1.1"
+   id="svg20924"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="netbox-topology-views-icons.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview20926"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.4723932"
+     inkscape:cx="1020.3364"
+     inkscape:cy="643.5317"
+     inkscape:window-width="1920"
+     inkscape:window-height="1133"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs20921" />
+  <g
+     inkscape:label="Icons"
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:highlight-color="#1685fc"
+     transform="translate(-442.62002,-22.619997)">
+    <g
+       id="patch-panel-fc"
+       transform="translate(436.25974,-67.887849)"
+       style="display:inline;image-rendering:auto"
+       inkscape:export-filename="patch-panel-fc.svg"
+       inkscape:export-xdpi="89.523453"
+       inkscape:export-ydpi="89.523453"
+       inkscape:label="fo-patch-panel">
+      <circle
+         style="fill:#ffffff;fill-opacity:1;stroke:#9cc8f8;stroke-width:1.32292;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="circle843"
+         cx="24.09306"
+         cy="108.24062"
+         r="17.071318" />
+      <g
+         id="g3322"
+         transform="translate(-1.2254715e-4)">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#1685fc;stroke-width:1.32292;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect845"
+           width="6.9177623"
+           height="6.9177623"
+           x="14.755642"
+           y="99.068886"
+           ry="3.4588811"
+           rx="3.4588811" />
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#1685fc;stroke-width:1.32292;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect847"
+           width="6.9180002"
+           height="6.9177623"
+           x="26.512722"
+           y="99.068886"
+           ry="3.4588811"
+           rx="3.4588811" />
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#1685fc;stroke-width:1.32292;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect849"
+           width="6.9177623"
+           height="6.9177623"
+           x="14.755642"
+           y="110.4946"
+           ry="3.4588811"
+           rx="3.4588811" />
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#1685fc;stroke-width:1.32292;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect851"
+           width="6.9177623"
+           height="6.9177623"
+           x="26.512722"
+           y="110.4946"
+           ry="3.4588811"
+           rx="3.4588811" />
+      </g>
+    </g>
+  </g>
+</svg>
