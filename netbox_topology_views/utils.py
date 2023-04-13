@@ -255,3 +255,4 @@ def export_data_to_xml(data: dict):
     # print(doc.toprettyxml())
 
     return doc.toxml(encoding='UTF-8')
+    
