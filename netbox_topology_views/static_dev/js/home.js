@@ -133,6 +133,22 @@ function performGraphDownload() {
     document.body.removeChild(tempDownloadLink)
 }
 
+// Download XML
+const downloadXmlButton = document.querySelector('#btnDownloadXml')
+downloadXmlButton.addEventListener('click', (e) => {
+    performXmlDownload(xmldata)
+})
+
+function performXmlDownload(xmldata) {
+    const tempDownloadLink = document.createElement('a');
+
+    tempDownloadLink.href = 'data:text/xml;charset:utf-8,' + encodeURIComponent(xmldata);
+    tempDownloadLink.download = 'topology.xml';
+    document.body.appendChild(tempDownloadLink);
+    tempDownloadLink.click();
+    document.body.removeChild(tempDownloadLink);
+}
+
 // Theme switching
 const observer = new MutationObserver((mutations) =>
     mutations.forEach((mutation) => {

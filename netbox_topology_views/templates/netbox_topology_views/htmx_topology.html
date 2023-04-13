@@ -8,9 +8,13 @@
     <div class="controls">
     	<div class="control-group">
 			{% block extra_controls %}{% endblock %}
+			<a id="btnDownloadXml" class="btn btn-sm btn-info" href="#">
+				<i class="mdi mdi-download"></i>
+				Download XML
+			</a>
 			<a id="btnDownloadImage" class="btn btn-sm btn-info" href="#">
 				<i class="mdi mdi-download"></i>
-				Download
+				Download PNG
 			</a>
             <a class="btn  btn-sm btn-danger" data-bs-dismiss="modal">
                 <i class="mdi mdi-close-thick"></i>
@@ -35,5 +39,10 @@
 <script type="text/javascript">
     const brokenImage = '{{ broken_image }}';
     const topologyData = {{ topology_data | safe }};
+    // Get XML data from view. We need to do a little div hack, because the
+    // contents of the XML structure irritates Javascript and produces errors.
+    var tempElement = document.createElement('div');
+    tempElement.innerHTML = "{{ xml_data }}";
+    var xmldata = tempElement.textContent;
 </script>
 <script src="{% static 'netbox_topology_views/js/app.js' %}?ver={{ epoch }} " defer></script>

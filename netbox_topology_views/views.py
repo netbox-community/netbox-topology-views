@@ -38,6 +38,8 @@ from netbox_topology_views.utils import (
     get_model_role,
     get_model_slug,
     image_static_url,
+    LinePattern,
+    export_data_to_xml,
 )
 
 
@@ -198,6 +200,7 @@ def create_edge(
     edge["id"] = edge_id
     edge["from"] = termination_a["device_id"]
     edge["to"] = termination_b["device_id"]
+    edge["color"] = '#2b7ce9'
     title = "Cable"
 
     if circuit is not None:
@@ -205,17 +208,17 @@ def create_edge(
         title = f"Circuit provider: {circuit['provider_name']}<br>Termination"
 
     elif wireless is not None:
-        edge["dashes"] = [2, 10, 2, 10]
+        edge["dashes"] = LinePattern().wireless
         title = "Wireless Connection"
 
     elif power is not None:
-        edge["dashes"] = [5, 5, 3, 3]
+        edge["dashes"] = LinePattern().power
         title = "Power Connection"
 
     elif interface is not None:
         title = "Interface Connection"
         edge["width"] = 3
-        edge["dashes"] = [1, 10, 1, 10]
+        edge["dashes"] = LinePattern().logical
         edge["color"] = '#f1c232'
         edge["href"] = interface.get_absolute_url() + "trace"
         
@@ -656,6 +659,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_power,
                     show_wireless,
                 )
+
+            if topo_data is not None:
+                xml_data = export_data_to_xml(topo_data).decode('utf-8')
+            else:
+                xml_data = ''
             
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
@@ -691,6 +699,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     "topology_data": json.dumps(topo_data),
                     "broken_image": find_image_url("role-unknown"),
                     "epoch": int(time.time()),
+                    "xml_data": xml_data,
                 },
             )
 
@@ -702,6 +711,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
                 "model": self.model,
+                "xml_data": xml_data,
             },
         )
 
