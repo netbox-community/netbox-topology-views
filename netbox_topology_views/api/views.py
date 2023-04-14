@@ -62,6 +62,14 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
 
         return Response({"status": "saved coords"})
 
+class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
+    queryset = Device.objects.none()
+    permission_required = ("dcim.view_site", "dcim.view_device")
+    serializer_class = TopologyDummySerializer
+
+    def list(self, request):
+        return JsonResponse({"status": "Ok"})
+
 
 class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):
     queryset = DeviceRole.objects.none()
