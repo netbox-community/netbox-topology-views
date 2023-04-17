@@ -66,7 +66,7 @@ def create_node(
     node = {}
     node_content = ""
     if isinstance(device, Circuit):
-        dev_name = f"Circuit {device.cid}"
+        dev_name = device.cid
         node["id"] = f"c{device.pk}"
 
         if device.provider is not None:
@@ -76,7 +76,7 @@ def create_node(
         if device.type is not None:
             node_content += f"<tr><th>Type: </th><td>{device.type.name}</td></tr>"
     elif isinstance(device, PowerPanel):
-        dev_name = f"Power Panel {device.pk}"
+        dev_name = device.name
         node["id"] = f"p{device.pk}"
 
         if device.site is not None:
@@ -86,7 +86,7 @@ def create_node(
                 f"<tr><th>Location: </th><td>{device.location.name}</td></tr>"
             )
     elif isinstance(device, PowerFeed):
-        dev_name = f"Power Feed {device.pk}"
+        dev_name = device.name
         node["id"] = f"f{device.pk}"
 
         if device.power_panel is not None:
@@ -106,7 +106,7 @@ def create_node(
     else:
         dev_name = device.name
         if dev_name is None:
-            dev_name = "device name unknown"
+            dev_name = device.device_type.get_full_name
 
         if device.device_type is not None:
             node_content += (
