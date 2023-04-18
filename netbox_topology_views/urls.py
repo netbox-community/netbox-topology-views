@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.generic.base import RedirectView
 
-from . import signals, views
+from . import views
 
 # Define a list of URL patterns to be imported by NetBox. Each pattern maps a URL to
 # a specific view so that it can be accessed by users.
