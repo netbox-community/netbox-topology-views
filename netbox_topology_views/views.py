@@ -804,12 +804,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 "image": find_image_url(cur.slug),
             }
 
-        device_role_ct = ContentType.objects.get_for_model(DeviceRole)
-        # get images that have a valid role
-        role_images = RoleImage.objects.filter(
-            Q(content_type=device_role_ct, object_id__isnull=False)
-            | ~Q(content_type=device_role_ct)
-        )
+        role_images = RoleImage.objects.all()
 
         for role_image in role_images:
             roles[role_image.role.name]["image"] = role_image.get_image_url()
