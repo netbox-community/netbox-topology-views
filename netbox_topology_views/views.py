@@ -262,7 +262,6 @@ def get_topology_data(
     show_power: bool,
     show_wireless: bool,
 ):
-
     supported_termination_types = []
     for t in IndividualOptions.CHOICES:
         supported_termination_types.append(t[1])
@@ -808,7 +807,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
         device_role_ct = ContentType.objects.get_for_model(DeviceRole)
         # get images that have a valid role
         role_images = RoleImage.objects.filter(
-            Q(content_type=device_role_ct, object_id__isnull=True)
+            Q(content_type=device_role_ct, object_id__isnull=False)
             | ~Q(content_type=device_role_ct)
         )
 
