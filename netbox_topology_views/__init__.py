@@ -14,8 +14,12 @@ class TopologyViewsConfig(PluginConfig):
         "static_image_directory": "netbox_topology_views/img",
         "allow_coordinates_saving": False,
         "always_save_coordinates": False,
-
     }
+
+    def ready(self):
+        from . import signals
+
+        super().ready()
 
 
 config = TopologyViewsConfig
