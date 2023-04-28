@@ -13,12 +13,13 @@ from tenancy.models import TenantGroup, Tenant
 from tenancy.forms import TenancyFilterForm
 from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
-from utilities.forms import (
+from utilities.forms.fields import (
     TagFilterField,
     DynamicModelMultipleChoiceField,
-    MultipleChoiceField,
-    widgets,
+    MultipleChoiceField
 )
+
+
 from .models import IndividualOptions
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
@@ -178,7 +179,6 @@ class IndividualOptionsForm(NetBoxModelForm):
         label=_("Preselected Tags"),
         queryset=Device.tags.all(),
         required=False,
-        widget=widgets.StaticSelectMultiple,
         help_text=_("Select Tags that you want to have "
             "preselected in the filter tab.")
     )
