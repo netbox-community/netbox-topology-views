@@ -263,3 +263,4 @@ class IndividualOptionsForm(NetBoxModelForm):
         fields = [
             'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
+        
