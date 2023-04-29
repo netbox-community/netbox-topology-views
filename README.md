@@ -150,12 +150,3 @@ To view `/plugins/netbox_topology-views/image`:
 
  To view `/plugins/netbox_topology-views/individualoptions`:
  + netbox topology views | individualoptions | change
-
- ## Icons info
-
-Power icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/power).
-
-Power icons created by [Flat Icons - Flaticon](https://www.flaticon.com/free-icons/power)
-
-Provider icons created by [Good Ware - Flaticon](https://www.flaticon.com/free-icons/provider)
-
