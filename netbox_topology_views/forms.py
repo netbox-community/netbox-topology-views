@@ -224,8 +224,9 @@ class IndividualOptionsForm(NetBoxModelForm):
         label =_("Show Neighbors"), 
         required=False, 
         initial=False,
-        help_text=_("Adds directly connected neighbors (link peers) to the "
-            "filter result set automatically.")
+        help_text=_("Adds neighbors to the filter result set automatically. "
+            "Link peers will be added if 'Show Cables' is ticked, far-end "
+            "terminations will be added if 'Show Logical Connections' is ticked.")
     )
     show_circuit = forms.BooleanField(
         label=_("Show Circuit Terminations"), 
