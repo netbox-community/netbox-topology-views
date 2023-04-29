@@ -39,7 +39,7 @@ from netbox_topology_views.utils import (
     get_model_slug,
     image_static_url,
     LinePattern,
-    export_data_to_xml,
+    get_query_settings
 )
 
 
@@ -599,53 +599,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         )
 
         if request.GET:
-            save_coords = False
-            if "save_coords" in request.GET:
-                if request.GET["save_coords"] == "on":
-                    save_coords = True
-            # General options overrides
-            if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
-                save_coords = False
-                messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
-            elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
-                save_coords = True
 
-            # Individual options
-            show_unconnected = False
-            if "show_unconnected" in request.GET:
-                if request.GET["show_unconnected"] == "on":
-                    show_unconnected = True
-
-            show_power = False
-            if "show_power" in request.GET:
-                if request.GET["show_power"] == "on":
-                    show_power = True
-
-            show_circuit = False
-            if "show_circuit" in request.GET:
-                if request.GET["show_circuit"] == "on":
-                    show_circuit = True
-
-            show_logical_connections = False
-            if "show_logical_connections" in request.GET:
-                if request.GET["show_logical_connections"] == "on" :
-                    show_logical_connections = True
-
-            show_single_cable_logical_conns = False
-            if "show_single_cable_logical_conns" in request.GET:
-                if request.GET["show_single_cable_logical_conns"] == "on" :
-                    show_single_cable_logical_conns = True
-
-            show_cables = False
-            if "show_cables" in request.GET:
-                if request.GET["show_cables"] == "on" :
-                    show_cables = True
-
-            show_wireless = False
-            if "show_wireless" in request.GET:
-                if request.GET["show_wireless"] == "on" :
-                    show_wireless = True
-
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless = get_query_settings(request)
+            
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
                     self.queryset,
@@ -659,11 +615,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_power,
                     show_wireless,
                 )
-
-            if topo_data is not None:
-                xml_data = export_data_to_xml(topo_data).decode('utf-8')
-            else:
-                xml_data = ''
             
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
@@ -698,8 +649,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                     "topology_data": json.dumps(topo_data),
                     "broken_image": find_image_url("role-unknown"),
-                    "epoch": int(time.time()),
-                    "xml_data": xml_data,
+                    "epoch": int(time.time())
                 },
             )
 
@@ -710,8 +660,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
-                "model": self.model,
-                "xml_data": xml_data,
+                "model": self.model
             },
         )
 

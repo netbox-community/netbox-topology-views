@@ -78,11 +78,6 @@
   <script type="text/javascript">
     const brokenImage = '{{ broken_image }}';
     const topologyData = {{ topology_data | safe }};
-    // Get XML data from view. We need to do a little div hack, because the
-    // contents of the XML structure irritates Javascript and produces errors.
-    var tempElement = document.createElement('div');
-    tempElement.innerHTML = "{{ xml_data }}";
-    var xmldata = tempElement.textContent;
   </script>
 	<script src="{% static 'netbox_topology_views/js/app.js' %}" defer></script>
 {% endblock javascript %}
