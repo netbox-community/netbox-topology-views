@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
+from django.contrib import messages
 
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
 if sys.version_info >= (3,9,0):
@@ -106,6 +107,55 @@ def get_model_role(model: Type[Model]) -> Role:
         name=re_camel_case.sub(r" \1", model.__name__),
     )
 
+def get_query_settings(request):
+    save_coords = False
+    if "save_coords" in request.GET:
+        if request.GET["save_coords"] == "on":
+            save_coords = True
+    # General options overrides
+    if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
+        save_coords = False
+        messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
+    elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
+        save_coords = True
+
+    # Individual options
+    show_unconnected = False
+    if "show_unconnected" in request.GET:
+        if request.GET["show_unconnected"] == "on":
+            show_unconnected = True
+
+    show_power = False
+    if "show_power" in request.GET:
+        if request.GET["show_power"] == "on":
+            show_power = True
+
+    show_circuit = False
+    if "show_circuit" in request.GET:
+        if request.GET["show_circuit"] == "on":
+            show_circuit = True
+
+    show_logical_connections = False
+    if "show_logical_connections" in request.GET:
+        if request.GET["show_logical_connections"] == "on" :
+            show_logical_connections = True
+
+    show_single_cable_logical_conns = False
+    if "show_single_cable_logical_conns" in request.GET:
+        if request.GET["show_single_cable_logical_conns"] == "on" :
+            show_single_cable_logical_conns = True
+
+    show_cables = False
+    if "show_cables" in request.GET:
+        if request.GET["show_cables"] == "on" :
+            show_cables = True
+
+    show_wireless = False
+    if "show_wireless" in request.GET:
+        if request.GET["show_wireless"] == "on" :
+            show_wireless = True
+    
+    return save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless
 
 class LinePattern():
     wireless = [2, 10, 2, 10]

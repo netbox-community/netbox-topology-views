@@ -5,7 +5,7 @@ from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
@@ -14,9 +14,10 @@ from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
 )
-from netbox_topology_views.models import RoleImage
-from netbox_topology_views.utils import get_image_from_url
-
+from netbox_topology_views.models import RoleImage, IndividualOptions
+from netbox_topology_views.views import get_topology_data
+from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
+from netbox_topology_views.filters import DeviceFilterSet
 
 class SaveCoordsViewSet(ReadOnlyModelViewSet):
     queryset = Device.objects.none()
@@ -61,6 +62,40 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
             )
 
         return Response({"status": "saved coords"})
+
+class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
+    queryset = Device.objects.none()
+    permission_required = ("dcim.view_site", "dcim.view_device")
+    serializer_class = TopologyDummySerializer
+
+    def list(self, request):
+
+        self.filterset = DeviceFilterSet
+        self.queryset = Device.objects.all().select_related(
+            "device_type", "device_role"
+        )
+        self.queryset = self.filterset(request.GET, self.queryset).qs
+
+        individualOptions, created = IndividualOptions.objects.get_or_create(
+            user_id=request.user.id,
+        )
+
+        save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless = get_query_settings(request)
+        topo_data = get_topology_data(
+                    self.queryset,
+                    individualOptions,
+                    show_unconnected,
+                    save_coords,
+                    show_cables,
+                    show_circuit,
+                    show_logical_connections,
+                    show_single_cable_logical_conns,
+                    show_power,
+                    show_wireless,
+                )
+        xml_data = export_data_to_xml(topo_data).decode('utf-8')
+
+        return HttpResponse(xml_data, content_type="application/xml; charset=utf-8")
 
 
 class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):

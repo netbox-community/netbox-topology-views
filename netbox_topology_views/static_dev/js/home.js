@@ -136,17 +136,24 @@ function performGraphDownload() {
 // Download XML
 const downloadXmlButton = document.querySelector('#btnDownloadXml')
 downloadXmlButton.addEventListener('click', (e) => {
-    performXmlDownload(xmldata)
+    performXmlDownload()
 })
 
-function performXmlDownload(xmldata) {
+function performXmlDownload() {
     const tempDownloadLink = document.createElement('a');
 
-    tempDownloadLink.href = 'data:text/xml;charset:utf-8,' + encodeURIComponent(xmldata);
-    tempDownloadLink.download = 'topology.xml';
-    document.body.appendChild(tempDownloadLink);
-    tempDownloadLink.click();
-    document.body.removeChild(tempDownloadLink);
+    fetch('/api/plugins/netbox_topology_views/xml-export/?' + new URLSearchParams(window.location.search)).then(response => response.text())
+    .then(data => {
+        var blob = new Blob([data ], { type: "text/plain" });
+
+        tempDownloadLink.setAttribute("href", window.URL.createObjectURL(blob));
+        tempDownloadLink.setAttribute("download", 'topology.xml');
+
+        tempDownloadLink.dataset.downloadurl = ["text/plain", tempDownloadLink.download, tempDownloadLink.href].join(":");
+
+        tempDownloadLink.click();
+
+    });
 }
 
 // Theme switching
