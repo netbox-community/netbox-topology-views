@@ -677,17 +677,17 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
-                    self.queryset,
-                    individualOptions,
-                    save_coords,
-                    show_unconnected,
-                    show_cables,
-                    show_logical_connections,
-                    show_single_cable_logical_conns,
-                    show_neighbors,
-                    show_circuit,
-                    show_power,
-                    show_wireless,
+                    queryset=self.queryset,
+                    individualOptions=individualOptions,
+                    save_coords=save_coords,
+                    show_unconnected=show_unconnected,
+                    show_cables=show_cables,
+                    show_logical_connections=show_logical_connections,
+                    show_single_cable_logical_conns=show_single_cable_logical_conns,
+                    show_neighbors=show_neighbors,
+                    show_circuit=show_circuit,
+                    show_power=show_power,
+                    show_wireless=show_wireless,
                 )
             
         else:
