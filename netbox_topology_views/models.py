@@ -137,6 +137,9 @@ class IndividualOptions(NetBoxModel):
     show_single_cable_logical_conns = models.BooleanField(
         default=False
     )
+    show_neighbors = models.BooleanField(
+        default=False
+    )
     show_circuit = models.BooleanField(
         default=False
     )

@@ -99,15 +99,13 @@ Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plu
 
 Select your options for the topology view:
 
-![selection_options](https://user-images.githubusercontent.com/20901110/220410144-5633d24c-6383-4cba-8d6d-ba77ef3d3cdd.png)
+![topology_options](https://user-images.githubusercontent.com/20901110/235302073-234c3ef7-2c2b-4d0c-a674-9909d490d7ea.png)
 
 <dl>
     <dt>Save Coordinates</dt>
     <dd>Save the coordinates of devices in the topology view.</dd>
     <dt>Show Unconnected</dt>
     <dd>Show devices that have no connections or for which no connection is displayed. This option depends on other parameters like 'Show Cables' and 'Show Logical Connections'.</dd>
-    <dt>Show Circuit Terminations</dt>
-    <dd>Show connections which end at a circuit termination in the topology view. These connections are displayed as blue dashed lines.</dd>
     <dt>Show Cables</dt>
     <dd>Show connections between interfaces, front / rear ports, etc., that are connected with one or more cables. These connections are displayed as solid lines in the color of the cable.</dd> 
     <dt>Show Logical Connections</dt>
@@ -116,6 +114,10 @@ Select your options for the topology view:
         intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. These connections are displayed as yellow dotted lines.</dd>
     <dt>Show redundant Cable and Locigal Connection</dt>
     <dd>Shows a logical connection (in addition to a cable), even if a cable is directly connected. Leaving this option disabled prevents that redundant display. This option only has an effect if 'Show Logical Connections' is activated.</dd>
+    <dt>Show Neighbors</dt>
+    <dd>Adds neighbors to the filter result set automatically. Link peers will be added if 'Show Cables' is ticked, far-end terminations will be added if 'Show Logical Connections' is ticked.</dd>
+    <dt>Show Circuit Terminations</dt>
+    <dd>Show connections which end at a circuit termination in the topology view. These connections are displayed as blue dashed lines.</dd>
     <dt>Show Power Feeds</dt>
     <dd>Displays connections between power outlets and power ports. These connections are displayed as solid lines in the color of the cable. This option depends on 'Show Cables'.</dd>
     <dt>Show Wireless Links</dt>

@@ -33,9 +33,10 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
                 "save_coords",
                 "show_unconnected",
                 "show_cables",
-                "show_circuit",
                 "show_logical_connections",
                 "show_single_cable_logical_conns",
+                "show_neighbors",
+                "show_circuit",
                 "show_power",
                 "show_wireless",
             ),
@@ -118,23 +119,26 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), required=False, initial=False
     )
+    show_cables = forms.BooleanField(
+        label =_("Show Cables"), required=False, initial=False
+    )
     show_logical_connections = forms.BooleanField(
         label =_("Show Logical Connections"), required=False, initial=False
     )
     show_single_cable_logical_conns = forms.BooleanField(
         label =_("Show redundant Cable and Locigal Connection"), required=False, initial=False
     )
-    show_cables = forms.BooleanField(
-        label =_("Show Cables"), required=False, initial=False
-    )
-    show_wireless = forms.BooleanField(
-        label =_("Show Wireless Links"), required=False, initial=False
+    show_neighbors = forms.BooleanField(
+        label =_("Show Neighbors"), required=False, initial=False
     )
     show_circuit = forms.BooleanField(
         label=_("Show Circuit Terminations"), required=False, initial=False
     )
     show_power = forms.BooleanField(
         label=_("Show Power Feeds"), required=False, initial=False
+    )
+    show_wireless = forms.BooleanField(
+        label =_("Show Wireless Links"), required=False, initial=False
     )
 
 class IndividualOptionsForm(NetBoxModelForm):
@@ -148,9 +152,10 @@ class IndividualOptionsForm(NetBoxModelForm):
                 "preselected_tags",
                 "show_unconnected",
                 "show_cables",
-                "show_circuit",
                 "show_logical_connections",
                 "show_single_cable_logical_conns",
+                "show_neighbors",
+                "show_circuit",
                 "show_power",
                 "show_wireless",
                 "draw_default_layout",
@@ -215,6 +220,14 @@ class IndividualOptionsForm(NetBoxModelForm):
             "disabled prevents that redundant display. This option only "
             "has an effect if 'Show Logical Connections' is activated.")
     )
+    show_neighbors = forms.BooleanField(
+        label =_("Show Neighbors"), 
+        required=False, 
+        initial=False,
+        help_text=_("Adds neighbors to the filter result set automatically. "
+            "Link peers will be added if 'Show Cables' is ticked, far-end "
+            "terminations will be added if 'Show Logical Connections' is ticked.")
+    )
     show_circuit = forms.BooleanField(
         label=_("Show Circuit Terminations"), 
         required=False, 
@@ -248,5 +261,6 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
         ]
+        

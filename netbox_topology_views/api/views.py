@@ -80,23 +80,29 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
             user_id=request.user.id,
         )
 
-        save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless = get_query_settings(request)
-        topo_data = get_topology_data(
-                    self.queryset,
-                    individualOptions,
-                    show_unconnected,
-                    save_coords,
-                    show_cables,
-                    show_circuit,
-                    show_logical_connections,
-                    show_single_cable_logical_conns,
-                    show_power,
-                    show_wireless,
-                )
-        xml_data = export_data_to_xml(topo_data).decode('utf-8')
+        if request.GET:
 
-        return HttpResponse(xml_data, content_type="application/xml; charset=utf-8")
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            topo_data = get_topology_data(
+                queryset=self.queryset,
+                individualOptions=individualOptions,
+                save_coords=save_coords,
+                show_unconnected=show_unconnected,
+                show_cables=show_cables,
+                show_logical_connections=show_logical_connections,
+                show_single_cable_logical_conns=show_single_cable_logical_conns,
+                show_neighbors=show_neighbors,
+                show_circuit=show_circuit,
+                show_power=show_power,
+                show_wireless=show_wireless,
+            )
+            xml_data = export_data_to_xml(topo_data).decode('utf-8')
 
+            return HttpResponse(xml_data, content_type="application/xml; charset=utf-8")
+        else:
+            return JsonResponse(
+                {"status": "Missing or malformed request parameters"}, status=400
+            )
 
 class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):
     queryset = DeviceRole.objects.none()

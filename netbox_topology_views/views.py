@@ -2,6 +2,7 @@ import json
 from functools import reduce
 from typing import DefaultDict, Dict, Optional, Union
 import time
+from itertools import chain
 
 from utilities.htmx import is_htmx
 from circuits.models import Circuit, CircuitTermination
@@ -263,6 +264,7 @@ def get_topology_data(
     show_circuit: bool,
     show_logical_connections: bool,
     show_single_cable_logical_conns: bool,
+    show_neighbors: bool,
     show_power: bool,
     show_wireless: bool,
 ):
@@ -289,6 +291,31 @@ def get_topology_data(
 
     device_ids = [d.pk for d in queryset]
     site_ids = [d.site_id for d in queryset]
+
+    if show_neighbors:
+        interfaces = Interface.objects.filter(
+            Q(device_id__in=device_ids)
+        )
+        frontports = FrontPort.objects.filter(
+            Q(device_id__in=device_ids)
+        )
+        rearports = RearPort.objects.filter(
+            Q(device_id__in=device_ids)
+        )
+
+        ports = chain(interfaces, frontports, rearports)
+        for port in ports:
+            for link_peer in port.link_peers:
+                if link_peer.device.id not in device_ids:
+                    device_ids.append(link_peer.device.id)
+
+        if show_logical_connections:
+            path_complete_interfaces = Interface.objects.filter(
+                Q(_path__is_complete=True) & Q(device_id__in=device_ids)
+            )
+            for path_complete_interface in path_complete_interfaces:
+                for connected_endpoint in path_complete_interface.connected_endpoints:
+                    device_ids.append(connected_endpoint.device.id)
 
     if show_circuit:
         circuit_terminations = CircuitTermination.objects.filter(
@@ -600,20 +627,21 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless = get_query_settings(request)
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
             
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
-                    self.queryset,
-                    individualOptions,
-                    show_unconnected,
-                    save_coords,
-                    show_cables,
-                    show_circuit,
-                    show_logical_connections,
-                    show_single_cable_logical_conns,
-                    show_power,
-                    show_wireless,
+                    queryset=self.queryset,
+                    individualOptions=individualOptions,
+                    save_coords=save_coords,
+                    show_unconnected=show_unconnected,
+                    show_cables=show_cables,
+                    show_logical_connections=show_logical_connections,
+                    show_single_cable_logical_conns=show_single_cable_logical_conns,
+                    show_neighbors=show_neighbors,
+                    show_circuit=show_circuit,
+                    show_power=show_power,
+                    show_wireless=show_wireless,
                 )
             
         else:
@@ -629,6 +657,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.show_cables: q['show_cables'] = "on"
             if individualOptions.show_logical_connections: q['show_logical_connections'] = "on"
             if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "on"
+            if individualOptions.show_neighbors: q['show_neighbors'] = "on"
             if individualOptions.show_circuit: q['show_circuit'] = "on"
             if individualOptions.show_power: q['show_power'] = "on"
             if individualOptions.show_wireless: q['show_wireless'] = "on"
@@ -751,6 +780,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,
                 'show_single_cable_logical_conns': queryset.show_single_cable_logical_conns,
+                'show_neighbors': queryset.show_neighbors,
                 'show_circuit': queryset.show_circuit,
                 'show_power': queryset.show_power,
                 'show_wireless': queryset.show_wireless,

@@ -25,4 +25,5 @@ class DeviceRoleSerializer(ModelSerializer):
 class IndividualOptionsSerializer(NetBoxModelSerializer):
     class Meta:
         model = IndividualOptions
-        fields = ("ignore_cable_type", "show_unconnected", "show_cables", "show_logical_connections", "show_single_cable_logical_conns", "show_circuit", "show_power", "show_wireless", "draw_default_layout")
+        fields = ("ignore_cable_type", "show_unconnected", "show_cables", "show_logical_connections", "show_single_cable_logical_conns", "show_neighbors", "show_circuit", "show_power", "show_wireless", "draw_default_layout")
+        
