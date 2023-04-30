@@ -39,6 +39,8 @@ from netbox_topology_views.utils import (
     get_model_role,
     get_model_slug,
     image_static_url,
+    LinePattern,
+    get_query_settings
 )
 
 
@@ -199,6 +201,7 @@ def create_edge(
     edge["id"] = edge_id
     edge["from"] = termination_a["device_id"]
     edge["to"] = termination_b["device_id"]
+    edge["color"] = '#2b7ce9'
     title = "Cable"
 
     if circuit is not None:
@@ -206,17 +209,17 @@ def create_edge(
         title = f"Circuit provider: {circuit['provider_name']}<br>Termination"
 
     elif wireless is not None:
-        edge["dashes"] = [2, 10, 2, 10]
+        edge["dashes"] = LinePattern().wireless
         title = "Wireless Connection"
 
     elif power is not None:
-        edge["dashes"] = [5, 5, 3, 3]
+        edge["dashes"] = LinePattern().power
         title = "Power Connection"
 
     elif interface is not None:
         title = "Interface Connection"
         edge["width"] = 3
-        edge["dashes"] = [1, 10, 1, 10]
+        edge["dashes"] = LinePattern().logical
         edge["color"] = '#f1c232'
         edge["href"] = interface.get_absolute_url() + "trace"
         
@@ -623,58 +626,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         )
 
         if request.GET:
-            save_coords = False
-            if "save_coords" in request.GET:
-                if request.GET["save_coords"] == "on":
-                    save_coords = True
-            # General options overrides
-            if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
-                save_coords = False
-                messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
-            elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
-                save_coords = True
 
-            # Individual options
-            show_unconnected = False
-            if "show_unconnected" in request.GET:
-                if request.GET["show_unconnected"] == "on":
-                    show_unconnected = True
-
-            show_cables = False
-            if "show_cables" in request.GET:
-                if request.GET["show_cables"] == "on" :
-                    show_cables = True
-
-            show_logical_connections = False
-            if "show_logical_connections" in request.GET:
-                if request.GET["show_logical_connections"] == "on" :
-                    show_logical_connections = True
-
-            show_single_cable_logical_conns = False
-            if "show_single_cable_logical_conns" in request.GET:
-                if request.GET["show_single_cable_logical_conns"] == "on" :
-                    show_single_cable_logical_conns = True
-
-            show_neighbors = False
-            if "show_neighbors" in request.GET:
-                if request.GET["show_neighbors"] == "on" :
-                    show_neighbors = True
-
-            show_circuit = False
-            if "show_circuit" in request.GET:
-                if request.GET["show_circuit"] == "on":
-                    show_circuit = True
-
-            show_power = False
-            if "show_power" in request.GET:
-                if request.GET["show_power"] == "on":
-                    show_power = True
-
-            show_wireless = False
-            if "show_wireless" in request.GET:
-                if request.GET["show_wireless"] == "on" :
-                    show_wireless = True
-
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
                     queryset=self.queryset,
@@ -724,7 +678,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                     "topology_data": json.dumps(topo_data),
                     "broken_image": find_image_url("role-unknown"),
-                    "epoch": int(time.time()),
+                    "epoch": int(time.time())
                 },
             )
 
@@ -735,7 +689,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
-                "model": self.model,
+                "model": self.model
             },
         )
 

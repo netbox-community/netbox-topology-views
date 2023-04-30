@@ -133,6 +133,29 @@ function performGraphDownload() {
     document.body.removeChild(tempDownloadLink)
 }
 
+// Download XML
+const downloadXmlButton = document.querySelector('#btnDownloadXml')
+downloadXmlButton.addEventListener('click', (e) => {
+    performXmlDownload()
+})
+
+function performXmlDownload() {
+    const tempDownloadLink = document.createElement('a');
+
+    fetch('/api/plugins/netbox_topology_views/xml-export/?' + new URLSearchParams(window.location.search)).then(response => response.text())
+    .then(data => {
+        var blob = new Blob([data ], { type: "text/plain" });
+
+        tempDownloadLink.setAttribute("href", window.URL.createObjectURL(blob));
+        tempDownloadLink.setAttribute("download", 'topology.xml');
+
+        tempDownloadLink.dataset.downloadurl = ["text/plain", tempDownloadLink.download, tempDownloadLink.href].join(":");
+
+        tempDownloadLink.click();
+
+    });
+}
+
 // Theme switching
 const observer = new MutationObserver((mutations) =>
     mutations.forEach((mutation) => {
