@@ -46,6 +46,7 @@ python3 manage.py collectstatic --no-input
 
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
+| >= 3.5.0       | >= v3.4.X                     |
 | >= 3.4.0       | >= v3.X.X                     |
 | >= 3.3.0       | >= v3.0.0                     |
 | >= 3.2.0       | >= v1.1.0                     |
@@ -149,12 +150,3 @@ To view `/plugins/netbox_topology-views/image`:
 
  To view `/plugins/netbox_topology-views/individualoptions`:
  + netbox topology views | individualoptions | change
-
- ## Icons info
-
-Power icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/power).
-
-Power icons created by [Flat Icons - Flaticon](https://www.flaticon.com/free-icons/power)
-
-Provider icons created by [Good Ware - Flaticon](https://www.flaticon.com/free-icons/provider)
-
