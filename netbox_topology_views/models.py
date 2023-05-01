@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Optional
 
-from dcim.models import DeviceRole
+from dcim.models import Device, DeviceRole
 from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.templatetags.static import static
+from django.urls import reverse
 from netbox.models import NetBoxModel
 from netbox.models.features import (
     ChangeLoggingMixin,
@@ -93,6 +94,63 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
         except ValueError:
             return self.get_default_image(dir)
         return static(f"/{self.image}")
+
+class CoordinateGroups(NetBoxModel):
+    """
+    A coordinate group is used to display the topology for a particular group. 
+    This allows different visualizations with the same devices.
+    """
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    description = models.CharField(
+        max_length=255,
+        blank = True,
+    )
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('plugins:netbox_topology_views:coordinategroups', args=[self.pk])
+
+class Coordinates(NetBoxModel):
+    """
+    Coordinates are being used to place devices in a topology view onto a certian 
+    position. Devices belong to one or more coordinate groups. They have to 
+    be unique together.
+    """
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    group = models.ForeignKey(CoordinateGroups, on_delete=models.CASCADE)
+    
+    x = models.IntegerField(
+        help_text='X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.',
+    )
+    y = models.IntegerField(
+        help_text='Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.',
+    )
+
+    class Meta:
+        ordering = ['group', 'device']
+        unique_together = ('device', 'group')
+
+    def __str__(self):
+        return f'{self.x};{self.y}'
+
+    def get_absolute_url(self):
+        return reverse('plugins:netbox_topology_views:coordinates', args=[self.pk])
+
+    def set_xy_from_text_coords(self, coords: str):
+        xy = coords.split(';')
+        self.x = xy[0]
+        self.y = xy[1]
 
 class IndividualOptions(NetBoxModel):
     CHOICES = (

@@ -29,10 +29,13 @@ from django.shortcuts import render
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
+from netbox.views.generic import ObjectView, ObjectListView, ObjectEditView, ObjectDeleteView, ObjectChangeLogView
 
-from netbox_topology_views.filters import DeviceFilterSet
-from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm
-from netbox_topology_views.models import RoleImage, IndividualOptions
+
+from netbox_topology_views.filters import DeviceFilterSet, CoordinateFilterSet
+from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, CoordinateGroupsForm, CoordinatesForm, CoordinatesFilterForm
+from netbox_topology_views.models import RoleImage, CoordinateGroups, Coordinates, IndividualOptions
+from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -750,6 +753,80 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 "images": images,
             },
         )
+
+class CoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinates'
+
+    queryset = Coordinates.objects.all()
+
+class CoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinates'
+
+    queryset = Coordinates.objects.all()
+    form = CoordinatesForm
+    template_name = 'netbox_topology_views/coordinates_add.html'
+
+class CoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinates'
+
+    queryset = Coordinates.objects.all()
+    table = CoordinateListTable
+    template_name = 'netbox_topology_views/coordinates_list.html'
+    filterset = CoordinateFilterSet
+    filterset_form = CoordinatesFilterForm
+
+class CoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinates'
+
+    queryset = Coordinates.objects.all()
+    form = CoordinatesForm
+    template_name = 'netbox_topology_views/coordinates_edit.html'
+
+class CoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinates'
+
+    queryset = Coordinates.objects.all()
+
+class CoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinates'
+
+    queryset = Coordinates.objects.all()
+
+class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
+
+class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
+    form = CoordinateGroupsForm
+    template_name = 'netbox_topology_views/coordinategroups_add.html'
+
+class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
+    table = CoordinateGroupListTable
+    template_name = 'netbox_topology_views/coordinategroups_list.html'
+
+class CoordinateGroupEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
+    form = CoordinateGroupsForm
+    template_name = 'netbox_topology_views/coordinategroups_edit.html'
+
+class CoordinateGroupDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
+
+class CoordinateGroupChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinategroups'
+
+    queryset = CoordinateGroups.objects.all()
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
     permission_required = 'netbox_topology_views.change_individualoptions'

@@ -15,12 +15,13 @@ from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
 from utilities.forms.fields import (
     TagFilterField,
+    DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     MultipleChoiceField
 )
 
 
-from .models import IndividualOptions
+from .models import IndividualOptions, CoordinateGroups, Coordinates
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
@@ -139,6 +140,55 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     )
     show_wireless = forms.BooleanField(
         label =_("Show Wireless Links"), required=False, initial=False
+    )
+
+class CoordinateGroupsForm(NetBoxModelForm):
+    fieldsets = (
+        ('Group Details', ('name', 'description')),
+    )
+
+    class Meta:
+        model = CoordinateGroups
+        fields = ('name', 'description')
+
+class CoordinatesForm(NetBoxModelForm):
+    fieldsets = (
+        ('Coordinates', ('group', 'device', 'x', 'y')),
+    )
+
+    class Meta:
+        model = Coordinates
+        fields = ('group', 'device', 'x', 'y')
+
+class CoordinatesFilterForm(NetBoxModelFilterSetForm):
+    model = Coordinates
+
+    group = forms.ModelMultipleChoiceField(
+        queryset=CoordinateGroups.objects.all(),
+        required=False
+    )
+
+    device = DynamicModelChoiceField(
+        queryset=Device.objects.all(),
+        required=False
+    )
+    id = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        label=_("Device"),
+        query_params={
+            "location_id": "$location_id",
+            "region_id": "$region_id",
+            "site_id": "$site_id",
+            "role_id": "$device_role_id",
+        },
+    )
+    x = forms.IntegerField(
+        required=False
+    )
+
+    y = forms.IntegerField(
+        required=False
     )
 
 class IndividualOptionsForm(NetBoxModelForm):
