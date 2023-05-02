@@ -1,7 +1,7 @@
 import django_filters
 from dcim.choices import DeviceStatusChoices
 from dcim.models import Device, DeviceRole, Location, Rack, Region, Site
-from .models import Coordinates
+from .models import Coordinate
 from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import TenancyFilterSet
@@ -57,7 +57,7 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
 
 class CoordinateFilterSet(NetBoxModelFilterSet):
     class Meta:
-        model = Coordinates
+        model = Coordinate
         fields = ('id', 'group', 'device', 'x', 'y')
 
     def search(self, queryset, name, value):

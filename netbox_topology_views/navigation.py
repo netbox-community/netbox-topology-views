@@ -1,18 +1,18 @@
 from extras.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
 from utilities.choices import ButtonColorChoices
 
-coordinategroups_buttons = [
+coordinategroup_buttons = [
     PluginMenuButton(
-        link='plugins:netbox_topology_views:coordinategroups_add',
+        link='plugins:netbox_topology_views:coordinategroup_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
         color=ButtonColorChoices.GREEN,
     )
 ]
 
-coordinates_buttons = [
+coordinate_buttons = [
     PluginMenuButton(
-        link='plugins:netbox_topology_views:coordinates_add',
+        link='plugins:netbox_topology_views:coordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
         color=ButtonColorChoices.GREEN,
@@ -26,8 +26,8 @@ menu = PluginMenu(
         ('TOPOLOGY', 
             (
                 PluginMenuItem(link="plugins:netbox_topology_views:home", link_text="Topology"),
-                PluginMenuItem(link="plugins:netbox_topology_views:coordinategroups_list", link_text="Coordinate Groups", buttons=coordinategroups_buttons),
-                PluginMenuItem(link="plugins:netbox_topology_views:coordinates_list", link_text="Coordinates", buttons=coordinates_buttons),
+                PluginMenuItem(link="plugins:netbox_topology_views:coordinategroup_list", link_text="Coordinate Groups", buttons=coordinategroup_buttons),
+                PluginMenuItem(link="plugins:netbox_topology_views:coordinate_list", link_text="Coordinates", buttons=coordinate_buttons),
             ),
         ),
         ('PREFERENCES', 

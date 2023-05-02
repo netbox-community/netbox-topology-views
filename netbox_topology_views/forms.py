@@ -21,7 +21,7 @@ from utilities.forms.fields import (
 )
 
 
-from .models import IndividualOptions, CoordinateGroups, Coordinates
+from .models import IndividualOptions, CoordinateGroup, Coordinate
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
@@ -148,23 +148,23 @@ class CoordinateGroupsForm(NetBoxModelForm):
     )
 
     class Meta:
-        model = CoordinateGroups
+        model = CoordinateGroup
         fields = ('name', 'description')
 
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        ('Coordinates', ('group', 'device', 'x', 'y')),
+        ('Coordinate', ('group', 'device', 'x', 'y')),
     )
 
     class Meta:
-        model = Coordinates
+        model = Coordinate
         fields = ('group', 'device', 'x', 'y')
 
 class CoordinatesFilterForm(NetBoxModelFilterSetForm):
-    model = Coordinates
+    model = Coordinate
 
     group = forms.ModelMultipleChoiceField(
-        queryset=CoordinateGroups.objects.all(),
+        queryset=CoordinateGroup.objects.all(),
         required=False
     )
 

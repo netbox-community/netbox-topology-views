@@ -34,7 +34,7 @@ from netbox.views.generic import ObjectView, ObjectListView, ObjectEditView, Obj
 
 from netbox_topology_views.filters import DeviceFilterSet, CoordinateFilterSet
 from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, CoordinateGroupsForm, CoordinatesForm, CoordinatesFilterForm
-from netbox_topology_views.models import RoleImage, CoordinateGroups, Coordinates, IndividualOptions
+from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
 from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
@@ -755,81 +755,81 @@ class TopologyImagesView(PermissionRequiredMixin, View):
         )
 
 class CoordinateView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_coordinates'
+    permission_required = 'netbox_topology_views.view_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
 
 class CoordinateAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_coordinates'
+    permission_required = 'netbox_topology_views.add_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
     form = CoordinatesForm
-    template_name = 'netbox_topology_views/coordinates_add.html'
+    template_name = 'netbox_topology_views/coordinate_add.html'
 
 class CoordinateListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_coordinates'
+    permission_required = 'netbox_topology_views.view_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
     table = CoordinateListTable
-    template_name = 'netbox_topology_views/coordinates_list.html'
+    template_name = 'netbox_topology_views/coordinate_list.html'
     filterset = CoordinateFilterSet
     filterset_form = CoordinatesFilterForm
 
 class CoordinateEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_coordinates'
+    permission_required = 'netbox_topology_views.change_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
     form = CoordinatesForm
-    template_name = 'netbox_topology_views/coordinates_edit.html'
+    template_name = 'netbox_topology_views/coordinate_edit.html'
 
 class CoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_coordinates'
+    permission_required = 'netbox_topology_views.delete_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
 
 class CoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
-    permission_required = 'netbox_topology_views.view_coordinates'
+    permission_required = 'netbox_topology_views.view_coordinate'
 
-    queryset = Coordinates.objects.all()
+    queryset = Coordinate.objects.all()
 
 class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_coordinategroups'
+    permission_required = 'netbox_topology_views.view_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
 
 class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_coordinategroups'
+    permission_required = 'netbox_topology_views.add_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
     form = CoordinateGroupsForm
-    template_name = 'netbox_topology_views/coordinategroups_add.html'
+    template_name = 'netbox_topology_views/coordinategroup_add.html'
 
 class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_coordinategroups'
+    permission_required = 'netbox_topology_views.view_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
     table = CoordinateGroupListTable
-    template_name = 'netbox_topology_views/coordinategroups_list.html'
+    template_name = 'netbox_topology_views/coordinategroup_list.html'
 
 class CoordinateGroupEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_coordinategroups'
+    permission_required = 'netbox_topology_views.change_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
     form = CoordinateGroupsForm
-    template_name = 'netbox_topology_views/coordinategroups_edit.html'
+    template_name = 'netbox_topology_views/coordinategroup_edit.html'
 
 class CoordinateGroupDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_coordinategroups'
+    permission_required = 'netbox_topology_views.delete_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
 
 class CoordinateGroupChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
-    permission_required = 'netbox_topology_views.view_coordinategroups'
+    permission_required = 'netbox_topology_views.view_coordinategroup'
 
-    queryset = CoordinateGroups.objects.all()
+    queryset = CoordinateGroup.objects.all()
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
-    permission_required = 'netbox_topology_views.change_individualoptions'
+    permission_required = 'netbox_topology_views.change_individualoption'
 
     def post(self, request):
         instance = IndividualOptions.objects.get(user_id=request.user.id)

@@ -1,7 +1,7 @@
 import django_tables2 as tables
 
 from netbox.tables import NetBoxTable, ChoiceFieldColumn
-from .models import CoordinateGroups, Coordinates
+from .models import CoordinateGroup, Coordinate
 
 class CoordinateGroupListTable(NetBoxTable):
     name = tables.Column(
@@ -9,7 +9,7 @@ class CoordinateGroupListTable(NetBoxTable):
     )
 
     class Meta(NetBoxTable.Meta):
-        model = CoordinateGroups
+        model = CoordinateGroup
         fields = ('pk', 'name', 'description')
         default_columns = ('name', 'description')
 
@@ -23,7 +23,7 @@ class CoordinateListTable(NetBoxTable):
     )
 
     class Meta(NetBoxTable.Meta):
-        model = Coordinates
+        model = Coordinate
         fields = ('pk', 'group', 'device', 'x', 'y')
         default_columns = ('id', 'group', 'device', 'x', 'y')
 

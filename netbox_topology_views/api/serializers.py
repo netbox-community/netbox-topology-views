@@ -2,7 +2,7 @@ from dcim.models import Device, DeviceRole
 from rest_framework.serializers import ModelSerializer
 from netbox.api.serializers import NetBoxModelSerializer
 
-from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroups, Coordinates
+from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate
 
 
 class TopologyDummySerializer(ModelSerializer):
@@ -22,14 +22,14 @@ class DeviceRoleSerializer(ModelSerializer):
         model = DeviceRole
         fields = ("name", "slug", "color", "vm_role", "description")
 
-class CoordinateGroupsSerializer(NetBoxModelSerializer):
+class CoordinateGroupSerializer(NetBoxModelSerializer):
     class Meta:
-        model = CoordinateGroups
+        model = CoordinateGroup
         fields = ("name", "description")
 
-class CoordinatesSerializer(NetBoxModelSerializer):
+class CoordinateSerializer(NetBoxModelSerializer):
     class Meta:
-        model = Coordinates
+        model = Coordinate
         fields = ("x", "y")
 
 class IndividualOptionsSerializer(NetBoxModelSerializer):

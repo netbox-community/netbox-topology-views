@@ -95,7 +95,7 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
             return self.get_default_image(dir)
         return static(f"/{self.image}")
 
-class CoordinateGroups(NetBoxModel):
+class CoordinateGroup(NetBoxModel):
     """
     A coordinate group is used to display the topology for a particular group. 
     This allows different visualizations with the same devices.
@@ -117,16 +117,16 @@ class CoordinateGroups(NetBoxModel):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('plugins:netbox_topology_views:coordinategroups', args=[self.pk])
+        return reverse('plugins:netbox_topology_views:coordinategroup', args=[self.pk])
 
-class Coordinates(NetBoxModel):
+class Coordinate(NetBoxModel):
     """
     Coordinates are being used to place devices in a topology view onto a certian 
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    group = models.ForeignKey(CoordinateGroups, on_delete=models.CASCADE)
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
@@ -145,7 +145,7 @@ class Coordinates(NetBoxModel):
         return f'{self.x};{self.y}'
 
     def get_absolute_url(self):
-        return reverse('plugins:netbox_topology_views:coordinates', args=[self.pk])
+        return reverse('plugins:netbox_topology_views:coordinate', args=[self.pk])
 
     def set_xy_from_text_coords(self, coords: str):
         xy = coords.split(';')

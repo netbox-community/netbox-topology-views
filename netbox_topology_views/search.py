@@ -1,9 +1,9 @@
 from netbox.search import SearchIndex, register_search
-from .models import CoordinateGroups, Coordinates
+from .models import CoordinateGroup, Coordinate
 
 @register_search
 class CoordinateGroupsIndex(SearchIndex):
-    model = CoordinateGroups
+    model = CoordinateGroup
     fields = (
         ('name', 100),
         ('description', 2000),
@@ -11,7 +11,7 @@ class CoordinateGroupsIndex(SearchIndex):
 
 @register_search
 class CoordinatesIndex(SearchIndex):
-    model = Coordinates
+    model = Coordinate
     fields = (
         ('group', 100),
         ('device', 200),
