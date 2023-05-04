@@ -121,7 +121,7 @@ class CoordinateGroup(NetBoxModel):
 
 class Coordinate(NetBoxModel):
     """
-    Coordinates are being used to place devices in a topology view onto a certian 
+    Coordinates are being used to place devices in a topology view onto a certain 
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
@@ -146,11 +146,6 @@ class Coordinate(NetBoxModel):
 
     def get_absolute_url(self):
         return reverse('plugins:netbox_topology_views:coordinate', args=[self.pk])
-
-    def set_xy_from_text_coords(self, coords: str):
-        xy = coords.split(';')
-        self.x = xy[0]
-        self.y = xy[1]
 
 class IndividualOptions(NetBoxModel):
     CHOICES = (

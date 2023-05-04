@@ -162,27 +162,21 @@ class CoordinatesForm(NetBoxModelForm):
 
 class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
+    fieldsets = (
+        (None, ('q', 'filter_id')),
+        ('Coordinates', ('group', 'device', 'x', 'y'))
+    )
 
     group = forms.ModelMultipleChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False
     )
 
-    device = DynamicModelChoiceField(
+    device = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
         required=False
     )
-    id = DynamicModelMultipleChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        label=_("Device"),
-        query_params={
-            "location_id": "$location_id",
-            "region_id": "$region_id",
-            "site_id": "$site_id",
-            "role_id": "$device_role_id",
-        },
-    )
+
     x = forms.IntegerField(
         required=False
     )

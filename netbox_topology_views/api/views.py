@@ -14,7 +14,7 @@ from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
 )
-from netbox_topology_views.models import RoleImage, IndividualOptions
+from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate
 from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
 from netbox_topology_views.filters import DeviceFilterSet
@@ -50,6 +50,8 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
         if not actual_device:
             return Response({"status": "invalid node_id in body"}, status=400)
 
+        # Storing coordinates in custom field is deprecated now. 
+        # We preserve this for backwards compatibility.
         try:
             actual_device.custom_field_data["coordinates"] = "%s;%s" % (
                 x_coord,
@@ -61,6 +63,40 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
                 {"status": "coords custom field could not be saved"}, status=500
             )
 
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        try:
+            group = CoordinateGroup.objects.get(name="default")
+        except CoordinateGroup.DoesNotExist:
+            try:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+            except:
+                return Response(
+                    {"status": "Error while creating default group."}, status=500
+                )
+
+        try:
+            # Hen-and-egg-problem. Thanks, Django! By default, Django updates records that
+            # already exist and inserts otherwise. This does not work with our 
+            # unique_together key if no pk is given. But: No record, no pk.
+            if not Coordinate.objects.filter(group=group, device=actual_device):
+                # Unique group/device pair does not exist. Prepare new data set
+                coords = Coordinate(group=group, device=actual_device, x=x_coord, y=y_coord)
+            else:
+                # Unique group/device pair already exists. Update data
+                coords = Coordinate(pk=Coordinate.objects.get(group=group, device=actual_device).pk, group=group, device=actual_device, x=x_coord, y=y_coord)  
+            coords.save()
+        except:
+            return Response(
+                {"status": "Coordinates could not be saved."}, status=500
+            )
         return Response({"status": "saved coords"})
 
 class ExportTopoToXML(PermissionRequiredMixin, ViewSet):

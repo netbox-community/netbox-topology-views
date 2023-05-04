@@ -32,7 +32,7 @@ from wireless.models import WirelessLink
 from netbox.views.generic import ObjectView, ObjectListView, ObjectEditView, ObjectDeleteView, ObjectChangeLogView
 
 
-from netbox_topology_views.filters import DeviceFilterSet, CoordinateFilterSet
+from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet
 from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, CoordinateGroupsForm, CoordinatesForm, CoordinatesFilterForm
 from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
 from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
@@ -156,8 +156,31 @@ def create_node(
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
 
+    # Default group named "default" must always exist in order to make sure
+    # that coordinate values can be stored even if no coordinate group has been
+    # selected. The default group will be added automatically if it does not exist.
+    try:
+        group = CoordinateGroup.objects.get(name="default")
+    except CoordinateGroup.DoesNotExist:
+        try:
+            group = CoordinateGroup(
+                name="default", 
+                description="Automatically generated default group. If you delete "
+                    "this group, all default coordinates are gone for good but "
+                    "the group itself will be re-created."
+            )
+            group.save()
+        except:
+            pass
+
     node["physics"] = True
-    if "coordinates" in device.custom_field_data:
+    if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
+        node["x"] = Coordinate.objects.get(group=group, device=device.pk).x
+        node["y"] = Coordinate.objects.get(group=group, device=device.pk).y
+        node["physics"] = False
+    elif "coordinates" in device.custom_field_data:
+        # We prefer the new Coordinate model but leave the deprecated method 
+        # for now as fallback for compatibility reasons
         if device.custom_field_data["coordinates"] is not None:
             if ";" in device.custom_field_data["coordinates"]:
                 cords = device.custom_field_data["coordinates"].split(";")
@@ -166,6 +189,9 @@ def create_node(
                 node["physics"] = False
         elif save_coords:
             node["physics"] = False
+    elif save_coords:
+        node["physics"] = False
+
     return node
 
 
@@ -772,7 +798,7 @@ class CoordinateListView(PermissionRequiredMixin, ObjectListView):
     queryset = Coordinate.objects.all()
     table = CoordinateListTable
     template_name = 'netbox_topology_views/coordinate_list.html'
-    filterset = CoordinateFilterSet
+    filterset = CoordinatesFilterSet
     filterset_form = CoordinatesFilterForm
 
 class CoordinateEditView(PermissionRequiredMixin, ObjectEditView):
