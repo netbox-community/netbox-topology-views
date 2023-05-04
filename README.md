@@ -4,7 +4,8 @@
 
 Create topology views/maps from your devices in netbox.
 The connections are based on the cables you created in netbox.
-Support to filter on name, site, tag and device role.
+Support to filter on name, site, tag and device role.  
+Options to export to xml (for draw.io/diagrams.net) or png.
 
 ## Preview
 
