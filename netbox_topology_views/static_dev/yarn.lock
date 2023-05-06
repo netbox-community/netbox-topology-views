@@ -291,7 +291,7 @@
   "resolved" "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz"
   "version" "7.0.0"
 
-"keycharm@^0.2.0 || ^0.3.0 || ^0.4.0", "keycharm@^0.4.0":
+"keycharm@^0.4.0":
   "integrity" "sha512-TyQTtsabOVv3MeOpR92sIKk/br9wxS+zGj4BG7CR8YbK4jM3tyIBaF0zhzeBUMx36/Q/iQLOKKOT+3jOQtemRQ=="
   "resolved" "https://registry.npmjs.org/keycharm/-/keycharm-0.4.0.tgz"
   "version" "0.4.0"
@@ -358,12 +358,12 @@
   dependencies:
     "is-number" "^7.0.0"
 
-"uuid@^3.4.0 || ^7.0.0 || ^8.0.0 || ^9.0.0", "uuid@^8.0.0":
+"uuid@^8.0.0":
   "integrity" "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg=="
   "resolved" "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
   "version" "8.3.2"
 
-"vis-data@^6.3.0 || ^7.0.0", "vis-data@^7.1.6":
+"vis-data@^7.1.6":
   "integrity" "sha512-lG7LJdkawlKSXsdcEkxe/zRDyW29a4r7N7PMwxCPxK12/QIdqxJwcMxwjVj9ozdisRhP5TyWDHZwsgjmj0g6Dg=="
   "resolved" "https://registry.npmjs.org/vis-data/-/vis-data-7.1.6.tgz"
   "version" "7.1.6"
@@ -373,7 +373,7 @@
   "resolved" "https://registry.npmjs.org/vis-network/-/vis-network-9.1.6.tgz"
   "version" "9.1.6"
 
-"vis-util@^5.0.1", "vis-util@^5.0.3":
+"vis-util@^5.0.3":
   "integrity" "sha512-Wf9STUcFrDzK4/Zr7B6epW2Kvm3ORNWF+WiwEz2dpf5RdWkLUXFSbLcuB88n1W6tCdFwVN+v3V4/Xmn9PeL39g=="
   "resolved" "https://registry.npmjs.org/vis-util/-/vis-util-5.0.3.tgz"
   "version" "5.0.3"
