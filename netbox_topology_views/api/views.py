@@ -65,23 +65,8 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
                     {"status": "coords custom field could not be saved"}, status=500
                 )
 
-            # Default group named "default" must exist in order to make sure that
-            # coordinate values can be stored even if no coordinate group has been
-            # selected. The default group will be added automatically if it does not exist.
-            try:
-                if CoordinateGroup.objects.filter(name="default"):
-                    group = CoordinateGroup.objects.get(name="default")
-                    group_id = group.pk
-                else:
-                    group = CoordinateGroup(
-                        name="default", 
-                        description="Automatically generated default group. If you delete "
-                            "this group, all default coordinates are gone for good but "
-                            "the group itself will be re-created."
-                    )
-                    group.save()
-                    group_id = group.pk
-            except:
+            group_id = Coordinate.get_or_create_default_group(group_id)
+            if not group_id:
                 return Response(
                     {"status": "Error while creating default group."}, status=500
                 )  

@@ -137,6 +137,27 @@ class Coordinate(NetBoxModel):
             'Smaller values correspond to a position further to the left on the monitor.',
     )
 
+    def get_or_create_default_group(group_id):
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        try:
+            if CoordinateGroup.objects.filter(name="default"):
+                group = CoordinateGroup.objects.get(name="default")
+                group_id = group.pk
+            else:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+                group_id = group.pk
+        except:
+            return False
+        return group_id
+
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
