@@ -88,7 +88,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                             body: JSON.stringify({
                                 node_id: nodeId,
                                 x: nodePosition.x,
-                                y: nodePosition.y
+                                y: nodePosition.y,
+                                group: topologyData.group
                             })
                         }
                     )

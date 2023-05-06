@@ -31,6 +31,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             (
                 "q",
                 "filter_id",
+                "group",
                 "save_coords",
                 "show_unconnected",
                 "show_cables",
@@ -60,7 +61,10 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         ),
         (None, ("tag",)),
     )
-
+    group = forms.ModelChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False
+    )
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(), required=False, label=_("Region")
     )

@@ -25,7 +25,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
@@ -65,7 +65,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, group_id="default"
 ):
     node = {}
     node_content = ""
@@ -156,22 +156,27 @@ def create_node(
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
 
-    # Default group named "default" must always exist in order to make sure
-    # that coordinate values can be stored even if no coordinate group has been
-    # selected. The default group will be added automatically if it does not exist.
-    try:
-        group = CoordinateGroup.objects.get(name="default")
-    except CoordinateGroup.DoesNotExist:
+    if group_id is None or group_id == "default":
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
         try:
-            group = CoordinateGroup(
-                name="default", 
-                description="Automatically generated default group. If you delete "
-                    "this group, all default coordinates are gone for good but "
-                    "the group itself will be re-created."
-            )
-            group.save()
+            if CoordinateGroup.objects.filter(name="default"):
+                group = CoordinateGroup.objects.get(name="default")
+                group_id = group.pk
+            else:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+                group_id = group.pk
         except:
             pass
+   
+    group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = True
     if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
@@ -296,6 +301,7 @@ def get_topology_data(
     show_neighbors: bool,
     show_power: bool,
     show_wireless: bool,
+    group_id,
 ):
     
     supported_termination_types = []
@@ -417,7 +423,7 @@ def get_topology_data(
                         ] = circuit_termination.circuit
 
         for d in nodes_circuits.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
@@ -467,10 +473,10 @@ def get_topology_data(
                     cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
         for d in nodes_powerpanel.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
     if show_logical_connections:
         interfaces = Interface.objects.filter(
@@ -627,10 +633,11 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords))
+        nodes.append(create_node(d, save_coords, group_id))
 
     results["nodes"] = nodes
     results["edges"] = edges
+    results["group"] = group_id
     return results
 
 
@@ -658,6 +665,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
             
+            if "group" not in request.GET:
+                group_id = "default"
+            else:
+                group_id = request.GET["group"]
+
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
                     queryset=self.queryset,
@@ -671,6 +683,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_circuit=show_circuit,
                     show_power=show_power,
                     show_wireless=show_wireless,
+                    group_id=group_id,
                 )
             
         else:
