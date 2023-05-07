@@ -15,13 +15,11 @@ from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
 from utilities.forms.fields import (
     TagFilterField,
-    DynamicModelChoiceField,
     DynamicModelMultipleChoiceField,
     MultipleChoiceField
 )
 
-
-from .models import IndividualOptions, CoordinateGroup, Coordinate
+from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
@@ -31,6 +29,11 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             (
                 "q",
                 "filter_id",
+            ),          
+        ),
+        (
+            None,
+            (
                 "group",
                 "save_coords",
                 "show_unconnected",
@@ -63,7 +66,8 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     )
     group = forms.ModelChoiceField(
         queryset=CoordinateGroup.objects.all(),
-        required=False
+        required=False,
+        label=_("Coordinate group"),
     )
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(), required=False, label=_("Region")

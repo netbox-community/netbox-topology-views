@@ -19,7 +19,9 @@ from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
 from netbox_topology_views.filters import DeviceFilterSet
 
-class SaveCoordsViewSet(ReadOnlyModelViewSet):
+class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
     queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 

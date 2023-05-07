@@ -159,6 +159,7 @@ def create_node(
     if group_id is None or group_id == "default":
         group_id = Coordinate.get_or_create_default_group(group_id)
         if not group_id:
+            print('Exception occured while handling default group. Setting node to 0;0.')
             node["x"] = 0
             node["y"] = 0
             return node
@@ -855,7 +856,7 @@ class CoordinateGroupChangeLogView(PermissionRequiredMixin, ObjectChangeLogView)
     queryset = CoordinateGroup.objects.all()
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
-    permission_required = 'netbox_topology_views.change_individualoption'
+    permission_required = 'netbox_topology_views.change_individualoptions'
 
     def post(self, request):
         instance = IndividualOptions.objects.get(user_id=request.user.id)

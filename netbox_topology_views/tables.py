@@ -1,7 +1,7 @@
 import django_tables2 as tables
 
 from netbox.tables import NetBoxTable, ChoiceFieldColumn
-from .models import CoordinateGroup, Coordinate
+from netbox_topology_views.models import CoordinateGroup, Coordinate
 
 class CoordinateGroupListTable(NetBoxTable):
     name = tables.Column(

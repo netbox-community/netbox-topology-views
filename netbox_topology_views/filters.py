@@ -1,12 +1,11 @@
 import django_filters
 from dcim.choices import DeviceStatusChoices
 from dcim.models import Device, DeviceRole, Location, Rack, Region, Site
-from .models import Coordinate, CoordinateGroup
 from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import TenancyFilterSet
 from utilities.filters import TreeNodeMultipleChoiceFilter
-
+from netbox_topology_views.models import CoordinateGroup, Coordinate
 
 class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     q = django_filters.CharFilter(
