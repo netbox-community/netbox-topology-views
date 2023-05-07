@@ -54,19 +54,6 @@ class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
             return Response({"status": "invalid node_id in body"}, status=400)
 
         if group_id is None or group_id == "default":
-            # Storing coordinates in custom field is deprecated now. 
-            # We preserve this for backwards compatibility.
-            try:
-                actual_device.custom_field_data["coordinates"] = "%s;%s" % (
-                    x_coord,
-                    y_coord,
-                )
-                actual_device.save()
-            except:
-                return Response(
-                    {"status": "coords custom field could not be saved"}, status=500
-                )
-
             group_id = Coordinate.get_or_create_default_group(group_id)
             if not group_id:
                 return Response(
