@@ -81,8 +81,9 @@ class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
         return Response({"status": "saved coords"})
 
 class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
-    queryset = Device.objects.none()
     permission_required = ("dcim.view_site", "dcim.view_device")
+
+    queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 
     def list(self, request):
@@ -100,6 +101,10 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
         if request.GET:
 
             save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            if 'group' not in request.query_params:
+                group_id = "default"
+            else:
+                group_id = request.query_params["group"]
             topo_data = get_topology_data(
                 queryset=self.queryset,
                 individualOptions=individualOptions,
@@ -112,6 +117,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 show_circuit=show_circuit,
                 show_power=show_power,
                 show_wireless=show_wireless,
+                group_id=group_id,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 
