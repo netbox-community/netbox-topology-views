@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic.base import RedirectView
-
+from netbox.views.generic import ObjectChangeLogView
 from . import models, views
 
 # Define a list of URL patterns to be imported by NetBox. Each pattern maps a URL to
@@ -17,7 +17,7 @@ urlpatterns = (
     path("coordinate-groups/<int:pk>/", views.CoordinateGroupView.as_view(), name="coordinategroup"),
     path("coordinate-groups/<int:pk>/edit/", views.CoordinateGroupEditView.as_view(), name="coordinategroup_edit"),
     path("coordinate-groups/<int:pk>/delete/", views.CoordinateGroupDeleteView.as_view(), name="coordinategroup_delete"),
-    path("coordinate-groups/<int:pk>/changelog/", views.CoordinateGroupChangeLogView.as_view(), name="coordinategroup_changelog", kwargs={'model': models.CoordinateGroup}),
+    path("coordinate-groups/<int:pk>/changelog/", ObjectChangeLogView.as_view(), name="coordinategroup_changelog", kwargs={'model': models.CoordinateGroup}),
 
     # Coordinate
     path("coordinate/", views.CoordinateListView.as_view(), name="coordinate_list"),
@@ -25,5 +25,5 @@ urlpatterns = (
     path("coordinate/<int:pk>/", views.CoordinateView.as_view(), name="coordinate"),
     path("coordinate/<int:pk>/edit/", views.CoordinateEditView.as_view(), name="coordinate_edit"),
     path("coordinate/<int:pk>/delete/", views.CoordinateDeleteView.as_view(), name="coordinate_delete"),
-    path("coordinate/<int:pk>/changelog/", views.CoordinateChangeLogView.as_view(), name="coordinate_changelog", kwargs={'model': models.Coordinate}),
+    path("coordinate/<int:pk>/changelog/", ObjectChangeLogView.as_view(), name="coordinate_changelog", kwargs={'model': models.Coordinate}),
 )

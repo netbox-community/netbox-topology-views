@@ -7,11 +7,12 @@ class CoordinateGroupListTable(NetBoxTable):
     name = tables.Column(
         linkify=True
     )
+    devices = tables.Column()
 
     class Meta(NetBoxTable.Meta):
         model = CoordinateGroup
-        fields = ('pk', 'name', 'description')
-        default_columns = ('name', 'description')
+        fields = ('pk', 'id', 'name', 'description', 'devices')
+        default_columns = ('name', 'description', 'devices')
 
 class CoordinateListTable(NetBoxTable):
     group = tables.Column(
@@ -24,6 +25,6 @@ class CoordinateListTable(NetBoxTable):
 
     class Meta(NetBoxTable.Meta):
         model = Coordinate
-        fields = ('pk', 'group', 'device', 'x', 'y')
+        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
         default_columns = ('id', 'group', 'device', 'x', 'y')
 

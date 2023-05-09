@@ -22,7 +22,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Count
 from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
@@ -825,6 +825,14 @@ class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
 
     queryset = CoordinateGroup.objects.all()
 
+    def get_extra_context(self, request, instance):
+        table = CoordinateListTable(instance.coordinate_set.all())
+        table.configure(request)
+
+        return {
+            'coordinates_table': table,
+        }
+
 class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
     permission_required = 'netbox_topology_views.add_coordinategroup'
 
@@ -835,7 +843,9 @@ class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
 class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'netbox_topology_views.view_coordinategroup'
 
-    queryset = CoordinateGroup.objects.all()
+    queryset = CoordinateGroup.objects.annotate(
+        devices = Count('coordinate')
+    )
     table = CoordinateGroupListTable
     template_name = 'netbox_topology_views/coordinategroup_list.html'
 
