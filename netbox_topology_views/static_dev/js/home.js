@@ -60,6 +60,9 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         }))
     )
 
+    // make nodes object available globally in order to update their physics and positions later
+    window.nodes = nodes;
+
     const edges = new DataSet(
         topologyData.edges.map((node) => ({
             ...node,
@@ -72,10 +75,11 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     graph.on('dragEnd', (params) => {
         if (coordSaveCheckbox == null) return
         if (!coordSaveCheckbox.checked) return
-        
+
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
+                    window.nodes.update({id: parseInt(nodeId), physics: false, x: nodePosition.x, y: nodePosition.y});
                     const res = await fetch(
                         '/api/plugins/netbox_topology_views/save-coords/save_coords/',
                         {

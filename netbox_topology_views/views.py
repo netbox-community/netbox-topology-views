@@ -147,15 +147,6 @@ def create_node(
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
 
-    dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
-
-    node["title"] = dev_title
-    node["name"] = dev_name
-    node["label"] = dev_name
-    node["shape"] = "image"
-    node["href"] = device.get_absolute_url()
-    node["image"] = get_image_for_entity(device)
-
     if group_id is None or group_id == "default":
         group_id = Coordinate.get_or_create_default_group(group_id)
         if not group_id:
@@ -182,8 +173,18 @@ def create_node(
                 node["physics"] = False
         elif save_coords:
             node["physics"] = False
-    elif save_coords:
-        node["physics"] = False
+    else:
+        node["physics"] = True
+        node["x"] = 0
+        node["y"] = 0
+
+    dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
+    node["title"] = dev_title
+    node["name"] = dev_name
+    node["label"] = dev_name
+    node["shape"] = "image"
+    node["href"] = device.get_absolute_url()
+    node["image"] = get_image_for_entity(device)
 
     return node
 
@@ -329,7 +330,7 @@ def get_topology_data(
         ports = chain(interfaces, frontports, rearports)
         for port in ports:
             for link_peer in port.link_peers:
-                if link_peer.device.id not in device_ids:
+                if hasattr(link_peer, 'device') and link_peer.device.id not in device_ids:
                     device_ids.append(link_peer.device.id)
 
         if show_logical_connections:
