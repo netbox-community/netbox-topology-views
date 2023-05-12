@@ -150,15 +150,18 @@ def create_node(
     if group_id is None or group_id == "default":
         group_id = Coordinate.get_or_create_default_group(group_id)
         if not group_id:
-            print('Exception occured while handling default group. Setting node to 0;0.')
-            node["x"] = 0
-            node["y"] = 0
+            print('Exception occured while handling default group.')
             return node
    
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = True
+    # Coords must be set even if no coords have been stored. Otherwise nodes with coords 
+    # will not be placed correctly by vis-network.
+    node["x"] = 0
+    node["y"] = 0
     if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
+        # Coordinates data for the device exists in Coordinates Group. Let's assign them
         node["x"] = Coordinate.objects.get(group=group, device=device.pk).x
         node["y"] = Coordinate.objects.get(group=group, device=device.pk).y
         node["physics"] = False
@@ -171,12 +174,6 @@ def create_node(
                 node["x"] = int(cords[0])
                 node["y"] = int(cords[1])
                 node["physics"] = False
-        elif save_coords:
-            node["physics"] = False
-    else:
-        node["physics"] = True
-        node["x"] = 0
-        node["y"] = 0
 
     dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
     node["title"] = dev_title
