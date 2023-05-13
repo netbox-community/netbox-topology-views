@@ -29,11 +29,26 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
-from netbox.views.generic import ObjectView, ObjectListView, ObjectEditView, ObjectDeleteView, ObjectChangeLogView
+from netbox.views.generic import (
+    ObjectView, 
+    ObjectListView, 
+    ObjectEditView, 
+    ObjectDeleteView, 
+    ObjectChangeLogView, 
+    BulkImportView
+)
 
 
 from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet
-from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm, CoordinateGroupsForm, CoordinatesForm, CoordinatesFilterForm
+from netbox_topology_views.forms import (
+    DeviceFilterForm, 
+    IndividualOptionsForm, 
+    CoordinateGroupsForm, 
+    CoordinatesForm, 
+    CoordinatesFilterForm, 
+    CoordinateGroupsImportForm,
+    CoordinatesImportForm
+)
 from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
 from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
@@ -791,6 +806,10 @@ class CoordinateAddView(PermissionRequiredMixin, ObjectEditView):
     form = CoordinatesForm
     template_name = 'netbox_topology_views/coordinate_add.html'
 
+class CoordinateBulkImportView(BulkImportView):
+    queryset = Coordinate.objects.all()
+    model_form = CoordinatesImportForm
+
 class CoordinateListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'netbox_topology_views.view_coordinate'
 
@@ -836,6 +855,10 @@ class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
     queryset = CoordinateGroup.objects.all()
     form = CoordinateGroupsForm
     template_name = 'netbox_topology_views/coordinategroup_add.html'
+
+class CoordinateGroupBulkImportView(BulkImportView):
+    queryset = CoordinateGroup.objects.all()
+    model_form = CoordinateGroupsImportForm
 
 class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'netbox_topology_views.view_coordinategroup'

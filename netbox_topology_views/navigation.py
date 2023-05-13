@@ -1,23 +1,35 @@
 from extras.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
 from utilities.choices import ButtonColorChoices
 
-coordinategroup_buttons = [
+coordinategroup_buttons = (
     PluginMenuButton(
         link='plugins:netbox_topology_views:coordinategroup_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
         color=ButtonColorChoices.GREEN,
+    ),
+    PluginMenuButton(
+        link='plugins:netbox_topology_views:coordinategroup_import',
+        title='Import',
+        icon_class='mdi mdi-upload',
+        color=ButtonColorChoices.CYAN,
     )
-]
+)
 
-coordinate_buttons = [
+coordinate_buttons = (
     PluginMenuButton(
         link='plugins:netbox_topology_views:coordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
         color=ButtonColorChoices.GREEN,
+    ),
+    PluginMenuButton(
+        link='plugins:netbox_topology_views:coordinate_import',
+        title='Import',
+        icon_class='mdi mdi-upload',
+        color=ButtonColorChoices.CYAN,
     )
-]
+)
 
 menu = PluginMenu(
     label='Topology Views',

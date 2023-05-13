@@ -12,7 +12,7 @@ from dcim.choices import DeviceStatusChoices
 from tenancy.models import TenantGroup, Tenant
 from tenancy.forms import TenancyFilterForm
 from django.conf import settings
-from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
+from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm, NetBoxModelImportForm
 from utilities.forms.fields import (
     TagFilterField,
     DynamicModelMultipleChoiceField,
@@ -159,11 +159,21 @@ class CoordinateGroupsForm(NetBoxModelForm):
         model = CoordinateGroup
         fields = ('name', 'description')
 
+class CoordinateGroupsImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = CoordinateGroup
+        fields = ('name', 'description')
+
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
         ('Coordinate', ('group', 'device', 'x', 'y')),
     )
 
+    class Meta:
+        model = Coordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class CoordinatesImportForm(NetBoxModelImportForm):
     class Meta:
         model = Coordinate
         fields = ('group', 'device', 'x', 'y')
