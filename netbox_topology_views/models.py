@@ -229,4 +229,3 @@ class IndividualOptions(NetBoxModel):
 
     def __str___(self):
         return f"{self.user_id}"
-        
