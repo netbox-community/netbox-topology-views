@@ -16,4 +16,3 @@ class CoordinatesIndex(SearchIndex):
         ('group', 100),
         ('device', 200),
     )
-    
