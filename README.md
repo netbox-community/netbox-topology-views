@@ -15,6 +15,8 @@ Options to export to xml (for draw.io/diagrams.net) or png.
 
 **_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
 
+**_NOTE:_** Add `RUN mkdir -p /opt/netbox/netbox/static/netbox_topology_views/img` to the Dockerfile-Plugins file to create the image folder
+
 The plugin is available as a Python package and can be installed with pip.
 
 Run `pip install netbox-topology-views` in your virtual env.
