@@ -113,7 +113,7 @@ Select your options for the topology view:
     <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
         interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
         intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. These connections are displayed as yellow dotted lines.</dd>
-    <dt>Show redundant Cable and Locigal Connection</dt>
+    <dt>Show redundant Cable and Logical Connection</dt>
     <dd>Shows a logical connection (in addition to a cable), even if a cable is directly connected. Leaving this option disabled prevents that redundant display. This option only has an effect if 'Show Logical Connections' is activated.</dd>
     <dt>Show Neighbors</dt>
     <dd>Adds neighbors to the filter result set automatically. Link peers will be added if 'Show Cables' is ticked, far-end terminations will be added if 'Show Logical Connections' is ticked.</dd>

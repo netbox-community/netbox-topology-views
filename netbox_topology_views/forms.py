@@ -126,7 +126,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         label =_("Show Logical Connections"), required=False, initial=False
     )
     show_single_cable_logical_conns = forms.BooleanField(
-        label =_("Show redundant Cable and Locigal Connection"), required=False, initial=False
+        label =_("Show redundant Cable and Logical Connection"), required=False, initial=False
     )
     show_neighbors = forms.BooleanField(
         label =_("Show Neighbors"), required=False, initial=False
@@ -212,7 +212,7 @@ class IndividualOptionsForm(NetBoxModelForm):
             "are displayed as yellow dotted lines.")
     )
     show_single_cable_logical_conns = forms.BooleanField(
-        label = ("Show redundant Cable and Locigal Connection"),
+        label = ("Show redundant Cable and Logical Connection"),
         required = False,
         initial=False,
         help_text=_("Shows a logical connection (in addition to a cable), "
