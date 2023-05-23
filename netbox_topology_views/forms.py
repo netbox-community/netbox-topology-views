@@ -12,15 +12,14 @@ from dcim.choices import DeviceStatusChoices
 from tenancy.models import TenantGroup, Tenant
 from tenancy.forms import TenancyFilterForm
 from django.conf import settings
-from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm
+from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm, NetBoxModelImportForm
 from utilities.forms.fields import (
     TagFilterField,
     DynamicModelMultipleChoiceField,
     MultipleChoiceField
 )
 
-
-from .models import IndividualOptions
+from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate
 
 class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Device
@@ -30,6 +29,12 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             (
                 "q",
                 "filter_id",
+            ),          
+        ),
+        (
+            None,
+            (
+                "group",
                 "save_coords",
                 "show_unconnected",
                 "show_cables",
@@ -59,7 +64,11 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         ),
         (None, ("tag",)),
     )
-
+    group = forms.ModelChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False,
+        label=_("Coordinate group"),
+    )
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(), required=False, label=_("Region")
     )
@@ -139,6 +148,59 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     )
     show_wireless = forms.BooleanField(
         label =_("Show Wireless Links"), required=False, initial=False
+    )
+
+class CoordinateGroupsForm(NetBoxModelForm):
+    fieldsets = (
+        ('Group Details', ('name', 'description')),
+    )
+
+    class Meta:
+        model = CoordinateGroup
+        fields = ('name', 'description')
+
+class CoordinateGroupsImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = CoordinateGroup
+        fields = ('name', 'description')
+
+class CoordinatesForm(NetBoxModelForm):
+    fieldsets = (
+        ('Coordinate', ('group', 'device', 'x', 'y')),
+    )
+
+    class Meta:
+        model = Coordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class CoordinatesImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = Coordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class CoordinatesFilterForm(NetBoxModelFilterSetForm):
+    model = Coordinate
+    fieldsets = (
+        (None, ('q', 'filter_id')),
+        ('Coordinates', ('group', 'device', 'x', 'y'))
+    )
+
+    group = forms.ModelMultipleChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False
+    )
+
+    x = forms.IntegerField(
+        required=False
+    )
+
+    y = forms.IntegerField(
+        required=False
     )
 
 class IndividualOptionsForm(NetBoxModelForm):

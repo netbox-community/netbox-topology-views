@@ -14,12 +14,14 @@ from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
 )
-from netbox_topology_views.models import RoleImage, IndividualOptions
+from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate
 from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
 from netbox_topology_views.filters import DeviceFilterSet
 
-class SaveCoordsViewSet(ReadOnlyModelViewSet):
+class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
     queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 
@@ -33,6 +35,7 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
         device_id: str = request.data.get("node_id", None)
         x_coord = request.data.get("x", None)
         y_coord = request.data.get("y", None)
+        group_id = request.data.get("group", "None")
 
         actual_device = None
         if device_id.startswith("c"):
@@ -50,22 +53,37 @@ class SaveCoordsViewSet(ReadOnlyModelViewSet):
         if not actual_device:
             return Response({"status": "invalid node_id in body"}, status=400)
 
+        if group_id is None or group_id == "default":
+            group_id = Coordinate.get_or_create_default_group(group_id)
+            if not group_id:
+                return Response(
+                    {"status": "Error while creating default group."}, status=500
+                )  
+
         try:
-            actual_device.custom_field_data["coordinates"] = "%s;%s" % (
-                x_coord,
-                y_coord,
-            )
-            actual_device.save()
+            if CoordinateGroup.objects.filter(pk=group_id):
+                group = CoordinateGroup.objects.get(pk=group_id)
+                # Hen-and-egg-problem. Thanks, Django! By default, Django updates records that
+                # already exist and inserts otherwise. This does not work with our 
+                # unique_together key if no pk is given. But: No record, no pk.
+                if not Coordinate.objects.filter(group=group, device=actual_device):
+                    # Unique group/device pair does not exist. Prepare new data set
+                    coords = Coordinate(group=group, device=actual_device, x=x_coord, y=y_coord)
+                else:
+                    # Unique group/device pair already exists. Update data
+                    coords = Coordinate(pk=Coordinate.objects.get(group=group, device=actual_device).pk, group=group, device=actual_device, x=x_coord, y=y_coord)  
+                coords.save()
         except:
             return Response(
-                {"status": "coords custom field could not be saved"}, status=500
+                {"status": "Coordinates could not be saved."}, status=500
             )
 
         return Response({"status": "saved coords"})
 
 class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
-    queryset = Device.objects.none()
     permission_required = ("dcim.view_site", "dcim.view_device")
+
+    queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 
     def list(self, request):
@@ -83,6 +101,10 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
         if request.GET:
 
             save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            if 'group' not in request.query_params:
+                group_id = "default"
+            else:
+                group_id = request.query_params["group"]
             topo_data = get_topology_data(
                 queryset=self.queryset,
                 individualOptions=individualOptions,
@@ -95,6 +117,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 show_circuit=show_circuit,
                 show_power=show_power,
                 show_wireless=show_wireless,
+                group_id=group_id,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 

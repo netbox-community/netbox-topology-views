@@ -5,7 +5,7 @@ from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import TenancyFilterSet
 from utilities.filters import TreeNodeMultipleChoiceFilter
-
+from netbox_topology_views.models import CoordinateGroup, Coordinate
 
 class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     q = django_filters.CharFilter(
@@ -53,3 +53,25 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
             return queryset
         qs_filter = Q(name__icontains=value)
         return queryset.filter(qs_filter)
+
+class CoordinatesFilterSet(NetBoxModelFilterSet):
+    group = django_filters.ModelMultipleChoiceFilter(
+        queryset = CoordinateGroup.objects.all(),
+    )
+
+    device = django_filters.ModelMultipleChoiceFilter(
+        queryset = Device.objects.all(),
+    )
+
+    class Meta:
+        model = Coordinate
+        fields = ['id', 'group', 'device', 'x', 'y']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(group__name__icontains=value) |
+            Q(device__name__icontains=value)
+        )

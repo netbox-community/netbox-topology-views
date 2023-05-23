@@ -22,17 +22,35 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Count
 from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag
 from wireless.models import WirelessLink
+from netbox.views.generic import (
+    ObjectView, 
+    ObjectListView, 
+    ObjectEditView, 
+    ObjectDeleteView, 
+    ObjectChangeLogView, 
+    BulkImportView
+)
 
-from netbox_topology_views.filters import DeviceFilterSet
-from netbox_topology_views.forms import DeviceFilterForm, IndividualOptionsForm
-from netbox_topology_views.models import RoleImage, IndividualOptions
+
+from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet
+from netbox_topology_views.forms import (
+    DeviceFilterForm, 
+    IndividualOptionsForm, 
+    CoordinateGroupsForm, 
+    CoordinatesForm, 
+    CoordinatesFilterForm, 
+    CoordinateGroupsImportForm,
+    CoordinatesImportForm
+)
+from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
+from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -62,7 +80,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, group_id="default"
 ):
     node = {}
     node_content = ""
@@ -144,8 +162,35 @@ def create_node(
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
 
-    dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
+    if group_id is None or group_id == "default":
+        group_id = Coordinate.get_or_create_default_group(group_id)
+        if not group_id:
+            print('Exception occured while handling default group.')
+            return node
+   
+    group = get_object_or_404(CoordinateGroup, pk=group_id)
 
+    node["physics"] = True
+    # Coords must be set even if no coords have been stored. Otherwise nodes with coords 
+    # will not be placed correctly by vis-network.
+    node["x"] = 0
+    node["y"] = 0
+    if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
+        # Coordinates data for the device exists in Coordinates Group. Let's assign them
+        node["x"] = Coordinate.objects.get(group=group, device=device.pk).x
+        node["y"] = Coordinate.objects.get(group=group, device=device.pk).y
+        node["physics"] = False
+    elif "coordinates" in device.custom_field_data:
+        # We prefer the new Coordinate model but leave the deprecated method 
+        # for now as fallback for compatibility reasons
+        if device.custom_field_data["coordinates"] is not None:
+            if ";" in device.custom_field_data["coordinates"]:
+                cords = device.custom_field_data["coordinates"].split(";")
+                node["x"] = int(cords[0])
+                node["y"] = int(cords[1])
+                node["physics"] = False
+
+    dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
     node["title"] = dev_title
     node["name"] = dev_name
     node["label"] = dev_name
@@ -153,16 +198,6 @@ def create_node(
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
 
-    node["physics"] = True
-    if "coordinates" in device.custom_field_data:
-        if device.custom_field_data["coordinates"] is not None:
-            if ";" in device.custom_field_data["coordinates"]:
-                cords = device.custom_field_data["coordinates"].split(";")
-                node["x"] = int(cords[0])
-                node["y"] = int(cords[1])
-                node["physics"] = False
-        elif save_coords:
-            node["physics"] = False
     return node
 
 
@@ -267,6 +302,7 @@ def get_topology_data(
     show_neighbors: bool,
     show_power: bool,
     show_wireless: bool,
+    group_id,
 ):
     
     supported_termination_types = []
@@ -306,7 +342,7 @@ def get_topology_data(
         ports = chain(interfaces, frontports, rearports)
         for port in ports:
             for link_peer in port.link_peers:
-                if link_peer.device.id not in device_ids:
+                if hasattr(link_peer, 'device') and link_peer.device.id not in device_ids:
                     device_ids.append(link_peer.device.id)
 
         if show_logical_connections:
@@ -388,7 +424,7 @@ def get_topology_data(
                         ] = circuit_termination.circuit
 
         for d in nodes_circuits.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
@@ -438,10 +474,10 @@ def get_topology_data(
                     cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
         for d in nodes_powerpanel.values():
-            nodes.append(create_node(d, save_coords))
+            nodes.append(create_node(d, save_coords, group_id))
 
     if show_logical_connections:
         interfaces = Interface.objects.filter(
@@ -598,10 +634,11 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords))
+        nodes.append(create_node(d, save_coords, group_id))
 
     results["nodes"] = nodes
     results["edges"] = edges
+    results["group"] = group_id
     return results
 
 
@@ -629,6 +666,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
             
+            if "group" not in request.GET:
+                group_id = "default"
+            else:
+                group_id = request.GET["group"]
+
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
                 topo_data = get_topology_data(
                     queryset=self.queryset,
@@ -642,6 +684,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_circuit=show_circuit,
                     show_power=show_power,
                     show_wireless=show_wireless,
+                    group_id=group_id,
                 )
             
         else:
@@ -750,6 +793,98 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 "images": images,
             },
         )
+
+class CoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = Coordinate.objects.all()
+
+class CoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = Coordinate.objects.all()
+    form = CoordinatesForm
+    template_name = 'netbox_topology_views/coordinate_add.html'
+
+class CoordinateBulkImportView(BulkImportView):
+    queryset = Coordinate.objects.all()
+    model_form = CoordinatesImportForm
+
+class CoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = Coordinate.objects.all()
+    table = CoordinateListTable
+    template_name = 'netbox_topology_views/coordinate_list.html'
+    filterset = CoordinatesFilterSet
+    filterset_form = CoordinatesFilterForm
+
+class CoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = Coordinate.objects.all()
+    form = CoordinatesForm
+    template_name = 'netbox_topology_views/coordinate_edit.html'
+
+class CoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = Coordinate.objects.all()
+
+class CoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = Coordinate.objects.all()
+
+class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinategroup'
+
+    queryset = CoordinateGroup.objects.all()
+
+    def get_extra_context(self, request, instance):
+        table = CoordinateListTable(instance.coordinate_set.all())
+        table.configure(request)
+
+        return {
+            'coordinates_table': table,
+        }
+
+class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinategroup'
+
+    queryset = CoordinateGroup.objects.all()
+    form = CoordinateGroupsForm
+    template_name = 'netbox_topology_views/coordinategroup_add.html'
+
+class CoordinateGroupBulkImportView(BulkImportView):
+    queryset = CoordinateGroup.objects.all()
+    model_form = CoordinateGroupsImportForm
+
+class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinategroup'
+
+    queryset = CoordinateGroup.objects.annotate(
+        devices = Count('coordinate')
+    )
+    table = CoordinateGroupListTable
+    template_name = 'netbox_topology_views/coordinategroup_list.html'
+
+class CoordinateGroupEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinategroup'
+
+    queryset = CoordinateGroup.objects.all()
+    form = CoordinateGroupsForm
+    template_name = 'netbox_topology_views/coordinategroup_edit.html'
+
+class CoordinateGroupDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinategroup'
+
+    queryset = CoordinateGroup.objects.all()
+
+class CoordinateGroupChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinategroup'
+
+    queryset = CoordinateGroup.objects.all()
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
     permission_required = 'netbox_topology_views.change_individualoptions'
