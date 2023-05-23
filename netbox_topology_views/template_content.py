@@ -11,5 +11,10 @@ class SiteButtons(PluginTemplateExtension):
     def buttons(self):
         return self.render('netbox_topology_views/site_button.html')
 
+class LocationButtons(PluginTemplateExtension):
+    model = 'dcim.location'
+    def buttons(self):
+        return self.render('netbox_topology_views/location_button.html')
 
-template_extensions = [SiteButtons]
+
+template_extensions = [SiteButtons, LocationButtons]
