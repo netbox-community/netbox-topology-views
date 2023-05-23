@@ -15,8 +15,7 @@ from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm, NetBoxModelImportForm
 from utilities.forms.fields import (
     TagFilterField,
-    DynamicModelMultipleChoiceField,
-    MultipleChoiceField
+    DynamicModelMultipleChoiceField
 )
 
 from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate
@@ -113,7 +112,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         },
         label=_("Rack"),
     )
-    status = MultipleChoiceField(
+    status = forms.MultipleChoiceField(
         choices=DeviceStatusChoices, required=False, label=_("Device Status")
     )
     tag = TagFilterField(model)
@@ -227,7 +226,7 @@ class IndividualOptionsForm(NetBoxModelForm):
 
     user_id = forms.CharField(widget=forms.HiddenInput())
 
-    ignore_cable_type = MultipleChoiceField(
+    ignore_cable_type = forms.MultipleChoiceField(
         label=_("Ignore Termination Types"), 
         required=False, 
         choices=IndividualOptions.CHOICES,
