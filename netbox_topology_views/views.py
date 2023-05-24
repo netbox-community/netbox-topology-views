@@ -696,6 +696,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist("device_role_id", list(preselected_device_roles))
             q.setlist("tag", list(preselected_tags))
 
+            if individualOptions.save_coords: q['save_coords'] = "on"
             if individualOptions.show_unconnected: q['show_unconnected'] = "on"
             if individualOptions.show_cables: q['show_cables'] = "on"
             if individualOptions.show_logical_connections: q['show_logical_connections'] = "on"
@@ -911,6 +912,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'ignore_cable_type': tuple(queryset.ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')),
                 'preselected_device_roles': IndividualOptions.objects.get(id=queryset.id).preselected_device_roles.all(),
                 'preselected_tags': IndividualOptions.objects.get(id=queryset.id).preselected_tags.all(),
+                'save_coords': queryset.save_coords,
                 'show_unconnected': queryset.show_unconnected,
                 'show_cables': queryset.show_cables, 
                 'show_logical_connections': queryset.show_logical_connections,

@@ -199,6 +199,9 @@ class IndividualOptions(NetBoxModel):
         blank=True,
         db_table='netbox_topology_views_individualoptions_preselected_tag',
     )
+    save_coords = models.BooleanField(
+        default=False
+    )
     show_unconnected = models.BooleanField(
         default=False
     )
