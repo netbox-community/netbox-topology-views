@@ -58,7 +58,8 @@ from netbox_topology_views.utils import (
     get_model_slug,
     image_static_url,
     LinePattern,
-    get_query_settings
+    get_query_settings,
+    IMAGE_FILETYPES
 )
 
 
@@ -752,7 +753,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
     def get(self, request: HttpRequest):
         images = [
             {"url": image_static_url(image), "title": image.stem}
-            for image in CONF_IMAGE_DIR.iterdir()
+            for image in CONF_IMAGE_DIR.iterdir() if image.name.lower().endswith(IMAGE_FILETYPES)
         ]
 
         roles = reduce(
