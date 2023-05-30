@@ -145,9 +145,33 @@ downloadXmlButton.addEventListener('click', (e) => {
 })
 
 function performXmlDownload() {
+
     const tempDownloadLink = document.createElement('a');
 
-    fetch('/api/plugins/netbox_topology_views/xml-export/?' + new URLSearchParams(window.location.search)).then(response => response.text())
+    let xml_search_options = '';
+
+    if (typeof is_htmx !== 'undefined') {
+        var curr_url = window.location.href;
+        const sites_prefix = '/sites/'
+        const location_prefix = '/locations/'
+        if (curr_url.includes(sites_prefix)) {
+            var site_id =  curr_url.split(sites_prefix)[1];
+            site_id = site_id.split('/')[0]
+            xml_search_options = 'site_id=' + site_id + '&show_cables=on&show_unconnected=on'
+        }
+        else if (curr_url.includes(location_prefix)) {
+            var location_id =  curr_url.split(location_prefix)[1];
+            location_id = location_id.split('/')[0]
+            xml_search_options = 'location_id=' + location_id + '&show_cables=on&show_unconnected=on'
+        }
+    }
+    else {
+        xml_search_options = new URLSearchParams(window.location.search);
+    }
+
+    
+
+    fetch('/api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
     .then(data => {
         var blob = new Blob([data ], { type: "text/plain" });
 
