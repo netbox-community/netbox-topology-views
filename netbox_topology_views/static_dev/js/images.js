@@ -7,7 +7,7 @@ const csrftoken = getCookie('csrftoken')
 document.querySelector('form#images').addEventListener('submit', async (e) => {
     e.preventDefault()
     try {
-        const res = await fetch('/api/plugins/netbox_topology_views/images/', {
+        const res = await fetch('/api/plugins/netbox_topology_views/images/save/', {
             method: 'POST',
             body: JSON.stringify(mapping),
             headers: {

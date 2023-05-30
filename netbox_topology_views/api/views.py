@@ -127,7 +127,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 {"status": "Missing or malformed request parameters"}, status=400
             )
 
-class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):
+class SaveRoleImageViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
     queryset = DeviceRole.objects.none()
     serializer_class = RoleImageSerializer
     permission_required = (
@@ -135,7 +135,8 @@ class SaveRoleImageViewSet(PermissionRequiredMixin, ViewSet):
         "dcim.change_device_role",
     )
 
-    def create(self, request):
+    @action(detail=False, methods=["post"])
+    def save(self, request):
         if not isinstance(request.data, dict):
             return JsonResponse(
                 {"status": "Missing or malformed request body"}, status=400
