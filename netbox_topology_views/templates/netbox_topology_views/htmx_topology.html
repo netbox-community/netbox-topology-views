@@ -37,7 +37,8 @@
 </style>
 
 <script type="text/javascript">
-    const brokenImage = '{{ broken_image }}';
-    const topologyData = {{ topology_data | safe }};
+    var is_htmx = true;
+    var brokenImage = '{{ broken_image }}';
+    var topologyData = {{ topology_data | safe }};
 </script>
 <script src="{% static 'netbox_topology_views/js/app.js' %}?ver={{ epoch }} " defer></script>
