@@ -211,6 +211,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 "ignore_cable_type",
                 "preselected_device_roles",
                 "preselected_tags",
+                "save_coords",
                 "show_unconnected",
                 "show_cables",
                 "show_logical_connections",
@@ -247,6 +248,15 @@ class IndividualOptionsForm(NetBoxModelForm):
         required=False,
         help_text=_("Select Tags that you want to have "
             "preselected in the filter tab.")
+    )
+    save_coords = forms.BooleanField(
+        label=_("Save Coordinates"), 
+        required=False, 
+        initial=False,
+        help_text=_("Coordinates of nodes will be saved if dragged to a different "
+            "position. This option depends on parameters set in the config file. "
+            "It has no effect if 'allow_coordinates_saving' has not been set or "
+            " 'always_save_coordinates' has been set.")
     )
     show_unconnected = forms.BooleanField(
         label=_("Show Unconnected"), 
@@ -322,6 +332,5 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
-        ]
-        
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+        ]        
