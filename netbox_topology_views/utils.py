@@ -29,7 +29,7 @@ else:
 
 
 def image_static_url(path: Path) -> str:
-    return settings.BASE_PATH + static(
+    return static(
         f"/{path.relative_to(Path(settings.STATIC_ROOT))}"
     )
 

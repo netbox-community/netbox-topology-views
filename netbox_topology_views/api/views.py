@@ -142,9 +142,12 @@ class SaveRoleImageViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
                 {"status": "Missing or malformed request body"}, status=400
             )
 
-        device_roles = {k: v for k, v in request.data.items() if k.isnumeric()}
+        device_roles = {
+            k: v.removeprefix(settings.STATIC_URL)
+            for k, v in request.data.items()
+            if k.isnumeric()}
         content_type_ids = {
-            k[2:]: v
+            k[2:]: v.removeprefix(settings.STATIC_URL)
             for k, v in request.data.items()
             if k.startswith("ct") and k[2:].isnumeric()
         }

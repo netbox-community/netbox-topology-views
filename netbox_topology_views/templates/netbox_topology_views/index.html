@@ -77,6 +77,7 @@
   <script type="text/javascript">
     const brokenImage = '{{ broken_image }}';
     const topologyData = {{ topology_data | safe }};
+    const basePath = '{{ basepath }}';
   </script>
 	<script src="{% static 'netbox_topology_views/js/app.js' %}" defer></script>
 {% endblock javascript %}
