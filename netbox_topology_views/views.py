@@ -723,7 +723,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                     "topology_data": json.dumps(topo_data),
                     "broken_image": find_image_url("role-unknown"),
-                    "epoch": int(time.time())
+                    "epoch": int(time.time()),
+                    "basepath": settings.BASE_PATH,
                 },
             )
 
@@ -734,7 +735,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
                 "topology_data": json.dumps(topo_data),
                 "broken_image": find_image_url("role-unknown"),
-                "model": self.model
+                "model": self.model,
+                "basepath": settings.BASE_PATH,
             },
         )
 
@@ -793,6 +795,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
             {
                 "roles": sorted(list(roles.values()), key=lambda r: r["name"]),
                 "images": images,
+                "basepath": settings.BASE_PATH,
             },
         )
 

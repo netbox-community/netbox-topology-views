@@ -29,18 +29,17 @@ else:
 
 
 def image_static_url(path: Path) -> str:
-    return settings.BASE_PATH + static(
+    return static(
         f"/{path.relative_to(Path(settings.STATIC_ROOT))}"
     )
 
 
 def get_image_from_url(url: str) -> str:
-    url_path = settings.BASE_PATH + settings.STATIC_URL
     if sys.version_info >= (3,9,0):
-        return url.removeprefix(url_path)
+        return url.removeprefix(settings.STATIC_URL)
     else:
-        if url.startswith(url_path):
-            url_new = url[len(url_path):]
+        if url.startswith(settings.STATIC_URL):
+            url_new = url[len(settings.STATIC_URL):]
             return url_new
         else:
             return url
@@ -250,7 +249,7 @@ def export_data_to_xml(data: dict):
     noPositionX = 0
     noPositionY = 1000
     for node in data['nodes']:
-        with open(str(Path(settings.BASE_DIR)) + node['image'], "rb") as img:
+        with open(settings.STATIC_ROOT + '/' + get_image_from_url(node['image']), "rb") as img:
             svg = base64.b64encode(img.read()).decode('utf-8')
         mxcell = doc.createElement('mxCell')
         mxcell.setAttribute('id', 'node_' + str(node['id']))
