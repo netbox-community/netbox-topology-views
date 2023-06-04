@@ -81,7 +81,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                 async ([nodeId, nodePosition]) => {
                     window.nodes.update({id: parseInt(nodeId), physics: false, x: nodePosition.x, y: nodePosition.y});
                     const res = await fetch(
-                        '/api/plugins/netbox_topology_views/save-coords/save_coords/',
+                        '/' + basePath + 'api/plugins/netbox_topology_views/save-coords/save_coords/',
                         {
                             method: 'PATCH',
                             headers: {
@@ -171,7 +171,7 @@ function performXmlDownload() {
 
     
 
-    fetch('/api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
+    fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
     .then(data => {
         var blob = new Blob([data ], { type: "text/plain" });
 
