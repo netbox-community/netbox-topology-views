@@ -9,8 +9,6 @@ import utilities.json
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dcim', '0171_cabletermination_change_logging'),
-        ('extras', '0092_delete_jobresult'),
         ('netbox_topology_views', '0003_individualoptions_show_neighbors'),
     ]
 
