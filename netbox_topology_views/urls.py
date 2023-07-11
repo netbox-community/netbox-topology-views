@@ -14,7 +14,7 @@ urlpatterns = (
     # Coordinate Group
     path("coordinate-groups/", views.CoordinateGroupListView.as_view(), name="coordinategroup_list"),
     path("coordinate-groups/add/", views.CoordinateGroupAddView.as_view(), name="coordinategroup_add"),
-    path('coordinate/import/', views.CoordinateGroupBulkImportView.as_view(), name='coordinategroup_import'),
+    path('coordinate-groups/import/', views.CoordinateGroupBulkImportView.as_view(), name='coordinategroup_import'),
     path("coordinate-groups/<int:pk>/", views.CoordinateGroupView.as_view(), name="coordinategroup"),
     path("coordinate-groups/<int:pk>/edit/", views.CoordinateGroupEditView.as_view(), name="coordinategroup_edit"),
     path("coordinate-groups/<int:pk>/delete/", views.CoordinateGroupDeleteView.as_view(), name="coordinategroup_delete"),
