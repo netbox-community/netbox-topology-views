@@ -90,7 +90,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         self.filterset = DeviceFilterSet
         self.queryset = Device.objects.all().select_related(
-            "device_type", "device_role"
+            "device_type", "role"
         )
         self.queryset = self.filterset(request.GET, self.queryset).qs
 
