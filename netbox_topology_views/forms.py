@@ -56,7 +56,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         (
             None,
             (
-                "device_role_id",
+                "role_id",
                 "id",
                 "status",
             ),
@@ -71,7 +71,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(), required=False, label=_("Region")
     )
-    device_role_id = DynamicModelMultipleChoiceField(
+    role_id = DynamicModelMultipleChoiceField(
         queryset=DeviceRole.objects.all(), required=False, label=_("Device Role")
     )
     id = DynamicModelMultipleChoiceField(
@@ -82,7 +82,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
             "location_id": "$location_id",
             "region_id": "$region_id",
             "site_id": "$site_id",
-            "role_id": "$device_role_id",
+            "role_id": "$role_id",
         },
     )
     site_id = DynamicModelMultipleChoiceField(

@@ -12,8 +12,8 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
         method="search",
         label="Search",
     )
-    device_role_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="device_role_id",
+    role_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="role_id",
         queryset=DeviceRole.objects.all(),
         label="Role (ID)",
     )

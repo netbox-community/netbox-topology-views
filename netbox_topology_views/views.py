@@ -67,7 +67,7 @@ from netbox_topology_views.utils import (
 def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
     is_device = isinstance(entity, Device)
     query = (
-        {"object_id": entity.device_role_id}
+        {"object_id": entity.role_id}
         if is_device
         else {"content_type_id": ContentType.objects.get_for_model(entity).pk}
     )
@@ -653,7 +653,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
     def get(self, request):
         self.filterset = DeviceFilterSet
         self.queryset = Device.objects.all().select_related(
-            "device_type", "device_role"
+            "device_type", "role"
         )
         self.queryset = self.filterset(request.GET, self.queryset).qs
         self.model = self.queryset.model
@@ -694,7 +694,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             preselected_tags = IndividualOptions.objects.get(id=individualOptions.id).preselected_tags.all().values_list(Lower('name'), flat=True)
 
             q = QueryDict(mutable=True)
-            q.setlist("device_role_id", list(preselected_device_roles))
+            q.setlist("role_id", list(preselected_device_roles))
             q.setlist("tag", list(preselected_tags))
 
             if individualOptions.save_coords: q['save_coords'] = "on"
