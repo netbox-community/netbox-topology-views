@@ -1,6 +1,6 @@
 import django_filters
 from dcim.choices import DeviceStatusChoices
-from dcim.models import Device, DeviceRole, Location, Rack, Region, Site
+from dcim.models import Device, DeviceRole, Location, Rack, Region, Site, SiteGroup
 from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import TenancyFilterSet
@@ -26,6 +26,12 @@ class DeviceFilterSet(TenancyFilterSet, NetBoxModelFilterSet):
     site_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Site.objects.all(),
         label="Site (ID)",
+    )
+    sitegroup_id = TreeNodeMultipleChoiceFilter(
+        queryset=SiteGroup.objects.all(),
+        field_name="site__group",
+        lookup_expr="in",
+        label="Site Group (ID)",
     )
     location_id = TreeNodeMultipleChoiceFilter(
         queryset=Location.objects.all(),
