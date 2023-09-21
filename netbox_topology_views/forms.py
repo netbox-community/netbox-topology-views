@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.utils.translation import gettext as _
 
-from dcim.models import Device, Site, Region, DeviceRole, Location, Rack
+from dcim.models import Device, Site, SiteGroup, Region, DeviceRole, Location, Rack
 
 from django import forms
 from dcim.choices import DeviceStatusChoices
@@ -52,7 +52,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
                 "tenant_id",
             ),
         ),
-        (None, ("region_id", "site_id", "location_id", "rack_id")),
+        (None, ("region_id", "sitegroup_id", "site_id", "location_id", "rack_id")),
         (
             None,
             (
@@ -69,10 +69,14 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         label=_("Coordinate group"),
     )
     region_id = DynamicModelMultipleChoiceField(
-        queryset=Region.objects.all(), required=False, label=_("Region")
+        queryset=Region.objects.all(), 
+        required=False, 
+        label=_("Region")
     )
     role_id = DynamicModelMultipleChoiceField(
-        queryset=DeviceRole.objects.all(), required=False, label=_("Device Role")
+        queryset=DeviceRole.objects.all(), 
+        required=False, 
+        label=_("Device Role")
     )
     id = DynamicModelMultipleChoiceField(
         queryset=Device.objects.all(),
@@ -81,6 +85,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         query_params={
             "location_id": "$location_id",
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
             "role_id": "$role_id",
         },
@@ -90,14 +95,21 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         required=False,
         query_params={
             "region_id": "$region_id",
+            "group_id": "$sitegroup_id",
         },
         label=_("Site"),
+    )
+    sitegroup_id = DynamicModelMultipleChoiceField(
+        queryset=SiteGroup.objects.all(),
+        required=False,
+        label=_("Site Group"),
     )
     location_id = DynamicModelMultipleChoiceField(
         queryset=Location.objects.all(),
         required=False,
         query_params={
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
         },
         label=_("Location"),
@@ -107,6 +119,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         required=False,
         query_params={
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
             "location_id": "$location_id",
         },
