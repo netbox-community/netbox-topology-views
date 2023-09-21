@@ -85,6 +85,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         query_params={
             "location_id": "$location_id",
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
             "role_id": "$role_id",
         },
@@ -108,6 +109,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         required=False,
         query_params={
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
         },
         label=_("Location"),
@@ -117,6 +119,7 @@ class DeviceFilterForm(TenancyFilterForm, NetBoxModelFilterSetForm):
         required=False,
         query_params={
             "region_id": "$region_id",
+            "site_group_id": "$sitegroup_id",
             "site_id": "$site_id",
             "location_id": "$location_id",
         },
