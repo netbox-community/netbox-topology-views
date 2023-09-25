@@ -49,6 +49,7 @@ from netbox_topology_views.forms import (
     CoordinateGroupsImportForm,
     CoordinatesImportForm
 )
+import netbox_topology_views.models
 from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
 from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
@@ -88,6 +89,7 @@ def create_node(
     if isinstance(device, Circuit):
         dev_name = device.cid
         node["id"] = f"c{device.pk}"
+        model_name = 'CircuitCoordinate'
 
         if device.provider is not None:
             node_content += (
@@ -98,6 +100,7 @@ def create_node(
     elif isinstance(device, PowerPanel):
         dev_name = device.name
         node["id"] = f"p{device.pk}"
+        model_name = 'PowerPanelCoordinate'
 
         if device.site is not None:
             node_content += f"<tr><th>Site: </th><td>{device.site.name}</td></tr>"
@@ -108,6 +111,7 @@ def create_node(
     elif isinstance(device, PowerFeed):
         dev_name = device.name
         node["id"] = f"f{device.pk}"
+        model_name = 'PowerFeedCoordinate'
 
         if device.power_panel is not None:
             node_content += (
@@ -124,6 +128,7 @@ def create_node(
         if device.voltage is not None:
             node_content += f"<tr><th>Voltage: </th><td>{device.voltage}</td></tr>"
     else:
+        model_name = 'Coordinate'
         dev_name = device.name
         if dev_name is None:
             dev_name = device.device_type.get_full_name
@@ -163,8 +168,10 @@ def create_node(
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
 
+    model_class = getattr(netbox_topology_views.models, model_name)
+
     if group_id is None or group_id == "default":
-        group_id = Coordinate.get_or_create_default_group(group_id)
+        group_id = model_class.get_or_create_default_group(group_id)
         if not group_id:
             print('Exception occured while handling default group.')
             return node
@@ -176,10 +183,10 @@ def create_node(
     # will not be placed correctly by vis-network.
     node["x"] = 0
     node["y"] = 0
-    if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
+    if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
         # Coordinates data for the device exists in Coordinates Group. Let's assign them
-        node["x"] = Coordinate.objects.get(group=group, device=device.pk).x
-        node["y"] = Coordinate.objects.get(group=group, device=device.pk).y
+        node["x"] = model_class.objects.get(group=group, device=device.pk).x
+        node["y"] = model_class.objects.get(group=group, device=device.pk).y
         node["physics"] = False
     elif "coordinates" in device.custom_field_data:
         # We prefer the new Coordinate model but leave the deprecated method 
