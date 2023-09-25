@@ -14,6 +14,7 @@ from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
 )
+import netbox_topology_views.models
 from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate
 from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
@@ -41,20 +42,26 @@ class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
         if device_id.startswith("c"):
             device_id = device_id.lstrip("c")
             actual_device = Circuit.objects.get(id=device_id)
+            model_name = 'CircuitCoordinate'
         elif device_id.startswith("p"):
             device_id = device_id.lstrip("p")
             actual_device = PowerPanel.objects.get(id=device_id)
+            model_name = 'PowerPanelCoordinate'
         elif device_id.startswith("f"):
             device_id = device_id.lstrip("f")
             actual_device = PowerFeed.objects.get(id=device_id)
+            model_name = 'PowerFeedCoordinate'
         elif device_id.isnumeric():
             actual_device = Device.objects.get(id=device_id)
+            model_name = 'Coordinate'
 
         if not actual_device:
             return Response({"status": "invalid node_id in body"}, status=400)
 
+        model_class = getattr(netbox_topology_views.models, model_name)
+
         if group_id is None or group_id == "default":
-            group_id = Coordinate.get_or_create_default_group(group_id)
+            group_id = model_class.get_or_create_default_group(group_id)
             if not group_id:
                 return Response(
                     {"status": "Error while creating default group."}, status=500
@@ -66,12 +73,12 @@ class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
                 # Hen-and-egg-problem. Thanks, Django! By default, Django updates records that
                 # already exist and inserts otherwise. This does not work with our 
                 # unique_together key if no pk is given. But: No record, no pk.
-                if not Coordinate.objects.filter(group=group, device=actual_device):
+                if not model_class.objects.filter(group=group, device=actual_device):
                     # Unique group/device pair does not exist. Prepare new data set
-                    coords = Coordinate(group=group, device=actual_device, x=x_coord, y=y_coord)
+                    coords = model_class(group=group, device=actual_device, x=x_coord, y=y_coord)
                 else:
                     # Unique group/device pair already exists. Update data
-                    coords = Coordinate(pk=Coordinate.objects.get(group=group, device=actual_device).pk, group=group, device=actual_device, x=x_coord, y=y_coord)  
+                    coords = model_class(pk=model_class.objects.get(group=group, device=actual_device).pk, group=group, device=actual_device, x=x_coord, y=y_coord)  
                 coords.save()
         except:
             return Response(
