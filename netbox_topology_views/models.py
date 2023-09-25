@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
-from dcim.models import Device, DeviceRole
+from circuits.models import Circuit
+from dcim.models import Device, DeviceRole, PowerPanel, PowerFeed
 from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
