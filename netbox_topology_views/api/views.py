@@ -15,7 +15,7 @@ from netbox_topology_views.api.serializers import (
     TopologyDummySerializer,
 )
 import netbox_topology_views.models
-from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate
+from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
 from netbox_topology_views.filters import DeviceFilterSet

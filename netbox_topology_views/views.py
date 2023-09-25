@@ -50,7 +50,7 @@ from netbox_topology_views.forms import (
     CoordinatesImportForm
 )
 import netbox_topology_views.models
-from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
+from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
