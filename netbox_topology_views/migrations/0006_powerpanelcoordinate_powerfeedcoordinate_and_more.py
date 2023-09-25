@@ -9,9 +9,6 @@ import utilities.json
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extras', '0098_webhook_custom_field_data_webhook_tags'),
-        ('circuits', '0042_provideraccount'),
-        ('dcim', '0181_rename_device_role_device_role'),
         ('netbox_topology_views', '0005_individualoptions_save_coords'),
     ]
 
