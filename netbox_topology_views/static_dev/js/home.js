@@ -79,7 +79,26 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
-                    window.nodes.update({id: parseInt(nodeId), physics: false, x: nodePosition.x, y: nodePosition.y});
+                    if(!isNaN(parseInt(nodeId))) { 
+                        nodeKey = parseInt(nodeId);
+                    }
+                    else {
+                        nodeKey = nodeId;
+                    }
+
+                    try {
+                        window.nodes.update({id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y});
+                    }
+                    catch (e) {
+                        console.log([
+                            'Error while executing window.nodes.update()', 
+                            'nodeId: ' + nodeId, 
+                            'nodeKey: ' + nodeKey, 
+                            'x: ' + nodePosition.x, 
+                            'y: ' + nodePosition.y
+                        ]);
+                        console.log(e);
+                    }
                     const res = await fetch(
                         '/' + basePath + 'api/plugins/netbox_topology_views/save-coords/save_coords/',
                         {
@@ -97,8 +116,6 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                             })
                         }
                     )
-
-                    console.log(nodeId, res.status, res.statusText)
                 }
             )
         )
