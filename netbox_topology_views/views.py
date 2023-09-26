@@ -995,10 +995,19 @@ class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
     queryset = CoordinateGroup.objects.all()
 
     def get_extra_context(self, request, instance):
+        circuittable = CircuitCoordinateListTable(instance.circuitcoordinate_set.all())
+        circuittable.configure(request)
+        powerpaneltable = PowerPanelCoordinateListTable(instance.powerpanelcoordinate_set.all())
+        powerpaneltable.configure(request)
+        powerfeedtable = PowerFeedCoordinateListTable(instance.powerfeedcoordinate_set.all())
+        powerfeedtable.configure(request)
         table = CoordinateListTable(instance.coordinate_set.all())
         table.configure(request)
 
         return {
+            'circuitcoordinates_table': circuittable,
+            'powerpanelcoordinates_table': powerpaneltable,
+            'powerfeedcoordinates_table': powerfeedtable,
             'coordinates_table': table,
         }
 
