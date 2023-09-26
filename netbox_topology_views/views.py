@@ -37,21 +37,36 @@ from netbox.views.generic import (
     ObjectChangeLogView, 
     BulkImportView
 )
-
-
-from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet
+from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet, CircuitCoordinatesFilterSet, PowerPanelCoordinatesFilterSet, PowerFeedCoordinatesFilterSet
 from netbox_topology_views.forms import (
     DeviceFilterForm, 
     IndividualOptionsForm, 
     CoordinateGroupsForm, 
+    CircuitCoordinatesForm, 
+    CircuitCoordinatesFilterForm, 
+    CircuitCoordinatesImportForm,
+    PowerPanelCoordinatesForm, 
+    PowerPanelCoordinatesFilterForm, 
+    PowerPanelCoordinatesImportForm,
+    PowerFeedCoordinatesForm, 
+    PowerFeedCoordinatesFilterForm, 
+    PowerFeedCoordinatesImportForm,
     CoordinatesForm, 
     CoordinatesFilterForm, 
     CoordinateGroupsImportForm,
     CoordinatesImportForm
 )
 import netbox_topology_views.models
-from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
-from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
+from netbox_topology_views.models import (
+    RoleImage, 
+    IndividualOptions, 
+    CoordinateGroup, 
+    Coordinate, 
+    CircuitCoordinate, 
+    PowerPanelCoordinate, 
+    PowerFeedCoordinate,
+)
+from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable, CircuitCoordinateListTable, PowerPanelCoordinateListTable, PowerFeedCoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -805,6 +820,132 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 "basepath": settings.BASE_PATH,
             },
         )
+
+class CircuitCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class CircuitCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    form = CircuitCoordinatesForm
+    template_name = 'netbox_topology_views/circuitcoordinate_add.html'
+
+class CircuitCoordinateBulkImportView(BulkImportView):
+    queryset = CircuitCoordinate.objects.all()
+    model_form = CircuitCoordinatesImportForm
+
+class CircuitCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    table = CircuitCoordinateListTable
+    template_name = 'netbox_topology_views/circuitcoordinate_list.html'
+    filterset = CircuitCoordinatesFilterSet
+    filterset_form = CircuitCoordinatesFilterForm
+
+class CircuitCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    form = CircuitCoordinatesForm
+    template_name = 'netbox_topology_views/circuitcoordinate_edit.html'
+
+class CircuitCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class CircuitCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class PowerPanelCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerPanelCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    form = PowerPanelCoordinatesForm
+    template_name = 'netbox_topology_views/powerpanelcoordinate_add.html'
+
+class PowerPanelCoordinateBulkImportView(BulkImportView):
+    queryset = PowerPanelCoordinate.objects.all()
+    model_form = PowerPanelCoordinatesImportForm
+
+class PowerPanelCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    table = PowerPanelCoordinateListTable
+    template_name = 'netbox_topology_views/powerpanelcoordinate_list.html'
+    filterset = PowerPanelCoordinatesFilterSet
+    filterset_form = PowerPanelCoordinatesFilterForm
+
+class PowerPanelCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    form = PowerPanelCoordinatesForm
+    template_name = 'netbox_topology_views/powerpanelcoordinate_edit.html'
+
+class PowerPanelCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerPanelCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerFeedCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+
+class PowerFeedCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    form = PowerFeedCoordinatesForm
+    template_name = 'netbox_topology_views/powerfeedcoordinate_add.html'
+
+class PowerFeedCoordinateBulkImportView(BulkImportView):
+    queryset = PowerFeedCoordinate.objects.all()
+    model_form = PowerFeedCoordinatesImportForm
+
+class PowerFeedCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    table = PowerFeedCoordinateListTable
+    template_name = 'netbox_topology_views/powerfeedcoordinate_list.html'
+    filterset = PowerFeedCoordinatesFilterSet
+    filterset_form = PowerFeedCoordinatesFilterForm
+
+class PowerFeedCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    form = PowerFeedCoordinatesForm
+    template_name = 'netbox_topology_views/powerfeedcoordinate_edit.html'
+
+class PowerFeedCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+
+class PowerFeedCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
 
 class CoordinateView(PermissionRequiredMixin, ObjectView):
     permission_required = 'netbox_topology_views.view_coordinate'

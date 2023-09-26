@@ -1,13 +1,14 @@
 import django_filters
+from circuits.models import Circuit
 from dcim.choices import DeviceStatusChoices
-from dcim.models import Device, DeviceRole, Location, Rack, Region, Site, SiteGroup, Manufacturer, DeviceType, Platform
+from dcim.models import Device, DeviceRole, Location, Rack, Region, Site, SiteGroup, Manufacturer, DeviceType, Platform, PowerPanel, PowerFeed
 from django.db.models import Q
 from extras.filtersets import LocalConfigContextFilterSet
 from extras.models import ConfigTemplate
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import TenancyFilterSet, ContactModelFilterSet
 from utilities.filters import TreeNodeMultipleChoiceFilter, MultiValueCharFilter, MultiValueMACAddressFilter
-from netbox_topology_views.models import CoordinateGroup, Coordinate
+from netbox_topology_views.models import CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 
 class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilterSet, LocalConfigContextFilterSet):
     q = django_filters.CharFilter(
@@ -163,6 +164,72 @@ class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilter
 
     def _virtual_chassis_member(self, queryset, name, value):
         return queryset.exclude(virtual_chassis__isnull=value)
+
+class CircuitCoordinatesFilterSet(NetBoxModelFilterSet):
+    group = django_filters.ModelMultipleChoiceFilter(
+        queryset = CoordinateGroup.objects.all(),
+    )
+
+    device = django_filters.ModelMultipleChoiceFilter(
+        queryset = Circuit.objects.all(),
+    )
+
+    class Meta:
+        model = CircuitCoordinate
+        fields = ['id', 'group', 'device', 'x', 'y']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(group__name__icontains=value) |
+            Q(device__name__icontains=value)
+        )
+
+class PowerPanelCoordinatesFilterSet(NetBoxModelFilterSet):
+    group = django_filters.ModelMultipleChoiceFilter(
+        queryset = CoordinateGroup.objects.all(),
+    )
+
+    device = django_filters.ModelMultipleChoiceFilter(
+        queryset = PowerPanel.objects.all(),
+    )
+
+    class Meta:
+        model = PowerPanelCoordinate
+        fields = ['id', 'group', 'device', 'x', 'y']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(group__name__icontains=value) |
+            Q(device__name__icontains=value)
+        )
+
+class PowerFeedCoordinatesFilterSet(NetBoxModelFilterSet):
+    group = django_filters.ModelMultipleChoiceFilter(
+        queryset = CoordinateGroup.objects.all(),
+    )
+
+    device = django_filters.ModelMultipleChoiceFilter(
+        queryset = PowerFeed.objects.all(),
+    )
+
+    class Meta:
+        model = PowerFeedCoordinate
+        fields = ['id', 'group', 'device', 'x', 'y']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(group__name__icontains=value) |
+            Q(device__name__icontains=value)
+        )
 
 class CoordinatesFilterSet(NetBoxModelFilterSet):
     group = django_filters.ModelMultipleChoiceFilter(

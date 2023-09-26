@@ -5,7 +5,8 @@ from django.conf import settings
 
 from django.utils.translation import gettext as _
 
-from dcim.models import Device, Site, SiteGroup, Region, DeviceRole, Location, Rack, Manufacturer, DeviceType, Platform
+from circuits.models import Circuit
+from dcim.models import Device, Site, SiteGroup, Region, DeviceRole, Location, Rack, Manufacturer, DeviceType, Platform, PowerPanel, PowerFeed
 
 from django import forms
 from dcim.choices import DeviceStatusChoices, DeviceAirflowChoices
@@ -21,7 +22,7 @@ from utilities.forms.fields import (
     DynamicModelMultipleChoiceField
 )
 
-from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate
+from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 
 class DeviceFilterForm(
     LocalConfigContextFilterForm,
@@ -272,6 +273,33 @@ class CoordinateGroupsImportForm(NetBoxModelImportForm):
         model = CoordinateGroup
         fields = ('name', 'description')
 
+class CircuitCoordinatesForm(NetBoxModelForm):
+    fieldsets = (
+        ('CircuitCoordinate', ('group', 'device', 'x', 'y')),
+    )
+
+    class Meta:
+        model = CircuitCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class PowerPanelCoordinatesForm(NetBoxModelForm):
+    fieldsets = (
+        ('PowerPanel', ('group', 'device', 'x', 'y')),
+    )
+
+    class Meta:
+        model = PowerPanelCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class PowerFeedCoordinatesForm(NetBoxModelForm):
+    fieldsets = (
+        ('PowerFeedCoordinate', ('group', 'device', 'x', 'y')),
+    )
+
+    class Meta:
+        model = PowerFeedCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
         ('Coordinate', ('group', 'device', 'x', 'y')),
@@ -281,10 +309,100 @@ class CoordinatesForm(NetBoxModelForm):
         model = Coordinate
         fields = ('group', 'device', 'x', 'y')
 
+class CircuitCoordinatesImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = CircuitCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class PowerPanelCoordinatesImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = PowerPanelCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
+class PowerFeedCoordinatesImportForm(NetBoxModelImportForm):
+    class Meta:
+        model = PowerFeedCoordinate
+        fields = ('group', 'device', 'x', 'y')
+
 class CoordinatesImportForm(NetBoxModelImportForm):
     class Meta:
         model = Coordinate
         fields = ('group', 'device', 'x', 'y')
+
+class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
+    model = CircuitCoordinate
+    fieldsets = (
+        (None, ('q', 'filter_id')),
+        ('CircuitCoordinates', ('group', 'device', 'x', 'y'))
+    )
+
+    group = forms.ModelMultipleChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=Circuit.objects.all(),
+        required=False
+    )
+
+    x = forms.IntegerField(
+        required=False
+    )
+
+    y = forms.IntegerField(
+        required=False
+    )
+
+class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
+    model = PowerPanelCoordinate
+    fieldsets = (
+        (None, ('q', 'filter_id')),
+        ('PowerPanelCoordinates', ('group', 'device', 'x', 'y'))
+    )
+
+    group = forms.ModelMultipleChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=PowerPanel.objects.all(),
+        required=False
+    )
+
+    x = forms.IntegerField(
+        required=False
+    )
+
+    y = forms.IntegerField(
+        required=False
+    )
+
+class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
+    model = Coordinate
+    fieldsets = (
+        (None, ('q', 'filter_id')),
+        ('PowerFeedCoordinates', ('group', 'device', 'x', 'y'))
+    )
+
+    group = forms.ModelMultipleChoiceField(
+        queryset=CoordinateGroup.objects.all(),
+        required=False
+    )
+
+    device = DynamicModelMultipleChoiceField(
+        queryset=PowerFeed.objects.all(),
+        required=False
+    )
+
+    x = forms.IntegerField(
+        required=False
+    )
+
+    y = forms.IntegerField(
+        required=False
+    )
 
 class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
