@@ -131,11 +131,11 @@ class Coordinate(NetBoxModel):
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+            'Smaller values correspond to a position further to the left on the monitor.',
     )
     y = models.IntegerField(
         help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+            'Smaller values correspond to a position further up on the monitor.',
     )
 
     def get_or_create_default_group(group_id):
@@ -180,11 +180,11 @@ class CircuitCoordinate(NetBoxModel):
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+            'Smaller values correspond to a position further to the left on the monitor.',
     )
     y = models.IntegerField(
         help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+            'Smaller values correspond to a position further up on the monitor.',
     )
 
     def get_or_create_default_group(group_id):
@@ -229,11 +229,11 @@ class PowerPanelCoordinate(NetBoxModel):
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+            'Smaller values correspond to a position further to the left on the monitor.',
     )
     y = models.IntegerField(
         help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+            'Smaller values correspond to a position further up on the monitor.',
     )
 
     def get_or_create_default_group(group_id):
@@ -278,11 +278,11 @@ class PowerFeedCoordinate(NetBoxModel):
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+            'Smaller values correspond to a position further to the left on the monitor.',
     )
     y = models.IntegerField(
         help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+            'Smaller values correspond to a position further up on the monitor.',
     )
 
     def get_or_create_default_group(group_id):
