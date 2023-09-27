@@ -37,20 +37,36 @@ from netbox.views.generic import (
     ObjectChangeLogView, 
     BulkImportView
 )
-
-
-from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet
+from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet, CircuitCoordinatesFilterSet, PowerPanelCoordinatesFilterSet, PowerFeedCoordinatesFilterSet
 from netbox_topology_views.forms import (
     DeviceFilterForm, 
     IndividualOptionsForm, 
     CoordinateGroupsForm, 
+    CircuitCoordinatesForm, 
+    CircuitCoordinatesFilterForm, 
+    CircuitCoordinatesImportForm,
+    PowerPanelCoordinatesForm, 
+    PowerPanelCoordinatesFilterForm, 
+    PowerPanelCoordinatesImportForm,
+    PowerFeedCoordinatesForm, 
+    PowerFeedCoordinatesFilterForm, 
+    PowerFeedCoordinatesImportForm,
     CoordinatesForm, 
     CoordinatesFilterForm, 
     CoordinateGroupsImportForm,
     CoordinatesImportForm
 )
-from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, IndividualOptions
-from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable
+import netbox_topology_views.models
+from netbox_topology_views.models import (
+    RoleImage, 
+    IndividualOptions, 
+    CoordinateGroup, 
+    Coordinate, 
+    CircuitCoordinate, 
+    PowerPanelCoordinate, 
+    PowerFeedCoordinate,
+)
+from netbox_topology_views.tables import CoordinateGroupListTable, CoordinateListTable, CircuitCoordinateListTable, PowerPanelCoordinateListTable, PowerFeedCoordinateListTable
 from netbox_topology_views.utils import (
     CONF_IMAGE_DIR,
     find_image_url,
@@ -88,6 +104,7 @@ def create_node(
     if isinstance(device, Circuit):
         dev_name = device.cid
         node["id"] = f"c{device.pk}"
+        model_name = 'CircuitCoordinate'
 
         if device.provider is not None:
             node_content += (
@@ -98,6 +115,7 @@ def create_node(
     elif isinstance(device, PowerPanel):
         dev_name = device.name
         node["id"] = f"p{device.pk}"
+        model_name = 'PowerPanelCoordinate'
 
         if device.site is not None:
             node_content += f"<tr><th>Site: </th><td>{device.site.name}</td></tr>"
@@ -108,6 +126,7 @@ def create_node(
     elif isinstance(device, PowerFeed):
         dev_name = device.name
         node["id"] = f"f{device.pk}"
+        model_name = 'PowerFeedCoordinate'
 
         if device.power_panel is not None:
             node_content += (
@@ -124,6 +143,7 @@ def create_node(
         if device.voltage is not None:
             node_content += f"<tr><th>Voltage: </th><td>{device.voltage}</td></tr>"
     else:
+        model_name = 'Coordinate'
         dev_name = device.name
         if dev_name is None:
             dev_name = device.device_type.get_full_name
@@ -163,8 +183,10 @@ def create_node(
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
 
+    model_class = getattr(netbox_topology_views.models, model_name)
+
     if group_id is None or group_id == "default":
-        group_id = Coordinate.get_or_create_default_group(group_id)
+        group_id = model_class.get_or_create_default_group(group_id)
         if not group_id:
             print('Exception occured while handling default group.')
             return node
@@ -176,10 +198,10 @@ def create_node(
     # will not be placed correctly by vis-network.
     node["x"] = 0
     node["y"] = 0
-    if Coordinate.objects.filter(group=group, device=device.pk).values('x') and Coordinate.objects.filter(group=group, device=device.pk).values('y'):
+    if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
         # Coordinates data for the device exists in Coordinates Group. Let's assign them
-        node["x"] = Coordinate.objects.get(group=group, device=device.pk).x
-        node["y"] = Coordinate.objects.get(group=group, device=device.pk).y
+        node["x"] = model_class.objects.get(group=group, device=device.pk).x
+        node["y"] = model_class.objects.get(group=group, device=device.pk).y
         node["physics"] = False
     elif "coordinates" in device.custom_field_data:
         # We prefer the new Coordinate model but leave the deprecated method 
@@ -799,6 +821,132 @@ class TopologyImagesView(PermissionRequiredMixin, View):
             },
         )
 
+class CircuitCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class CircuitCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    form = CircuitCoordinatesForm
+    template_name = 'netbox_topology_views/circuitcoordinate_add.html'
+
+class CircuitCoordinateBulkImportView(BulkImportView):
+    queryset = CircuitCoordinate.objects.all()
+    model_form = CircuitCoordinatesImportForm
+
+class CircuitCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    table = CircuitCoordinateListTable
+    template_name = 'netbox_topology_views/circuitcoordinate_list.html'
+    filterset = CircuitCoordinatesFilterSet
+    filterset_form = CircuitCoordinatesFilterForm
+
+class CircuitCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+    form = CircuitCoordinatesForm
+    template_name = 'netbox_topology_views/circuitcoordinate_edit.html'
+
+class CircuitCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class CircuitCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = CircuitCoordinate.objects.all()
+
+class PowerPanelCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerPanelCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    form = PowerPanelCoordinatesForm
+    template_name = 'netbox_topology_views/powerpanelcoordinate_add.html'
+
+class PowerPanelCoordinateBulkImportView(BulkImportView):
+    queryset = PowerPanelCoordinate.objects.all()
+    model_form = PowerPanelCoordinatesImportForm
+
+class PowerPanelCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    table = PowerPanelCoordinateListTable
+    template_name = 'netbox_topology_views/powerpanelcoordinate_list.html'
+    filterset = PowerPanelCoordinatesFilterSet
+    filterset_form = PowerPanelCoordinatesFilterForm
+
+class PowerPanelCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+    form = PowerPanelCoordinatesForm
+    template_name = 'netbox_topology_views/powerpanelcoordinate_edit.html'
+
+class PowerPanelCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerPanelCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerPanelCoordinate.objects.all()
+
+class PowerFeedCoordinateView(PermissionRequiredMixin, ObjectView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+
+class PowerFeedCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.add_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    form = PowerFeedCoordinatesForm
+    template_name = 'netbox_topology_views/powerfeedcoordinate_add.html'
+
+class PowerFeedCoordinateBulkImportView(BulkImportView):
+    queryset = PowerFeedCoordinate.objects.all()
+    model_form = PowerFeedCoordinatesImportForm
+
+class PowerFeedCoordinateListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    table = PowerFeedCoordinateListTable
+    template_name = 'netbox_topology_views/powerfeedcoordinate_list.html'
+    filterset = PowerFeedCoordinatesFilterSet
+    filterset_form = PowerFeedCoordinatesFilterForm
+
+class PowerFeedCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'netbox_topology_views.change_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+    form = PowerFeedCoordinatesForm
+    template_name = 'netbox_topology_views/powerfeedcoordinate_edit.html'
+
+class PowerFeedCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'netbox_topology_views.delete_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+
+class PowerFeedCoordinateChangeLogView(PermissionRequiredMixin, ObjectChangeLogView):
+    permission_required = 'netbox_topology_views.view_coordinate'
+
+    queryset = PowerFeedCoordinate.objects.all()
+
 class CoordinateView(PermissionRequiredMixin, ObjectView):
     permission_required = 'netbox_topology_views.view_coordinate'
 
@@ -847,10 +995,19 @@ class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
     queryset = CoordinateGroup.objects.all()
 
     def get_extra_context(self, request, instance):
+        circuittable = CircuitCoordinateListTable(instance.circuitcoordinate_set.all())
+        circuittable.configure(request)
+        powerpaneltable = PowerPanelCoordinateListTable(instance.powerpanelcoordinate_set.all())
+        powerpaneltable.configure(request)
+        powerfeedtable = PowerFeedCoordinateListTable(instance.powerfeedcoordinate_set.all())
+        powerfeedtable.configure(request)
         table = CoordinateListTable(instance.coordinate_set.all())
         table.configure(request)
 
         return {
+            'circuitcoordinates_table': circuittable,
+            'powerpanelcoordinates_table': powerpaneltable,
+            'powerfeedcoordinates_table': powerfeedtable,
             'coordinates_table': table,
         }
 

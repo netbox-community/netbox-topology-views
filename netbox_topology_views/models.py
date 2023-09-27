@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
-from dcim.models import Device, DeviceRole
+from circuits.models import Circuit
+from dcim.models import Device, DeviceRole, PowerPanel, PowerFeed
 from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -130,11 +131,11 @@ class Coordinate(NetBoxModel):
     
     x = models.IntegerField(
         help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+            'Smaller values correspond to a position further to the left on the monitor.',
     )
     y = models.IntegerField(
         help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+            'Smaller values correspond to a position further up on the monitor.',
     )
 
     def get_or_create_default_group(group_id):
@@ -167,6 +168,153 @@ class Coordinate(NetBoxModel):
 
     def get_absolute_url(self):
         return reverse('plugins:netbox_topology_views:coordinate', args=[self.pk])
+
+class CircuitCoordinate(NetBoxModel):
+    """
+    Coordinates are being used to place devices in a topology view onto a certain 
+    position. Devices belong to one or more coordinate groups. They have to 
+    be unique together.
+    """
+    device = models.ForeignKey(Circuit, on_delete=models.CASCADE)
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    
+    x = models.IntegerField(
+        help_text='X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.',
+    )
+    y = models.IntegerField(
+        help_text='Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.',
+    )
+
+    def get_or_create_default_group(group_id):
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        try:
+            if CoordinateGroup.objects.filter(name="default"):
+                group = CoordinateGroup.objects.get(name="default")
+                group_id = group.pk
+            else:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+                group_id = group.pk
+        except:
+            return False
+        return group_id
+
+    class Meta:
+        ordering = ['group', 'device']
+        unique_together = ('device', 'group')
+
+    def __str__(self):
+        return f'{self.x};{self.y}'
+
+    def get_absolute_url(self):
+        return reverse('plugins:netbox_topology_views:circuitcoordinate', args=[self.pk])
+
+class PowerPanelCoordinate(NetBoxModel):
+    """
+    Coordinates are being used to place devices in a topology view onto a certain 
+    position. Devices belong to one or more coordinate groups. They have to 
+    be unique together.
+    """
+    device = models.ForeignKey(PowerPanel, on_delete=models.CASCADE)
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    
+    x = models.IntegerField(
+        help_text='X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.',
+    )
+    y = models.IntegerField(
+        help_text='Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.',
+    )
+
+    def get_or_create_default_group(group_id):
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        try:
+            if CoordinateGroup.objects.filter(name="default"):
+                group = CoordinateGroup.objects.get(name="default")
+                group_id = group.pk
+            else:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+                group_id = group.pk
+        except:
+            return False
+        return group_id
+
+    class Meta:
+        ordering = ['group', 'device']
+        unique_together = ('device', 'group')
+
+    def __str__(self):
+        return f'{self.x};{self.y}'
+
+    def get_absolute_url(self):
+        return reverse('plugins:netbox_topology_views:powerpanelcoordinate', args=[self.pk])
+
+class PowerFeedCoordinate(NetBoxModel):
+    """
+    Coordinates are being used to place devices in a topology view onto a certain 
+    position. Devices belong to one or more coordinate groups. They have to 
+    be unique together.
+    """
+    device = models.ForeignKey(PowerFeed, on_delete=models.CASCADE)
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    
+    x = models.IntegerField(
+        help_text='X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.',
+    )
+    y = models.IntegerField(
+        help_text='Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.',
+    )
+
+    def get_or_create_default_group(group_id):
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        try:
+            if CoordinateGroup.objects.filter(name="default"):
+                group = CoordinateGroup.objects.get(name="default")
+                group_id = group.pk
+            else:
+                group = CoordinateGroup(
+                    name="default", 
+                    description="Automatically generated default group. If you delete "
+                        "this group, all default coordinates are gone for good but "
+                        "the group itself will be re-created."
+                )
+                group.save()
+                group_id = group.pk
+        except:
+            return False
+        return group_id
+
+    class Meta:
+        ordering = ['group', 'device']
+        unique_together = ('device', 'group')
+
+    def __str__(self):
+        return f'{self.x};{self.y}'
+
+    def get_absolute_url(self):
+        return reverse('plugins:netbox_topology_views:powerfeedcoordinate', args=[self.pk])
 
 class IndividualOptions(NetBoxModel):
     CHOICES = (
