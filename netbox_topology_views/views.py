@@ -5,7 +5,7 @@ import time
 from itertools import chain
 
 from utilities.htmx import is_htmx
-from circuits.models import Circuit, CircuitTermination
+from circuits.models import Circuit, CircuitTermination, ProviderNetwork
 from dcim.models import (
     Cable,
     CableTermination,
@@ -374,7 +374,8 @@ def get_topology_data(
             )
             for path_complete_interface in path_complete_interfaces:
                 for connected_endpoint in path_complete_interface.connected_endpoints:
-                    device_ids.append(connected_endpoint.device.id)
+                    if type(connected_endpoint) != ProviderNetwork:
+                        device_ids.append(connected_endpoint.device.id)
 
     if show_circuit:
         circuit_terminations = CircuitTermination.objects.filter(
