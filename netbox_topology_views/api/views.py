@@ -1,4 +1,5 @@
 from typing import Dict
+import sys
 
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
@@ -149,15 +150,26 @@ class SaveRoleImageViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
                 {"status": "Missing or malformed request body"}, status=400
             )
 
-        device_roles = {
-            k: v.removeprefix(settings.STATIC_URL)
-            for k, v in request.data.items()
-            if k.isnumeric()}
-        content_type_ids = {
-            k[2:]: v.removeprefix(settings.STATIC_URL)
-            for k, v in request.data.items()
-            if k.startswith("ct") and k[2:].isnumeric()
-        }
+        if sys.version_info >= (3,9,0):
+            device_roles = {
+                k: v.removeprefix(settings.STATIC_URL)
+                for k, v in request.data.items()
+                if k.isnumeric()}
+            content_type_ids = {
+                k[2:]: v.removeprefix(settings.STATIC_URL)
+                for k, v in request.data.items()
+                if k.startswith("ct") and k[2:].isnumeric()
+            }
+        else:
+            device_roles = {}
+            for k, v in request.data.items():
+                if k.isdigit() and v.startswith(settings.STATIC_URL):
+                    device_roles[k] = v[len(settings.STATIC_URL):]
+
+            content_type_ids = {}
+            for k, v in request.data.items():
+                if k.startswith("ct") and k[2:].isdigit() and v.startswith(settings.STATIC_URL):
+                    content_type_ids[k[2:]] = v[len(settings.STATIC_URL):]
 
         roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(device_roles.keys())
         content_types: Dict[int, ContentType] = ContentType.objects.in_bulk(
