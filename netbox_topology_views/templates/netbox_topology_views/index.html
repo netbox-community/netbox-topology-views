@@ -29,7 +29,7 @@
 {% endblock controls %}
 
 {% block tabs %}
-	<ul class="nav nav-tabs px-3">
+	<ul class="nav nav-tabs px-3" id="tabswrapper">
     	{% block tab_items %}
 		<li class="nav-item" role="presentation">
 			<button class="nav-link active" id="network-tab" data-bs-toggle="tab" data-bs-target="#networks" type="button" role="tab" aria-controls="filters-form" aria-selected="true">
@@ -50,11 +50,13 @@
 
 {% block content-wrapper %}
   {% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
-    <div class="tab-content">
+    <div class="tab-content" id="tabcontentwrapper">
 
       {# Applied filters #}
       {% if filter_form %}
-        {% applied_filters model filter_form request.GET %}
+        <div id="filterwrapper">
+          {% applied_filters model filter_form request.GET %}
+        </div>
       {% endif %}
 
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
@@ -78,6 +80,36 @@
     const brokenImage = '{{ broken_image }}';
     const topologyData = {{ topology_data | safe }};
     const basePath = '{{ basepath }}';
-  </script>
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function resizeCanvas() {
+      heightToSubtract = getElementHeight('.navbar') + 
+        getElementHeight('.title-container') + 
+        getElementHeight('#tabswrapper') + 
+        getElementHeight('#filterwrapper') + 
+        getElementHeight('.footer') +
+        getElementPadding('#tabcontentwrapper');
+
+      document.getElementById("visgraph").style.height = "calc(100vh - " + heightToSubtract + "px)";
+    }
+
+    function getElementPadding(element) {
+      el = document.querySelector(element);
+      els = getComputedStyle(el);
+      padding = parseInt(els.paddingTop) + parseInt(els.paddingBottom);
+
+      return padding;
+    }
+
+    function getElementHeight(element) {
+      el = document.querySelector(element);
+      els = getComputedStyle(el);
+      height = el.offsetHeight + parseInt(els.marginTop) + parseInt(els.marginBottom);
+
+      return height;
+    }
+</script>
 	<script src="{% static 'netbox_topology_views/js/app.js' %}" defer></script>
 {% endblock javascript %}
