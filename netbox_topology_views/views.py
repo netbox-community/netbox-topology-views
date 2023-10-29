@@ -771,9 +771,9 @@ ADDITIONAL_ROLES = (PowerPanel, PowerFeed, Circuit)
 class TopologyImagesView(PermissionRequiredMixin, View):
     permission_required = (
         "dcim.view_site",
-        "dcim.view_device_role",
-        "dcim.add_device_role",
-        "dcim.change_device_role",
+        "dcim.view_devicerole",
+        "dcim.add_devicerole",
+        "dcim.change_devicerole",
     )
 
     def get(self, request: HttpRequest):

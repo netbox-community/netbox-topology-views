@@ -106,7 +106,7 @@ menu = PluginMenu(
         ),
         ('PREFERENCES', 
             (
-                PluginMenuItem(link="plugins:netbox_topology_views:images", link_text="Images", permissions=[ "dcim.view_site","dcim.view_device_role"]),
+                PluginMenuItem(link="plugins:netbox_topology_views:images", link_text="Images", permissions=[ "dcim.view_site","dcim.view_devicerole"]),
                 PluginMenuItem(link="plugins:netbox_topology_views:individualoptions", link_text="Individual Options", permissions=['netbox_topology_views.change_individualoptions']),
             ),
         ),
