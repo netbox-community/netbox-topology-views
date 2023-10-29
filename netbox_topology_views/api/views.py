@@ -139,8 +139,8 @@ class SaveRoleImageViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
     queryset = DeviceRole.objects.none()
     serializer_class = RoleImageSerializer
     permission_required = (
-        "dcim.add_device_role",
-        "dcim.change_device_role",
+        "dcim.add_devicerole",
+        "dcim.change_devicerole",
     )
 
     @action(detail=False, methods=["post"])
