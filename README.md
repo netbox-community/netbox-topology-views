@@ -200,3 +200,12 @@ Set `Coordinate Groups` according to your needs:
 
 Set `Coordinates` according to your needs:
  + netbox_topology_views | coordinate | view/add/change/delete
+
+Set `Power Feed Coordinates` according to your needs:
+ + netbox_topology_views | power feed coordinate | view/add/change/delete
+
+Set `Power Panel Coordinates` according to your needs:
+ + netbox_topology_views | power panel coordinate | view/add/change/delete
+
+Set `Circuit Coordinates` according to your needs:
+ + netbox_topology_views | circuit coordinate | view/add/change/delete
