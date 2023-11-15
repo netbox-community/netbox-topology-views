@@ -1,5 +1,4 @@
 from cProfile import label
-import imp
 from django import forms
 from django.conf import settings
 
