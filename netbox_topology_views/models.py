@@ -13,7 +13,7 @@ from netbox.models import NetBoxModel
 from netbox.models.features import (
     ChangeLoggingMixin,
     ExportTemplatesMixin,
-    WebhooksMixin,
+    EventRulesMixin,
 )
 
 from netbox_topology_views.utils import (
@@ -26,7 +26,7 @@ from netbox_topology_views.utils import (
 )
 
 
-class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, WebhooksMixin):
+class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
         indexes = [
             models.Index(fields=["content_type", "object_id"]),
