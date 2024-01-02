@@ -1,16 +1,16 @@
 {
   "private": true,
   "name": "netbox_topology_views",
-  "version": "3.8.1",
+  "version": "3.9.0",
   "scripts": {
     "bundle": "node bundle.js",
     "bundle:styles": "node bundle.js --styles",
     "bundle:scripts": "node bundle.js --scripts"
   },
   "dependencies": {
-    "vis-data": "^7.1.6",
-    "vis-network": "^9.1.6",
-    "vis-util": "^5.0.3"
+    "vis-data": "^7.1.9",
+    "vis-network": "^9.1.9",
+    "vis-util": "^5.0.7"
   },
   "devDependencies": {
     "@egjs/hammerjs": "^2.0.0",
