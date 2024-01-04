@@ -1,11 +1,12 @@
 #visgraph {
   height: 64vh;
+  border: 1px solid #ced4da
 }
 
 html[data-netbox-color-mode=dark] #visgraph {
   background-color: #212529;
+  border: 1px solid #495057
 }
-
 
 .image-dropdown img {
   width: 64px;
