@@ -133,6 +133,92 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             })
         }
     })
+    
+    function combineNodeLocationInfo() {
+        let nodesArray = [];
+        // extract node ids and node location ids from all nodes
+        for (let [key, value] of nodes._data) {
+            nodesArray.push([value.id, value.location_id, value.location]);
+        }
+        // split single array above into arrays grouped by location_id
+        let groupedNodeLocationArray = nodesArray.reduce((acc, value) => {
+            let key = value[1]; // group by location_id
+            acc[key] = acc[key] || [];
+            acc[key].push(value);
+            return acc;
+        }, {});
+
+        return Object.values(groupedNodeLocationArray);
+    }
+
+    function combineNodeSiteInfo() {
+        let nodesArray = [];
+        // extract node ids and node site ids from all nodes
+        for (let [key, value] of nodes._data) {
+            nodesArray.push([value.id, value.site_id, value.site]);
+        }
+        // split single array above into arrays grouped by site_id
+        let groupedNodeSiteArray = nodesArray.reduce((acc, value) => {
+            let key = value[1]; // group by site_id
+            acc[key] = acc[key] || [];
+            acc[key].push(value);
+            return acc;
+        }, {});
+
+        return Object.values(groupedNodeSiteArray);
+    }
+
+    graph.on('afterDrawing', (canvascontext) => {
+        groupedNodeSites = combineNodeSiteInfo();
+        for(let value of Object.entries(groupedNodeSites)) { 
+            xValues = [];
+            yValues = [];
+            for(let val of value[1]) { 
+                xValues.push(graph.getPosition(val[0]).x);
+                yValues.push(graph.getPosition(val[0]).y);
+            }
+            const rectX = Math.min(...xValues) - 80
+            const rectY = Math.min(...yValues) - 80
+            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 160
+            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 160
+            // Draw rectangle
+            canvascontext.beginPath();
+            canvascontext.lineWidth = "4";
+            canvascontext.strokeStyle = "red";
+            canvascontext.rect(rectX, rectY, rectSizeX, rectSizeY);
+            canvascontext.stroke();
+    
+            // Draw text
+            canvascontext.font = "14px helvetica";
+            canvascontext.fillStyle = "red"
+            canvascontext.fillText(value[1][0][2], rectX + 8, rectY - 8); 
+        }
+
+        groupedNodeLocations = combineNodeLocationInfo();
+        for(let value of Object.entries(groupedNodeLocations)) { 
+            xValues = [];
+            yValues = [];
+            for(let val of value[1]) { 
+                xValues.push(graph.getPosition(val[0]).x);
+                yValues.push(graph.getPosition(val[0]).y);
+            }
+            const rectX = Math.min(...xValues) - 75
+            const rectY = Math.min(...yValues) - 75
+            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 150
+            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 150
+            // Draw rectangle
+            canvascontext.beginPath();
+            canvascontext.lineWidth = "4";
+            canvascontext.strokeStyle = "yellow";
+            canvascontext.rect(rectX, rectY, rectSizeX, rectSizeY);
+            canvascontext.stroke();
+    
+            // Draw text
+            canvascontext.font = "14px helvetica";
+            canvascontext.fillStyle = "yellow"
+            canvascontext.fillText(value[1][0][2], rectX + 8, rectY + 18); 
+        }
+    })
 })()
 
 // Download Graph

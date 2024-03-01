@@ -220,6 +220,10 @@ def create_node(
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
+    node["site"] = device.site.name
+    node["site_id"] = device.site_id
+    node["location"] = device.location.name
+    node["location_id"] = device.location_id
 
     return node
 
