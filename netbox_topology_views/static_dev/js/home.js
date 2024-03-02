@@ -134,6 +134,12 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         }
     })
 
+    graph.on('afterDrawing', (canvascontext) => {
+        drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams);
+        drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams);
+        drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams);
+    })
+
     // Add information on which node belongs to which group (site/location/rack).
     // Create an array for each group in order to loop through that arrays later
     function combineNodeInfo(typeId, type) {
@@ -226,43 +232,38 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         }
     }
 
-    graph.on('afterDrawing', (canvascontext) => {
-        let groupedNodeSites = combineNodeInfo('site_id', 'site');
-        let siteRectParams = {
-            lineWidth: "3", 
-            color: "red",
-            paddingX: 80, 
-            paddingY: 80, 
-            textPaddingX: 8, 
-            textPaddingY: -8, 
-            font: "14px helvetica"
-        }
-        drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams);
+    let groupedNodeSites = combineNodeInfo('site_id', 'site');
+    let siteRectParams = {
+        lineWidth: "3", 
+        color: "red",
+        paddingX: 80, 
+        paddingY: 80, 
+        textPaddingX: 8, 
+        textPaddingY: -8, 
+        font: "14px helvetica"
+    }
+    
+    let groupedNodeLocations = combineNodeInfo('location_id', 'location');
+    let locationRectParams = {
+        lineWidth: "3", 
+        color: "yellow",
+        paddingX: 75, 
+        paddingY: 75, 
+        textPaddingX: 8, 
+        textPaddingY: 18, 
+        font: "14px helvetica"
+    }
 
-        let groupedNodeLocations = combineNodeInfo('location_id', 'location');
-        let locationRectParams = {
-            lineWidth: "3", 
-            color: "yellow",
-            paddingX: 75, 
-            paddingY: 75, 
-            textPaddingX: 8, 
-            textPaddingY: 18, 
-            font: "14px helvetica"
-        }
-        drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams);
-
-        let groupedNodeRacks = combineNodeInfo('rack_id', 'rack');
-        let rackRectParams = {
-            lineWidth: "3", 
-            color: "green",
-            paddingX: 70, 
-            paddingY: 70, 
-            textPaddingX: 8, 
-            textPaddingY: 26, 
-            font: "14px helvetica"
-        }
-        drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams);
-    })
+    let groupedNodeRacks = combineNodeInfo('rack_id', 'rack');
+    let rackRectParams = {
+        lineWidth: "3", 
+        color: "green",
+        paddingX: 70, 
+        paddingY: 70, 
+        textPaddingX: 8, 
+        textPaddingY: 26, 
+        font: "14px helvetica"
+    }
 })()
 
 // Download Graph
