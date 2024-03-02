@@ -42,6 +42,11 @@ const csrftoken = getCookie('csrftoken')
 // Render vis graph
 let graph = null // vis graph instance
 
+let searchParams = new URLSearchParams(window.location.search)
+let group_sites = searchParams.get('group_sites')
+let group_locations = searchParams.get('group_locations')
+let group_racks = searchParams.get('group_racks')
+
 const container = document.querySelector('#visgraph')
 const coordSaveCheckbox = document.querySelector('#id_save_coords')
 ;(function handleLoadData() {
@@ -135,9 +140,9 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     })
 
     graph.on('afterDrawing', (canvascontext) => {
-        drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams);
-        drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams);
-        drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams);
+        if(group_sites != null && group_sites == 'on') { drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams); }
+        if(group_locations != null && group_locations == 'on') { drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams); }
+        if(group_racks != null && group_racks == 'on') { drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams); }
     })
 
     // Add information on which node belongs to which group (site/location/rack).

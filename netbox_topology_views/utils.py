@@ -154,12 +154,27 @@ def get_query_settings(request):
         if request.GET["show_wireless"] == "on" :
             show_wireless = True
 
+    group_sites = False
+    if "group_sites" in request.GET:
+        if request.GET["group_sites"] == "on" :
+            group_sites = True
+
+    group_locations = False
+    if "group_locations" in request.GET:
+        if request.GET["group_locations"] == "on" :
+            group_locations = True
+
+    group_racks = False
+    if "group_racks" in request.GET:
+        if request.GET["group_racks"] == "on" :
+            group_racks = True
+
     show_neighbors = False
     if "show_neighbors" in request.GET:
         if request.GET["show_neighbors"] == "on" :
             show_neighbors = True
     
-    return save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors
+    return save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors
 
 class LinePattern():
     wireless = [2, 10, 2, 10]

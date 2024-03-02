@@ -374,6 +374,15 @@ class IndividualOptions(NetBoxModel):
     show_wireless = models.BooleanField(
         default=False
     )
+    group_sites = models.BooleanField(
+        default=False
+    )
+    group_locations = models.BooleanField(
+        default=False
+    )
+    group_racks = models.BooleanField(
+        default=False
+    )
     draw_default_layout = models.BooleanField(
         default=False
     )

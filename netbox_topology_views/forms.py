@@ -35,7 +35,8 @@ class DeviceFilterForm(
         (None, ('q', 'filter_id', 'tag')),
         (_('Options'), (
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
-            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
+            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 
+            'group_sites', 'group_locations', 'group_racks'
         )),
         (_('Device'), ('id',)),        
         (_('Location'), ('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id')),
@@ -258,6 +259,15 @@ class DeviceFilterForm(
     show_wireless = forms.BooleanField(
         label =_('Show Wireless Links'), required=False, initial=False
     )
+    group_sites = forms.BooleanField(
+        label =_('Group Sites'), required=False, initial=False
+    )
+    group_locations = forms.BooleanField(
+        label =_('Group Locations'), required=False, initial=False
+    )
+    group_racks = forms.BooleanField(
+        label =_('Group Racks'), required=False, initial=False
+    )
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (
@@ -447,6 +457,9 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'show_circuit',
                 'show_power',
                 'show_wireless',
+                'group_sites',
+                'group_locations',
+                'group_racks',
                 'draw_default_layout',
             ),
         ),
@@ -548,6 +561,27 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_('Displays wireless connections. These connections are '
             'displayed as blue dotted lines.')
     )
+    group_sites = forms.BooleanField(
+        label =_('Group Sites'), 
+        required=False, 
+        initial=False,
+        help_text=_('Draws a rectangle around Devices that belong to the '
+            'same site.')
+    )
+    group_locations = forms.BooleanField(
+        label =_('Group Locations'), 
+        required=False, 
+        initial=False,
+        help_text=_('Draws a rectangle around Devices that belong to the '
+            'same location.')
+    )
+    group_racks = forms.BooleanField(
+        label =_('Group Racks'), 
+        required=False, 
+        initial=False,
+        help_text=_('Draws a rectangle around Devices that belong to the '
+            'same rack.')
+    )
     draw_default_layout = forms.BooleanField(
         label = ('Draw Default Layout'),
         required=False,
@@ -559,5 +593,8 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 'draw_default_layout'
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 
+            'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections', 
+            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 
+            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'draw_default_layout'
         ]        
