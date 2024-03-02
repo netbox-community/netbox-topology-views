@@ -133,91 +133,135 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             })
         }
     })
-    
-    function combineNodeLocationInfo() {
+
+    // Add information on which node belongs to which group (site/location/rack).
+    // Create an array for each group in order to loop through that arrays later
+    function combineNodeInfo(typeId, type) {
         let nodesArray = [];
-        // extract node ids and node location ids from all nodes
+        // Extract node ids and node type ids from all nodes
         for (let [key, value] of nodes._data) {
-            nodesArray.push([value.id, value.location_id, value.location]);
+            if (value[typeId] != undefined) {
+                nodesArray.push([value.id, value[typeId], value[type]]);
+            }
         }
-        // split single array above into arrays grouped by location_id
-        let groupedNodeLocationArray = nodesArray.reduce((acc, value) => {
-            let key = value[1]; // group by location_id
+        // Split single array above into arrays grouped by node id
+        let groupedNodeRackArray = nodesArray.reduce((acc, value) => {
+            let key = value[1]; // node id
             acc[key] = acc[key] || [];
             acc[key].push(value);
             return acc;
         }, {});
 
-        return Object.values(groupedNodeLocationArray);
+        return Object.values(groupedNodeRackArray);
     }
 
-    function combineNodeSiteInfo() {
-        let nodesArray = [];
-        // extract node ids and node site ids from all nodes
-        for (let [key, value] of nodes._data) {
-            nodesArray.push([value.id, value.site_id, value.site]);
-        }
-        // split single array above into arrays grouped by site_id
-        let groupedNodeSiteArray = nodesArray.reduce((acc, value) => {
-            let key = value[1]; // group by site_id
-            acc[key] = acc[key] || [];
-            acc[key].push(value);
-            return acc;
-        }, {});
+    /* Draw a single rectangle with given parameters
+        rectangle expects an object that consists of the following keys:
+        ctx: canvas context on which the rectangle should be drawn
+        x: x-coordinate of top left point of the rectangle
+        y: y-coordinate of top left point of the rectangle 
+        width: width of rectangle 
+        height: height of rectangle 
+        lineWidth: border width 
+        color: border color 
+        text: a string to be placed where you want it to be
+        textPaddingX: x-position of the text 
+        textPaddingY: y-position of the text
+        font: text font */
+    function drawGroupRectangle(rectangle) {
+        // Draw rectangle
+        rectangle.ctx.beginPath();
+        rectangle.ctx.lineWidth = rectangle.lineWidth;
+        rectangle.ctx.strokeStyle = rectangle.color;
+        rectangle.ctx.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        rectangle.ctx.stroke();
+        // Draw text
+        rectangle.ctx.font = rectangle.font;
+        rectangle.ctx.fillStyle = rectangle.color;
+        rectangle.ctx.fillText(rectangle.text, rectangle.x + rectangle.textPaddingX, rectangle.y + rectangle.textPaddingY); 
+    }
 
-        return Object.values(groupedNodeSiteArray);
+    /* Draw all rectangles of a given group (site/location/rack)
+        rectParams expects an object that consists of the following keys:
+        lineWidth: border width (string)
+        color: border color (string)
+        paddingX: rectangle x-padding, calculated from the center of a node (int)
+        paddingY: rectangle y-padding, calculated from the center of a node (int)
+        textPaddingX: text x-padding, calculated from the lower left point of the text (int)
+        textPaddingY: text y-padding, calculated from the lower left point of the text (int)
+        font: css-like font size and font (string) */
+    function drawGroupRectangles(canvascontext, groupedNodes, rectParams) {
+        for(let value of Object.entries(groupedNodes)) { 
+            const siteRectangles = [];
+            const xValues = [];
+            const yValues = [];
+
+            for(let val of value[1]) { 
+                xValues.push(graph.getPosition(val[0]).x);
+                yValues.push(graph.getPosition(val[0]).y);
+            }
+
+            const rectX = Math.min(...xValues) - rectParams.paddingX;
+            const rectY = Math.min(...yValues) - rectParams.paddingY;
+            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 2*rectParams.paddingX;
+            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 2*rectParams.paddingY;
+
+            siteRectangles.push({
+                ctx: canvascontext, 
+                x: rectX, 
+                y: rectY, 
+                width: rectSizeX, 
+                height: rectSizeY, 
+                lineWidth: rectParams.lineWidth, 
+                color: rectParams.color, 
+                text: value[1][0][2], 
+                textPaddingX: rectParams.textPaddingX, 
+                textPaddingY: rectParams.textPaddingY, 
+                font: rectParams.font
+            });
+
+            siteRectangles.forEach(function(rectangle) {
+                drawGroupRectangle(rectangle);
+            });
+        }
     }
 
     graph.on('afterDrawing', (canvascontext) => {
-        groupedNodeSites = combineNodeSiteInfo();
-        for(let value of Object.entries(groupedNodeSites)) { 
-            xValues = [];
-            yValues = [];
-            for(let val of value[1]) { 
-                xValues.push(graph.getPosition(val[0]).x);
-                yValues.push(graph.getPosition(val[0]).y);
-            }
-            const rectX = Math.min(...xValues) - 80
-            const rectY = Math.min(...yValues) - 80
-            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 160
-            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 160
-            // Draw rectangle
-            canvascontext.beginPath();
-            canvascontext.lineWidth = "4";
-            canvascontext.strokeStyle = "red";
-            canvascontext.rect(rectX, rectY, rectSizeX, rectSizeY);
-            canvascontext.stroke();
-    
-            // Draw text
-            canvascontext.font = "14px helvetica";
-            canvascontext.fillStyle = "red"
-            canvascontext.fillText(value[1][0][2], rectX + 8, rectY - 8); 
+        let groupedNodeSites = combineNodeInfo('site_id', 'site');
+        let siteRectParams = {
+            lineWidth: "3", 
+            color: "red",
+            paddingX: 80, 
+            paddingY: 80, 
+            textPaddingX: 8, 
+            textPaddingY: -8, 
+            font: "14px helvetica"
         }
+        drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams);
 
-        groupedNodeLocations = combineNodeLocationInfo();
-        for(let value of Object.entries(groupedNodeLocations)) { 
-            xValues = [];
-            yValues = [];
-            for(let val of value[1]) { 
-                xValues.push(graph.getPosition(val[0]).x);
-                yValues.push(graph.getPosition(val[0]).y);
-            }
-            const rectX = Math.min(...xValues) - 75
-            const rectY = Math.min(...yValues) - 75
-            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 150
-            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 150
-            // Draw rectangle
-            canvascontext.beginPath();
-            canvascontext.lineWidth = "4";
-            canvascontext.strokeStyle = "yellow";
-            canvascontext.rect(rectX, rectY, rectSizeX, rectSizeY);
-            canvascontext.stroke();
-    
-            // Draw text
-            canvascontext.font = "14px helvetica";
-            canvascontext.fillStyle = "yellow"
-            canvascontext.fillText(value[1][0][2], rectX + 8, rectY + 18); 
+        let groupedNodeLocations = combineNodeInfo('location_id', 'location');
+        let locationRectParams = {
+            lineWidth: "3", 
+            color: "yellow",
+            paddingX: 75, 
+            paddingY: 75, 
+            textPaddingX: 8, 
+            textPaddingY: 18, 
+            font: "14px helvetica"
         }
+        drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams);
+
+        let groupedNodeRacks = combineNodeInfo('rack_id', 'rack');
+        let rackRectParams = {
+            lineWidth: "3", 
+            color: "green",
+            paddingX: 70, 
+            paddingY: 70, 
+            textPaddingX: 8, 
+            textPaddingY: 26, 
+            font: "14px helvetica"
+        }
+        drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams);
     })
 })()
 
