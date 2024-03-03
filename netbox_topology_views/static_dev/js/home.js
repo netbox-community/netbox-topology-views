@@ -140,9 +140,47 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     })
 
     graph.on('afterDrawing', (canvascontext) => {
+        allRectangles = [];
         if(group_sites != null && group_sites == 'on') { drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams); }
         if(group_locations != null && group_locations == 'on') { drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams); }
         if(group_racks != null && group_racks == 'on') { drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams); }
+    })
+
+    graph.on('click', (canvascontext) => {
+        allRectangles.forEach(key => {
+            // Is the mouse pointer inside of the current rectangle?
+            if(canvascontext.pointer.canvas.x > (key.x1 - key.border / 2 - 1) && canvascontext.pointer.canvas.x < (key.x2 + key.border / 2 + 1)
+                && canvascontext.pointer.canvas.y > (key.y1 - key.border / 2 - 1) && canvascontext.pointer.canvas.y < (key.y2 + key.border / 2 + 1)) {
+                // We just want to react when the border has been clicked, not the whole rectangle
+                if (canvascontext.pointer.canvas.x < (key.x1 + key.border / 2 + 1) || canvascontext.pointer.canvas.x > (key.x2 - key.border / 2 - 1)
+                    || canvascontext.pointer.canvas.y < (key.y1 + key.border / 2 + 1) || canvascontext.pointer.canvas.y > (key.y2 - key.border / 2 - 1)) {
+                    // Generate an array of affected nodes in order to pass it to the select.Nodes() function
+                    let arr = [];
+                    groupedNodeSites.forEach(subArray => {
+                        subArray.forEach(element => {
+                            if (key.category == "Site" && element[1] === key.id) {
+                                arr.push(element[0]);
+                            }
+                        });
+                    });
+                    groupedNodeLocations.forEach(subArray => {
+                        subArray.forEach(element => {
+                            if (key.category == "Location" && element[1] === key.id) {
+                                arr.push(element[0]);
+                            }
+                        });
+                    });
+                    groupedNodeRacks.forEach(subArray => {
+                        subArray.forEach(element => {
+                            if (key.category == "Rack" && element[1] === key.id) {
+                                arr.push(element[0]);
+                            }
+                        });
+                    });
+                    graph.selectNodes(arr);
+                }
+            }
+        });
     })
 
     // Add information on which node belongs to which group (site/location/rack).
@@ -156,16 +194,17 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             }
         }
         // Split single array above into arrays grouped by node id
-        let groupedNodeRackArray = nodesArray.reduce((acc, value) => {
+        let groupedNodeArray = nodesArray.reduce((acc, value) => {
             let key = value[1]; // node id
             acc[key] = acc[key] || [];
             acc[key].push(value);
             return acc;
         }, {});
 
-        return Object.values(groupedNodeRackArray);
+        return Object.values(groupedNodeArray);
     }
 
+    var allRectangles = [];
     /* Draw a single rectangle with given parameters
         rectangle expects an object that consists of the following keys:
         ctx: canvas context on which the rectangle should be drawn
@@ -190,6 +229,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         rectangle.ctx.font = rectangle.font;
         rectangle.ctx.fillStyle = rectangle.color;
         rectangle.ctx.fillText(rectangle.text, rectangle.x + rectangle.textPaddingX, rectangle.y + rectangle.textPaddingY); 
+
+        allRectangles.push({category: rectangle.category, id: rectangle.id, x1: rectangle.x, y1: rectangle.y, x2: rectangle.x + rectangle.width, y2: rectangle.y + rectangle.height, border: rectangle.lineWidth})
     }
 
     /* Draw all rectangles of a given group (site/location/rack)
@@ -228,7 +269,9 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                 text: value[1][0][2], 
                 textPaddingX: rectParams.textPaddingX, 
                 textPaddingY: rectParams.textPaddingY, 
-                font: rectParams.font
+                font: rectParams.font,
+                id: value[1][0][1],
+                category: rectParams.category
             });
 
             siteRectangles.forEach(function(rectangle) {
@@ -245,7 +288,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         paddingY: 80, 
         textPaddingX: 8, 
         textPaddingY: -8, 
-        font: "14px helvetica"
+        font: "14px helvetica",
+        category: "Site"
     }
     
     let groupedNodeLocations = combineNodeInfo('location_id', 'location');
@@ -256,7 +300,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         paddingY: 75, 
         textPaddingX: 8, 
         textPaddingY: 18, 
-        font: "14px helvetica"
+        font: "14px helvetica",
+        category: "Location"
     }
 
     let groupedNodeRacks = combineNodeInfo('rack_id', 'rack');
@@ -267,7 +312,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         paddingY: 70, 
         textPaddingX: 8, 
         textPaddingY: 26, 
-        font: "14px helvetica"
+        font: "14px helvetica",
+        category: "Rack"
     }
 })()
 
