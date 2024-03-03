@@ -244,7 +244,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         font: css-like font size and font (string) */
     function drawGroupRectangles(canvascontext, groupedNodes, rectParams) {
         for(let value of Object.entries(groupedNodes)) { 
-            const siteRectangles = [];
+            const rectangles = [];
             const xValues = [];
             const yValues = [];
 
@@ -258,7 +258,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 2*rectParams.paddingX;
             const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 2*rectParams.paddingY;
 
-            siteRectangles.push({
+            rectangles.push({
                 ctx: canvascontext, 
                 x: rectX, 
                 y: rectY, 
@@ -274,7 +274,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                 category: rectParams.category
             });
 
-            siteRectangles.forEach(function(rectangle) {
+            rectangles.forEach(function(rectangle) {
                 drawGroupRectangle(rectangle);
             });
         }
