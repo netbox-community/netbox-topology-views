@@ -220,6 +220,15 @@ def create_node(
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
+    if device.site is not None:
+        node["site"] = device.site.name
+        node["site_id"] = device.site_id
+    if device.location is not None:
+        node["location"] = device.location.name
+        node["location_id"] = device.location_id
+    if device.rack is not None:
+        node["rack"] = device.rack.name
+        node["rack_id"] = device.rack_id
 
     return node
 
@@ -325,6 +334,9 @@ def get_topology_data(
     show_neighbors: bool,
     show_power: bool,
     show_wireless: bool,
+    group_sites: bool,
+    group_locations: bool,
+    group_racks: bool,
     group_id,
 ):
     
@@ -688,7 +700,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
             
             if "group" not in request.GET:
                 group_id = "default"
@@ -708,6 +720,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     show_circuit=show_circuit,
                     show_power=show_power,
                     show_wireless=show_wireless,
+                    group_sites=group_sites,
+                    group_locations=group_locations,
+                    group_racks=group_racks,
                     group_id=group_id,
                 )
             
@@ -729,6 +744,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.show_circuit: q['show_circuit'] = "on"
             if individualOptions.show_power: q['show_power'] = "on"
             if individualOptions.show_wireless: q['show_wireless'] = "on"
+            if individualOptions.group_sites: q['group_sites'] = "on"
+            if individualOptions.group_locations: q['group_locations'] = "on"
+            if individualOptions.group_racks: q['group_racks'] = "on"
             if individualOptions.draw_default_layout: 
                 q['draw_init'] = "true"
             else:
@@ -1083,6 +1101,9 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'show_circuit': queryset.show_circuit,
                 'show_power': queryset.show_power,
                 'show_wireless': queryset.show_wireless,
+                'group_sites': queryset.group_sites,
+                'group_locations': queryset.group_locations,
+                'group_racks': queryset.group_racks,
                 'draw_default_layout': queryset.draw_default_layout,
             },
         )
