@@ -156,27 +156,33 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                     || canvascontext.pointer.canvas.y < (key.y1 + key.border / 2 + 1) || canvascontext.pointer.canvas.y > (key.y2 - key.border / 2 - 1)) {
                     // Generate an array of affected nodes in order to pass it to the select.Nodes() function
                     let arr = [];
-                    groupedNodeSites.forEach(subArray => {
-                        subArray.forEach(element => {
-                            if (key.category == "Site" && element[1] === key.id) {
-                                arr.push(element[0]);
-                            }
+                    if(key.category == "Site") {
+                        groupedNodeSites.forEach(subArray => {
+                            subArray.forEach(element => {
+                                if (element[1] == key.id) {
+                                    arr.push(element[0]);
+                                }
+                            });
                         });
-                    });
-                    groupedNodeLocations.forEach(subArray => {
-                        subArray.forEach(element => {
-                            if (key.category == "Location" && element[1] === key.id) {
-                                arr.push(element[0]);
-                            }
+                    }
+                    if(key.category == "Location") {
+                        groupedNodeLocations.forEach(subArray => {
+                            subArray.forEach(element => {
+                                if (element[1] === key.id) {
+                                    arr.push(element[0]);
+                                }
+                            });
                         });
-                    });
-                    groupedNodeRacks.forEach(subArray => {
-                        subArray.forEach(element => {
-                            if (key.category == "Rack" && element[1] === key.id) {
-                                arr.push(element[0]);
-                            }
+                    }
+                    if(key.category == "Rack") {
+                        groupedNodeRacks.forEach(subArray => {
+                            subArray.forEach(element => {
+                                if (element[1] === key.id) {
+                                    arr.push(element[0]);
+                                }
+                            });
                         });
-                    });
+                    }
                     graph.selectNodes(arr);
                 }
             }
