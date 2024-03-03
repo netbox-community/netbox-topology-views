@@ -288,10 +288,10 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
 
     let groupedNodeSites = combineNodeInfo('site_id', 'site');
     let siteRectParams = {
-        lineWidth: "3", 
+        lineWidth: "5", 
         color: "red",
-        paddingX: 80, 
-        paddingY: 80, 
+        paddingX: 84, 
+        paddingY: 84, 
         textPaddingX: 8, 
         textPaddingY: -8, 
         font: "14px helvetica",
@@ -300,24 +300,24 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     
     let groupedNodeLocations = combineNodeInfo('location_id', 'location');
     let locationRectParams = {
-        lineWidth: "3", 
+        lineWidth: "5", 
         color: "yellow",
-        paddingX: 75, 
-        paddingY: 75, 
-        textPaddingX: 8, 
-        textPaddingY: 18, 
+        paddingX: 77, 
+        paddingY: 77, 
+        textPaddingX: 12, 
+        textPaddingY: 22, 
         font: "14px helvetica",
         category: "Location"
     }
 
     let groupedNodeRacks = combineNodeInfo('rack_id', 'rack');
     let rackRectParams = {
-        lineWidth: "3", 
+        lineWidth: "5", 
         color: "green",
         paddingX: 70, 
         paddingY: 70, 
         textPaddingX: 8, 
-        textPaddingY: 26, 
+        textPaddingY: 30, 
         font: "14px helvetica",
         category: "Rack"
     }
