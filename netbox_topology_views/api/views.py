@@ -108,7 +108,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         if request.GET:
 
-            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, show_neighbors = get_query_settings(request)
+            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks,show_neighbors = get_query_settings(request)
             if 'group' not in request.query_params:
                 group_id = "default"
             else:
@@ -125,6 +125,9 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 show_circuit=show_circuit,
                 show_power=show_power,
                 show_wireless=show_wireless,
+                group_sites=group_sites,
+                group_locations=group_locations,
+                group_racks=group_racks,
                 group_id=group_id,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
