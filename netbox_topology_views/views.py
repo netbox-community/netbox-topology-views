@@ -27,7 +27,7 @@ from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
-from extras.models import Tag
+from extras.models import Tag, SavedFilter
 from wireless.models import WirelessLink
 from netbox.views.generic import (
     ObjectView, 
@@ -701,8 +701,30 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
             
+            # Read options from saved filters as NetBox does not handle custom plugin filters
+            if "filter_id" in request.GET and request.GET["filter_id"] != '':
+                try:
+                    saved_filter = SavedFilter.objects.get(pk=filter_id)
+                    saved_filter_params = getattr(saved_filter, 'parameters')
+
+                    if save_coords == False and 'save_coords' in saved_filter_params: save_coords = saved_filter_params['save_coords']
+                    if show_power == False and 'show_power' in saved_filter_params: show_power = saved_filter_params['show_power']
+                    if show_circuit == False and 'show_circuit' in saved_filter_params: show_circuit = saved_filter_params['show_circuit']
+                    if show_logical_connections == False and 'show_logical_connections' in saved_filter_params: show_logical_connections = saved_filter_params['show_logical_connections']
+                    if show_single_cable_logical_conns == False and 'show_single_cable_logical_conns' in saved_filter_params: show_single_cable_logical_conns = saved_filter_params['show_single_cable_logical_conns']
+                    if show_cables == False and 'show_cables' in saved_filter_params: show_cables = saved_filter_params['show_cables']
+                    if show_wireless == False and 'show_wireless' in saved_filter_params: show_wireless = saved_filter_params['show_wireless']
+                    if group_sites == False and 'group_sites' in saved_filter_params: group_sites = saved_filter_params['group_sites']
+                    if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
+                    if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
+                    if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
+                except SavedFilter.DoesNotExist: # filter_id not found
+                    pass
+                except Exception as inst:
+                    print(type(inst))
+
             if "group" not in request.GET:
                 group_id = "default"
             else:

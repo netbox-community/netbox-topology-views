@@ -107,6 +107,10 @@ def get_model_role(model: Type[Model]) -> Role:
     )
 
 def get_query_settings(request):
+    filter_id = ''
+    if "filter_id" in request.GET:
+        filter_id = request.GET["filter_id"]
+
     save_coords = False
     if "save_coords" in request.GET:
         if request.GET["save_coords"] == "on":
@@ -174,7 +178,7 @@ def get_query_settings(request):
         if request.GET["show_neighbors"] == "on" :
             show_neighbors = True
     
-    return save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors
+    return filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors
 
 class LinePattern():
     wireless = [2, 10, 2, 10]
