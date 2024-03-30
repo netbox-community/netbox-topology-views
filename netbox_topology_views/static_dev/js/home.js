@@ -301,7 +301,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     let groupedNodeLocations = combineNodeInfo('location_id', 'location');
     let locationRectParams = {
         lineWidth: "5", 
-        color: "yellow",
+        color: "#337ab7",
         paddingX: 77, 
         paddingY: 77, 
         textPaddingX: 12, 
