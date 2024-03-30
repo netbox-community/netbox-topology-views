@@ -180,6 +180,16 @@ def create_node(
 
         node["id"] = device.pk
 
+        if device.site is not None:
+            node["site"] = device.site.name
+            node["site_id"] = device.site_id
+        if device.location is not None:
+            node["location"] = device.location.name
+            node["location_id"] = device.location_id
+        if device.rack is not None:
+            node["rack"] = device.rack.name
+            node["rack_id"] = device.rack_id
+
         if device.device_role.color != "":
             node["color.border"] = "#" + device.device_role.color
 
@@ -220,15 +230,6 @@ def create_node(
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
-    if device.site is not None:
-        node["site"] = device.site.name
-        node["site_id"] = device.site_id
-    if device.location is not None:
-        node["location"] = device.location.name
-        node["location_id"] = device.location_id
-    if device.rack is not None:
-        node["rack"] = device.rack.name
-        node["rack_id"] = device.rack_id
 
     return node
 
