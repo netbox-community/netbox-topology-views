@@ -351,6 +351,7 @@ def get_topology_data(
     nodes_devices = {}
     edges = []
     nodes = []
+    options = {}
     edge_ids = 0
     nodes_circuits: Dict[int, Circuit] = {}
     nodes_powerpanel: Dict[int, PowerPanel] = {}
@@ -664,6 +665,13 @@ def get_topology_data(
                 )
             )
 
+    if group_locations:
+        options['group_locations'] = 'on'
+    if group_racks:
+        options['group_racks'] = 'on'
+    if group_sites:
+        options['group_sites'] = 'on'
+
     for qs_device in queryset:
         if qs_device.pk not in nodes_devices and show_unconnected:
             nodes_devices[qs_device.pk] = qs_device
@@ -676,6 +684,7 @@ def get_topology_data(
     results["nodes"] = nodes
     results["edges"] = edges
     results["group"] = group_id
+    results["options"] = options
     return results
 
 

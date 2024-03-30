@@ -42,11 +42,6 @@ const csrftoken = getCookie('csrftoken')
 // Render vis graph
 let graph = null // vis graph instance
 
-let searchParams = new URLSearchParams(window.location.search)
-let group_sites = searchParams.get('group_sites')
-let group_locations = searchParams.get('group_locations')
-let group_racks = searchParams.get('group_racks')
-
 const container = document.querySelector('#visgraph')
 const coordSaveCheckbox = document.querySelector('#id_save_coords')
 ;(function handleLoadData() {
@@ -74,6 +69,11 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             title: htmlTitle(node.title)
         }))
     )
+
+    const group_sites = topologyData.options.group_sites
+    const group_locations = topologyData.options.group_locations
+    const group_racks = topologyData.options.group_racks
+
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
 
