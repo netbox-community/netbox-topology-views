@@ -41,6 +41,8 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
 
     __role: Optional[Role] = None
 
+    _netbox_private = True
+
     @property
     def role(self) -> Role:
         if self.__role:
@@ -111,6 +113,8 @@ class CoordinateGroup(NetBoxModel):
         blank = True,
     )
 
+    _netbox_private = True
+
     class Meta:
         ordering = ['name']
 
@@ -137,6 +141,8 @@ class Coordinate(NetBoxModel):
         help_text='Y-coordinate of the device (vertical) on the canvas. '
             'Smaller values correspond to a position further up on the monitor.',
     )
+
+    _netbox_private = True
 
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
@@ -187,6 +193,8 @@ class CircuitCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
+    _netbox_private = True
+
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -236,6 +244,8 @@ class PowerPanelCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
+    _netbox_private = True
+
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -284,6 +294,8 @@ class PowerFeedCoordinate(NetBoxModel):
         help_text='Y-coordinate of the device (vertical) on the canvas. '
             'Smaller values correspond to a position further up on the monitor.',
     )
+
+    _netbox_private = True
 
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
@@ -386,6 +398,8 @@ class IndividualOptions(NetBoxModel):
     draw_default_layout = models.BooleanField(
         default=False
     )
+
+    _netbox_private = True
 
     def __str___(self):
         return f"{self.user_id}"
