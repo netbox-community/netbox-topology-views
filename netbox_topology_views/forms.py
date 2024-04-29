@@ -502,6 +502,8 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'group_locations',
                 'group_racks',
                 'draw_default_layout',
+                'disable_smooth_cables',
+                'disable_physics',
             ),
     )
 
@@ -628,6 +630,21 @@ class IndividualOptionsForm(NetBoxModelForm):
         initial=False,
         help_text=_('Enable this option if you want to draw the topology on '
             'the initial load (when you go to the topology plugin page).')
+    )
+
+    disable_smooth_cables = forms.BooleanField(
+        label=('Disable Smooth Cables'),
+        required=False,
+        initial=False,
+        help_text=_('Enable this option if you want to draw cables as straight lines '
+                    'instead of curves.')
+    )
+    disable_physics = forms.BooleanField(
+        label=('Disable Physics'),
+        required=False,
+        initial=False,
+        help_text=_('When enables, no forces will act on nodes in the topology and they will only move '
+                    'when dragged by hand. Devices without coordinates will be places at (0, 0) by default.')
     )
 
     class Meta:
