@@ -1164,6 +1164,8 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'group_locations': queryset.group_locations,
                 'group_racks': queryset.group_racks,
                 'draw_default_layout': queryset.draw_default_layout,
+                'disable_physics': queryset.disable_physics,
+                'disable_smooth_cables': queryset.disable_smooth_cables,
             },
         )
 
