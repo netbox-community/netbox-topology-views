@@ -1,4 +1,4 @@
-from extras.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
+from netbox.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
 from utilities.choices import ButtonColorChoices
 
 coordinategroup_buttons = (
