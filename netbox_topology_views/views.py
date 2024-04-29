@@ -97,7 +97,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, disable_gravity: bool, group_id="default"
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, disable_physics: bool, group_id="default"
 ):
     node = {}
     node_content = ""
@@ -203,7 +203,7 @@ def create_node(
    
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
-    node["physics"] = not disable_gravity
+    node["physics"] = not disable_physics
     # Coords must be set even if no coords have been stored. Otherwise nodes with coords 
     # will not be placed correctly by vis-network.
     node["x"] = 0
@@ -238,8 +238,8 @@ def create_edge(
     edge_id: int,
     termination_a: Dict,
     termination_b: Dict,
-    disable_curved: bool,
-    disable_gravity: bool,
+    disable_smooth: bool,
+    disable_physics: bool,
     circuit: Optional[Dict] = None,
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
@@ -303,8 +303,8 @@ def create_edge(
             edge["color"] = "#" + cable.color
 
     # Invert, because value must be False if disabled
-    edge["smooth"] = not disable_curved
-    edge["physics"] = not disable_gravity
+    edge["smooth"] = not disable_smooth
+    edge["physics"] = not disable_physics
 
     return edge
 
@@ -345,8 +345,8 @@ def get_topology_data(
     group_locations: bool,
     group_racks: bool,
     group_id,
-    disable_curved_cables: bool,
-    disable_gravity: bool,
+    disable_smooth_cables: bool,
+    disable_physics: bool,
 ):
     
     supported_termination_types = []
@@ -444,8 +444,8 @@ def get_topology_data(
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
-                        disable_curved=disable_curved_cables,
-                        disable_gravity=disable_gravity,
+                        disable_smooth=disable_smooth_cables,
+                        disable_physics=disable_physics,
                     )
                 )
 
@@ -472,7 +472,7 @@ def get_topology_data(
                         ] = circuit_termination.circuit
 
         for d in nodes_circuits.values():
-            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
+            nodes.append(create_node(d, save_coords, disable_physics, group_id))
 
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
@@ -515,8 +515,8 @@ def get_topology_data(
                         termination_a=termination_a,
                         termination_b=termination_b,
                         power=True,
-                        disable_curved=disable_curved_cables,
-                        disable_gravity=disable_gravity,
+                        disable_smooth=disable_smooth_cables,
+                        disable_physics=disable_physics,
                     )
                 )
 
@@ -524,10 +524,10 @@ def get_topology_data(
                     cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
-            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
+            nodes.append(create_node(d, save_coords, disable_physics, group_id))
 
         for d in nodes_powerpanel.values():
-            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
+            nodes.append(create_node(d, save_coords, disable_physics, group_id))
 
     if show_logical_connections:
         interfaces = Interface.objects.filter(
@@ -561,8 +561,8 @@ def get_topology_data(
                             termination_a=termination_a,
                             termination_b=termination_b,
                             interface=interface,
-                            disable_curved=disable_curved_cables,
-                            disable_gravity=disable_gravity
+                            disable_smooth=disable_smooth_cables,
+                            disable_physics=disable_physics
                         )
                     )
                     nodes_devices[interface.device.id] = interface.device
@@ -644,8 +644,8 @@ def get_topology_data(
                             cable=link.cable,
                             termination_a=termination_a,
                             termination_b=termination_b,
-                            disable_curved=disable_curved_cables,
-                            disable_gravity=disable_gravity,
+                            disable_smooth=disable_smooth_cables,
+                            disable_physics=disable_physics,
                         )
                     )
 
@@ -685,8 +685,8 @@ def get_topology_data(
                     termination_a=termination_a,
                     termination_b=termination_b,
                     wireless=wireless,
-                    disable_curved=disable_curved_cables,
-                    disable_gravity=disable_gravity
+                    disable_smooth=disable_smooth_cables,
+                    disable_physics=disable_physics
                 )
             )
 
@@ -704,7 +704,7 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords, disable_gravity, group_id))
+        nodes.append(create_node(d, save_coords, disable_physics, group_id))
 
     results["nodes"] = nodes
     results["edges"] = edges
@@ -735,7 +735,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_curved_cables, disable_gravity = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_smooth_cables, disable_physics = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -781,8 +781,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_locations=group_locations,
                     group_racks=group_racks,
                     group_id=group_id,
-                    disable_curved_cables=disable_curved_cables,
-                    disable_gravity=disable_gravity,
+                    disable_smooth_cables=disable_smooth_cables,
+                    disable_physics=disable_physics,
                 )
             
         else:
