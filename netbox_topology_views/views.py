@@ -97,7 +97,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, group_id="default"
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, disable_gravity: bool, group_id="default"
 ):
     node = {}
     node_content = ""
@@ -203,7 +203,7 @@ def create_node(
    
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
-    node["physics"] = True
+    node["physics"] = not disable_gravity
     # Coords must be set even if no coords have been stored. Otherwise nodes with coords 
     # will not be placed correctly by vis-network.
     node["x"] = 0
@@ -472,7 +472,7 @@ def get_topology_data(
                         ] = circuit_termination.circuit
 
         for d in nodes_circuits.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
 
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
@@ -524,10 +524,10 @@ def get_topology_data(
                     cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
 
         for d in nodes_powerpanel.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, disable_gravity, group_id))
 
     if show_logical_connections:
         interfaces = Interface.objects.filter(
@@ -704,7 +704,7 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords, group_id))
+        nodes.append(create_node(d, save_coords, disable_gravity, group_id))
 
     results["nodes"] = nodes
     results["edges"] = edges
