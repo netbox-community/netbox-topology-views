@@ -444,8 +444,8 @@ def get_topology_data(
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
-                        disable_smooth=disable_smooth_cables,
-                        disable_physics=disable_physics,
+                        disable_smooth=individualOptions.disable_smooth_cables,
+                        disable_physics=individualOptions.disable_physics,
                     )
                 )
 
@@ -515,8 +515,8 @@ def get_topology_data(
                         termination_a=termination_a,
                         termination_b=termination_b,
                         power=True,
-                        disable_smooth=disable_smooth_cables,
-                        disable_physics=disable_physics,
+                        disable_smooth=individualOptions.disable_smooth_cables,
+                        disable_physics=individualOptions.disable_physics,
                     )
                 )
 
@@ -561,8 +561,8 @@ def get_topology_data(
                             termination_a=termination_a,
                             termination_b=termination_b,
                             interface=interface,
-                            disable_smooth=disable_smooth_cables,
-                            disable_physics=disable_physics
+                            disable_smooth=individualOptions.disable_smooth_cables,
+                            disable_physics=individualOptions.disable_physics
                         )
                     )
                     nodes_devices[interface.device.id] = interface.device
@@ -644,8 +644,8 @@ def get_topology_data(
                             cable=link.cable,
                             termination_a=termination_a,
                             termination_b=termination_b,
-                            disable_smooth=disable_smooth_cables,
-                            disable_physics=disable_physics,
+                            disable_smooth=individualOptions.disable_smooth_cables,
+                            disable_physics=individualOptions.disable_physics,
                         )
                     )
 
@@ -685,8 +685,8 @@ def get_topology_data(
                     termination_a=termination_a,
                     termination_b=termination_b,
                     wireless=wireless,
-                    disable_smooth=disable_smooth_cables,
-                    disable_physics=disable_physics
+                    disable_smooth=individualOptions.disable_smooth_cables,
+                    disable_physics=individualOptions.disable_physics
                 )
             )
 
@@ -781,8 +781,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_locations=group_locations,
                     group_racks=group_racks,
                     group_id=group_id,
-                    disable_smooth_cables=disable_smooth_cables,
-                    disable_physics=disable_physics,
+                    disable_smooth_cables=individualOptions.disable_smooth_cables,
+                    disable_physics=individualOptions.disable_physics,
                 )
             
         else:
