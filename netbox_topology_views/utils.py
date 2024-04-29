@@ -178,13 +178,9 @@ def get_query_settings(request):
         if request.GET["show_neighbors"] == "True" :
             show_neighbors = True
 
-    disable_smooth_cables = False
-    if "disable_smooth_cables" in settings.PLUGINS_CONFIG["netbox_topology_views"]:
-        disable_smooth_cables = settings.PLUGINS_CONFIG["netbox_topology_views"]["disable_smooth_cables"]
+    disable_smooth_cables = ""
 
-    disable_physics = False
-    if "disable_physics" in settings.PLUGINS_CONFIG["netbox_topology_views"]:
-        disable_physics = settings.PLUGINS_CONFIG["netbox_topology_views"]["disable_physics"]
+    disable_physics = ""
 
     return filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_smooth_cables, disable_physics
 
