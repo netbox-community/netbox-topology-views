@@ -238,7 +238,7 @@ def create_edge(
     edge_id: int,
     termination_a: Dict,
     termination_b: Dict,
-    disable_smooth: bool,
+    straight_cables: bool,
     circuit: Optional[Dict] = None,
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
@@ -301,8 +301,7 @@ def create_edge(
         if hasattr(cable, 'color') and cable.color != "":
             edge["color"] = "#" + cable.color
 
-    # Invert, because value must be False if disabled
-    edge["smooth"] = not disable_smooth
+    edge["smooth"] = straight_cables
 
     return edge
 
@@ -343,7 +342,7 @@ def get_topology_data(
     group_locations: bool,
     group_racks: bool,
     group_id,
-    disable_smooth_cables: bool,
+    straight_cables: bool,
 ):
     
     supported_termination_types = []
@@ -441,7 +440,7 @@ def get_topology_data(
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
-                        disable_smooth=individualOptions.disable_smooth_cables,
+                        straight_cables=individualOptions.straight_cables,
                     )
                 )
 
@@ -511,7 +510,7 @@ def get_topology_data(
                         termination_a=termination_a,
                         termination_b=termination_b,
                         power=True,
-                        disable_smooth=individualOptions.disable_smooth_cables,
+                        straight_cables=individualOptions.straight_cables,
                     )
                 )
 
@@ -550,7 +549,7 @@ def get_topology_data(
                     edge_ids += 1
                     termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
                     termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
-                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface, disable_smooth=individualOptions.disable_smooth_cables))
+                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface, straight_cables=individualOptions.straight_cables))
                     nodes_devices[interface.device.id] = interface.device
                     nodes_devices[destination.device.id] = destination.device
 
@@ -630,7 +629,7 @@ def get_topology_data(
                             cable=link.cable,
                             termination_a=termination_a,
                             termination_b=termination_b,
-                            disable_smooth=individualOptions.disable_smooth_cables,
+                            straight_cables=individualOptions.straight_cables,
                         )
                     )
 
@@ -670,7 +669,7 @@ def get_topology_data(
                     termination_a=termination_a,
                     termination_b=termination_b,
                     wireless=wireless,
-                    disable_smooth=individualOptions.disable_smooth_cables,
+                    straight_cables=individualOptions.straight_cables,
                 )
             )
 
@@ -765,7 +764,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_locations=group_locations,
                     group_racks=group_racks,
                     group_id=group_id,
-                    disable_smooth_cables=individualOptions.disable_smooth_cables,
+                    straight_cables=individualOptions.straight_cables,
                 )
             
         else:
@@ -1147,7 +1146,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'group_locations': queryset.group_locations,
                 'group_racks': queryset.group_racks,
                 'draw_default_layout': queryset.draw_default_layout,
-                'disable_smooth_cables': queryset.disable_smooth_cables,
+                'straight_cables': queryset.straight_cables,
             },
         )
 

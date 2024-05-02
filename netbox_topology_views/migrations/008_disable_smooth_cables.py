@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='individualoptions',
-            name='disable_smooth_cables',
+            name='straight_cables',
             field=models.BooleanField(default=False),
         ),
     ]

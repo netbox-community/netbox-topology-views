@@ -153,7 +153,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 group_locations=group_locations,
                 group_racks=group_racks,
                 group_id=group_id,
-                disable_smooth_cables=individualOptions.disable_smooth_cables,
+                straight_cables=individualOptions.straight_cables,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 
