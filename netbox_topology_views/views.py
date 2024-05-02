@@ -301,7 +301,8 @@ def create_edge(
         if hasattr(cable, 'color') and cable.color != "":
             edge["color"] = "#" + cable.color
 
-    edge["smooth"] = straight_cables
+    # if straight_cables == True: edge["smooth"] = False
+    edge["smooth"] = not straight_cables
 
     return edge
 
