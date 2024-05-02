@@ -15,9 +15,4 @@ class Migration(migrations.Migration):
             name='disable_physics',
             field=models.BooleanField(default=False),
         ),
-        migrations.AddField(
-            model_name='individualoptions',
-            name='disable_smooth_cables',
-            field=models.BooleanField(default=False),
-        ),
     ]
