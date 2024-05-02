@@ -461,6 +461,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'group_locations',
                 'group_racks',
                 'draw_default_layout',
+                'disable_smooth_cables',
             ),
         ),
     )
@@ -589,6 +590,13 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_('Enable this option if you want to draw the topology on '
             'the initial load (when you go to the topology plugin page).')
     )
+    disable_smooth_cables = forms.BooleanField(
+        label=('Disable Smooth Cables'),
+        required=False,
+        initial=False,
+        help_text=_('Enable this option if you want to draw cables as straight lines '
+                    'instead of curves.')
+    )
 
     class Meta:
         model = IndividualOptions
@@ -596,5 +604,6 @@ class IndividualOptionsForm(NetBoxModelForm):
             'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 
             'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections', 
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 
-            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'draw_default_layout'
+            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'draw_default_layout',
+            'disable_smooth_cables'
         ]        

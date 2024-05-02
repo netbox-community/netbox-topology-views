@@ -398,6 +398,9 @@ class IndividualOptions(NetBoxModel):
     draw_default_layout = models.BooleanField(
         default=False
     )
+    disable_smooth_cables = models.BooleanField(
+        default=False
+    )
 
     _netbox_private = True
 
