@@ -204,8 +204,7 @@ def create_node(
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = not disable_physics
-
-    if disable_physics:
+    if not disable_physics:
         # set (hopefully) unique coords for every device
         node["x"] = 0
         node["y"] = 0
@@ -213,10 +212,14 @@ def create_node(
         # Coords must be set even if no coords have been stored. Otherwise nodes with coords
         # will not be placed correctly by vis-network.
         import random
-        random.seed(dev_name)
-        fak = 10
-        node["x"] = random.randint(-fak * nnodes, fak * nnodes)
-        node["y"] = random.randint(-fak * nnodes, fak * nnodes)
+        random.seed(device.rack.name if hasattr(device, "rack") else device.name)
+        fak = nnodes / 12
+        base_coords_x = random.randint(-fak * nnodes, fak * nnodes)
+        base_coords_y = random.randint(-fak * nnodes, fak * nnodes)
+        if hasattr(device, "rack"):
+            random.seed(device.name)
+        node["x"] = base_coords_x + random.randint(-2 * nnodes, 2 * nnodes)
+        node["y"] = base_coords_y + random.randint(-2 * nnodes, 2 * nnodes)
     if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
         # Coordinates data for the device exists in Coordinates Group. Let's assign them
         node["x"] = model_class.objects.get(group=group, device=device.pk).x
