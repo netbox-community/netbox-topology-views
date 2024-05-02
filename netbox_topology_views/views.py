@@ -205,7 +205,7 @@ def create_node(
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = not disable_physics
-    if disable_physics:
+    if not disable_physics:
         # Coords must be set even if no coords have been stored. Otherwise nodes with coords
         # will not be placed correctly by vis-network.
         node["x"] = 0
@@ -215,7 +215,7 @@ def create_node(
         # for center coordinates of a rack, use the rack name as seed (if available)
         random.seed(device.rack.name if hasattr(device, "rack") else device.name)
         # set the upper size of the graph
-        plot_size = int(nnodes / 10) + 1
+        plot_size = int(nnodes / 12) + 1
         base_coords_x = random.randint(-plot_size * nnodes, plot_size * nnodes)
         base_coords_y = random.randint(-plot_size * nnodes, plot_size * nnodes)
         # make seed unique for devices for spread
@@ -712,7 +712,7 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords, disable_physics, group_id))
+        nodes.append(create_node(d, save_coords, disable_physics, group_id, nnodes=len(nodes_devices.keys())))
 
     results["nodes"] = nodes
     results["edges"] = edges
