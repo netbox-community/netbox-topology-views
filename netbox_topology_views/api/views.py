@@ -109,7 +109,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_smooth_cables, disable_gravity = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
 
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -153,8 +153,8 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 group_locations=group_locations,
                 group_racks=group_racks,
                 group_id=group_id,
-                disable_smooth_cables=disable_smooth_cables,
-                disable_physics=disable_gravity,
+                disable_smooth_cables=individualOptions.disable_smooth_cables,
+                disable_physics=individualOptions.disable_gravity,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 
