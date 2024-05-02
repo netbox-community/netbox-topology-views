@@ -1,5 +1,6 @@
 import json
 from functools import reduce
+import random
 from typing import DefaultDict, Dict, Optional, Union
 import time
 from itertools import chain
@@ -204,20 +205,23 @@ def create_node(
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = not disable_physics
-    if not disable_physics:
-        # set (hopefully) unique coords for every device
+    if disable_physics:
+        # Coords must be set even if no coords have been stored. Otherwise nodes with coords
+        # will not be placed correctly by vis-network.
         node["x"] = 0
         node["y"] = 0
     else:
-        # Coords must be set even if no coords have been stored. Otherwise nodes with coords
-        # will not be placed correctly by vis-network.
-        import random
+        # draw devices clustered by their rack neighbours
+        # for center coordinates of a rack, use the rack name as seed (if available)
         random.seed(device.rack.name if hasattr(device, "rack") else device.name)
-        fak = nnodes / 12
-        base_coords_x = random.randint(-fak * nnodes, fak * nnodes)
-        base_coords_y = random.randint(-fak * nnodes, fak * nnodes)
+        # set the upper size of the graph
+        plot_size = int(nnodes / 10) + 1
+        base_coords_x = random.randint(-plot_size * nnodes, plot_size * nnodes)
+        base_coords_y = random.randint(-plot_size * nnodes, plot_size * nnodes)
+        # make seed unique for devices for spread
         if hasattr(device, "rack"):
             random.seed(device.name)
+        # spread devices around the rack center coordinates
         node["x"] = base_coords_x + random.randint(-2 * nnodes, 2 * nnodes)
         node["y"] = base_coords_y + random.randint(-2 * nnodes, 2 * nnodes)
     if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
