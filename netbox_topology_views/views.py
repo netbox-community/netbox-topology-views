@@ -97,7 +97,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, disable_physics: bool, group_id="default"
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, disable_physics: bool, group_id="default", nnodes=1,
 ):
     node = {}
     node_content = ""
@@ -200,14 +200,23 @@ def create_node(
         if not group_id:
             print('Exception occured while handling default group.')
             return node
-   
+
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = not disable_physics
-    # Coords must be set even if no coords have been stored. Otherwise nodes with coords 
-    # will not be placed correctly by vis-network.
-    node["x"] = 0
-    node["y"] = 0
+
+    if disable_physics:
+        # set (hopefully) unique coords for every device
+        node["x"] = 0
+        node["y"] = 0
+    else:
+        # Coords must be set even if no coords have been stored. Otherwise nodes with coords
+        # will not be placed correctly by vis-network.
+        import random
+        random.seed(dev_name)
+        fak = 10
+        node["x"] = random.randint(-fak * nnodes, fak * nnodes)
+        node["y"] = random.randint(-fak * nnodes, fak * nnodes)
     if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
         # Coordinates data for the device exists in Coordinates Group. Let's assign them
         node["x"] = model_class.objects.get(group=group, device=device.pk).x
