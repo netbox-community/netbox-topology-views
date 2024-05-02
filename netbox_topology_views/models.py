@@ -401,9 +401,6 @@ class IndividualOptions(NetBoxModel):
     disable_physics = models.BooleanField(
         default=False
     )
-    disable_smooth_cables = models.BooleanField(
-        default=False
-    )
 
     _netbox_private = True
 
