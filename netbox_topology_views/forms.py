@@ -36,7 +36,7 @@ class DeviceFilterForm(
         (_('Options'), (
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 
-            'group_sites', 'group_locations', 'group_racks', 'enable_straight_cables'
+            'group_sites', 'group_locations', 'group_racks', 'straight_cables'
         )),
         (_('Device'), ('id',)),        
         (_('Location'), ('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id')),
@@ -268,7 +268,7 @@ class DeviceFilterForm(
     group_racks = forms.BooleanField(
         label =_('Group Racks'), required=False, initial=False
     )
-    enable_straight_cables = forms.BooleanField(
+    straight_cables = forms.BooleanField(
         label = _('Straight Cables'), required=False, initial=False
     )
 
