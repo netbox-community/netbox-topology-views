@@ -36,7 +36,7 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
-            'group_sites', 'group_locations', 'group_racks', name=_("Options")
+            'group_sites', 'group_locations', 'group_racks', 'disable_physics', name=_("Options")
         ),
         FieldSet('id', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
@@ -309,6 +309,9 @@ class DeviceFilterForm(
         widget=forms.Select(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
+    )
+    disable_physics = forms.BooleanField(
+        label =_('Disable Physics'), required=False, initial=False
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):
