@@ -269,7 +269,7 @@ class DeviceFilterForm(
         label =_('Group Racks'), required=False, initial=False
     )
     enable_straight_cables = forms.BooleanField(
-        label = _('Straight Cables', required=False, initial=False)
+        label = _('Straight Cables'), required=False, initial=False
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):
