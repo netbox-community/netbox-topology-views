@@ -457,7 +457,7 @@ def get_topology_data(
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
-                        disable_physics=individualOptions.disable_physics,
+                        disable_physics=disable_physics,
                     )
                 )
 
@@ -527,7 +527,7 @@ def get_topology_data(
                         termination_a=termination_a,
                         termination_b=termination_b,
                         power=True,
-                        disable_physics=individualOptions.disable_physics,
+                        disable_physics=disable_physics,
                     )
                 )
 
@@ -572,7 +572,7 @@ def get_topology_data(
                             termination_a=termination_a,
                             termination_b=termination_b,
                             interface=interface,
-                            disable_physics=individualOptions.disable_physics
+                            disable_physics=disable_physics
                         )
                     )
                     nodes_devices[interface.device.id] = interface.device
@@ -654,7 +654,7 @@ def get_topology_data(
                             cable=link.cable,
                             termination_a=termination_a,
                             termination_b=termination_b,
-                            disable_physics=individualOptions.disable_physics,
+                            disable_physics=disable_physics,
                         )
                     )
 
@@ -694,7 +694,7 @@ def get_topology_data(
                     termination_a=termination_a,
                     termination_b=termination_b,
                     wireless=wireless,
-                    disable_physics=individualOptions.disable_physics
+                    disable_physics=disable_physics
                 )
             )
 
@@ -743,7 +743,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_physics = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -762,6 +762,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
                     if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
+                    if disable_physics == False and 'disable_physics' in saved_filter_params: disable_physics = saved_filter_params['disable_physics']
                 except SavedFilter.DoesNotExist: # filter_id not found
                     pass
                 except Exception as inst:
@@ -789,7 +790,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_locations=group_locations,
                     group_racks=group_racks,
                     group_id=group_id,
-                    disable_physics=individualOptions.disable_physics,
+                    disable_physics=disable_physics,
                 )
             
         else:
@@ -813,7 +814,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_sites: q['group_sites'] = "on"
             if individualOptions.group_locations: q['group_locations'] = "on"
             if individualOptions.group_racks: q['group_racks'] = "on"
-            if individualOptions.draw_default_layout: 
+            if individualOptions.disable_physics: q['disable_physics'] = "on"
+            if individualOptions.draw_default_layout:
                 q['draw_init'] = "true"
             else:
                 q['draw_init'] = "false"
