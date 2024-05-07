@@ -109,7 +109,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, disable_physics = get_query_settings(request)
 
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -128,6 +128,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                     if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
                     if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
+                    if disable_physics == False and 'disable_physics' in saved_filter_params: disable_physics = saved_filter_params['disable_physics']
                 except SavedFilter.DoesNotExist: # filter_id not found
                     pass
                 except Exception as inst:
@@ -153,7 +154,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 group_locations=group_locations,
                 group_racks=group_racks,
                 group_id=group_id,
-                disable_physics=individualOptions.disable_physics,
+                disable_physics=disable_physics,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 

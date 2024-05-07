@@ -635,7 +635,7 @@ class IndividualOptionsForm(NetBoxModelForm):
         required=False,
         initial=False,
         help_text=_('When enables, no forces will act on nodes in the topology and they will only move '
-                    'when dragged by hand. Devices without coordinates will be places at (0, 0) by default.')
+                    'when dragged by hand. Devices without coordinates will be placed at (0, 0) by default.')
     )
 
     class Meta:
