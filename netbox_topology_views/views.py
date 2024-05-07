@@ -794,6 +794,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 q['draw_init'] = "true"
             else:
                 q['draw_init'] = "false"
+            if individualOptions.straight_cables: q['straight_cables'] = "on"
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
