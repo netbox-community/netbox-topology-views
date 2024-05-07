@@ -205,25 +205,11 @@ def create_node(
     group = get_object_or_404(CoordinateGroup, pk=group_id)
 
     node["physics"] = not disable_physics
-    if not disable_physics:
-        # Coords must be set even if no coords have been stored. Otherwise nodes with coords
-        # will not be placed correctly by vis-network.
-        node["x"] = 0
-        node["y"] = 0
-    else:
-        # draw devices clustered by their rack neighbours
-        # for center coordinates of a rack, use the rack name as seed (if available)
-        random.seed(device.rack.name if hasattr(device, "rack") else device.name)
-        # set the upper size of the graph
-        plot_size = int(nnodes / 12) + 1
-        base_coords_x = random.randint(-plot_size * nnodes, plot_size * nnodes)
-        base_coords_y = random.randint(-plot_size * nnodes, plot_size * nnodes)
-        # make seed unique for devices for spread
-        if hasattr(device, "rack"):
-            random.seed(device.name)
-        # spread devices around the rack center coordinates
-        node["x"] = base_coords_x + random.randint(-2 * nnodes, 2 * nnodes)
-        node["y"] = base_coords_y + random.randint(-2 * nnodes, 2 * nnodes)
+
+    # Coords must be set even if no coords have been stored. Otherwise nodes with coords
+    # will not be placed correctly by vis-network.
+    node["x"] = 0
+    node["y"] = 0
     if model_class.objects.filter(group=group, device=device.pk).values('x') and model_class.objects.filter(group=group, device=device.pk).values('y'):
         # Coordinates data for the device exists in Coordinates Group. Let's assign them
         node["x"] = model_class.objects.get(group=group, device=device.pk).x
@@ -238,6 +224,21 @@ def create_node(
                 node["x"] = int(cords[0])
                 node["y"] = int(cords[1])
                 node["physics"] = False
+    elif disable_physics:
+        # draw devices clustered by their rack neighbours
+        # for center coordinates of a rack, use the rack name as seed (if available)
+        random.seed(device.rack.name if hasattr(device, "rack") else device.name)
+        # set the upper size of the graph
+        plot_size = int(nnodes / 12) + 1
+        base_coords_x = random.randint(-plot_size * nnodes, plot_size * nnodes)
+        base_coords_y = random.randint(-plot_size * nnodes, plot_size * nnodes)
+        # make seed unique for devices for spread
+        if hasattr(device, "rack"):
+            random.seed(device.name)
+        # spread devices around the rack center coordinates
+        node["x"] = base_coords_x + random.randint(-2 * nnodes, 2 * nnodes)
+        node["y"] = base_coords_y + random.randint(-2 * nnodes, 2 * nnodes)
+
 
     dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
     node["title"] = dev_title
