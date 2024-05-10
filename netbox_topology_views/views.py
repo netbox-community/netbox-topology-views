@@ -91,7 +91,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
         return RoleImage.objects.get(**query).get_image_url()
     except RoleImage.DoesNotExist:
         return find_image_url(
-            entity.device_role.slug if is_device else get_model_slug(entity.__class__)
+            entity.role.slug if is_device else get_model_slug(entity.__class__)
         )
 
 
@@ -151,9 +151,9 @@ def create_node(
             node_content += (
                 f"<tr><th>Type: </th><td>{device.device_type.model}</td></tr>"
             )
-        if device.device_role.name is not None:
+        if device.role.name is not None:
             node_content += (
-                f"<tr><th>Role: </th><td>{device.device_role.name}</td></tr>"
+                f"<tr><th>Role: </th><td>{device.role.name}</td></tr>"
             )
         if device.serial != "":
             node_content += f"<tr><th>Serial: </th><td>{device.serial}</td></tr>"
@@ -189,8 +189,8 @@ def create_node(
             node["rack"] = device.rack.name
             node["rack_id"] = device.rack_id
 
-        if device.device_role.color != "":
-            node["color.border"] = "#" + device.device_role.color
+        if device.role.color != "":
+            node["color.border"] = "#" + device.role.color
 
     model_class = getattr(netbox_topology_views.models, model_name)
 

@@ -15,6 +15,7 @@ from extras.forms import LocalConfigContextFilterForm
 from tenancy.forms import ContactModelFilterForm, TenancyFilterForm
 from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm, NetBoxModelImportForm
+from utilities.forms.rendering import FieldSet
 from utilities.forms import BOOLEAN_WITH_BLANK_CHOICES, add_blank_choice
 from utilities.forms.fields import (
     TagFilterField,
@@ -29,27 +30,27 @@ class DeviceFilterForm(
     ContactModelFilterForm,
     NetBoxModelFilterSetForm
 ):
-    default_renderer = forms.renderers.DjangoTemplates()
+
     model = Device
     fieldsets = (
-        (None, ('q', 'filter_id', 'tag')),
-        (_('Options'), (
+        FieldSet('q', 'filter_id', 'tag'),
+        FieldSet(
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 
-            'group_sites', 'group_locations', 'group_racks'
-        )),
-        (_('Device'), ('id',)),        
-        (_('Location'), ('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id')),
-        (_('Operation'), ('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address')),
-        (_('Hardware'), ('manufacturer_id', 'device_type_id', 'platform_id')),
-        (_('Tenant'), ('tenant_group_id', 'tenant_id')),
-        (_('Contacts'), ('contact', 'contact_role', 'contact_group')),
-        (_('Components'), (
-            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports',
-        )),
-        (_('Miscellaneous'), (
-            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data',
-        )),
+            'group_sites', 'group_locations', 'group_racks', name="Options"
+        ),
+        FieldSet('id', name="Device"),        
+        FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name="Location"),
+        FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name="Operation"),
+        FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name="Hardware"),
+        FieldSet('tenant_group_id', 'tenant_id', name="Tenant"),
+        FieldSet('contact', 'contact_role', 'contact_group', name="Contacts"),
+        FieldSet(
+            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports', name="Components"
+        ),
+        FieldSet(
+            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name="Miscellaneous"
+        ),
     )
     group = forms.ModelChoiceField(
         queryset=CoordinateGroup.objects.all(),
@@ -271,7 +272,8 @@ class DeviceFilterForm(
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (
-        ('Group Details', ('name', 'description')),
+        FieldSet('q', 'filter_id'),
+        FieldSet('name', 'description', name=_("Group Details")),
     )
 
     class Meta:
@@ -285,7 +287,8 @@ class CoordinateGroupsImportForm(NetBoxModelImportForm):
 
 class CircuitCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        ('CircuitCoordinate', ('group', 'device', 'x', 'y')),
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinate")),
     )
 
     class Meta:
@@ -294,7 +297,8 @@ class CircuitCoordinatesForm(NetBoxModelForm):
 
 class PowerPanelCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        ('PowerPanel', ('group', 'device', 'x', 'y')),
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("Power Panel")),
     )
 
     class Meta:
@@ -303,7 +307,8 @@ class PowerPanelCoordinatesForm(NetBoxModelForm):
 
 class PowerFeedCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        ('PowerFeedCoordinate', ('group', 'device', 'x', 'y')),
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinate")),
     )
 
     class Meta:
@@ -312,7 +317,8 @@ class PowerFeedCoordinatesForm(NetBoxModelForm):
 
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        ('Coordinate', ('group', 'device', 'x', 'y')),
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("Coordinate")),
     )
 
     class Meta:
@@ -342,8 +348,8 @@ class CoordinatesImportForm(NetBoxModelImportForm):
 class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = CircuitCoordinate
     fieldsets = (
-        (None, ('q', 'filter_id')),
-        ('CircuitCoordinates', ('group', 'device', 'x', 'y'))
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates"))
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -367,8 +373,8 @@ class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
 class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = PowerPanelCoordinate
     fieldsets = (
-        (None, ('q', 'filter_id')),
-        ('PowerPanelCoordinates', ('group', 'device', 'x', 'y'))
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates'))
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -392,8 +398,8 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
 class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
-        (None, ('q', 'filter_id')),
-        ('PowerFeedCoordinates', ('group', 'device', 'x', 'y'))
+       FieldSet('q', 'filter_id'),
+       FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates"))
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -417,8 +423,8 @@ class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
 class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
-        (None, ('q', 'filter_id')),
-        ('Coordinates', ('group', 'device', 'x', 'y'))
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("Coordinates"))
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -440,9 +446,8 @@ class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     )
 
 class IndividualOptionsForm(NetBoxModelForm):
-    fieldsets = (
-        (
-            None,
+    fieldsets = (    
+            FieldSet
             (
                 'user_id',
                 'ignore_cable_type',
@@ -462,7 +467,6 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'group_racks',
                 'draw_default_layout',
             ),
-        ),
     )
 
     user_id = forms.CharField(widget=forms.HiddenInput())

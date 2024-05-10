@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
 {% endblock %}
 
-{% block content-wrapper %}
+{% block content %}
   <form id="images" class="container py-4">
     <div class="d-flex flex-wrap justify-content-center gap-3 mb-2">
       {% for role in roles %}
@@ -39,7 +39,7 @@
     <button class="btn btn-primary" type="submit">Save</button>
   </form>
   {% include 'netbox_topology_views/toasts.html' %}
-{% endblock content-wrapper %}
+{% endblock content %}
 
 {% block javascript %}
 <script type="text/javascript">
