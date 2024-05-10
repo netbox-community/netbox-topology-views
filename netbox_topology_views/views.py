@@ -4,7 +4,6 @@ from typing import DefaultDict, Dict, Optional, Union
 import time
 from itertools import chain
 
-from utilities.htmx import is_htmx
 from circuits.models import Circuit, CircuitTermination, ProviderNetwork
 from dcim.models import (
     Cable,
@@ -788,7 +787,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             return HttpResponseRedirect(f"{request.path}?{query_string}")
 
 
-        if is_htmx(request): 
+        if request.htmx: 
             return render(
                 request,
                 "netbox_topology_views/htmx_topology.html",
