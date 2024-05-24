@@ -29,7 +29,7 @@
 {% endblock controls %}
 
 {% block tabs %}
-	<ul class="nav nav-tabs">
+	<ul class="nav nav-tabs" id="tabswrapper">
     	{% block tab_items %}
 		<li class="nav-item" role="presentation">
 			<button class="nav-link active" id="network-tab" data-bs-toggle="tab" data-bs-target="#networks" type="button" role="tab" aria-controls="filters-form" aria-selected="true">
@@ -85,10 +85,9 @@
     resizeCanvas();
 
     function resizeCanvas() {
-      heightToSubtract = getElementHeight('.navbar') + 
-        getElementHeight('.title-container') + 
-        getElementHeight('#tabswrapper') + 
-        getElementHeight('#filterwrapper') + 
+      heightToSubtract = getElementHeight('.page-header') +
+        getElementHeight('#tabswrapper') +
+        getElementHeight('#filterwrapper') +
         getElementHeight('.footer') +
         getElementPadding('#tabcontentwrapper');
 
