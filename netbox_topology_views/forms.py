@@ -30,7 +30,7 @@ class DeviceFilterForm(
     ContactModelFilterForm,
     NetBoxModelFilterSetForm
 ):
-
+    default_renderer = forms.renderers.DjangoTemplates()
     model = Device
     fieldsets = (
         FieldSet('q', 'filter_id', 'tag'),
