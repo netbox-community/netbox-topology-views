@@ -37,19 +37,19 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 
-            'group_sites', 'group_locations', 'group_racks', name="Options"
+            'group_sites', 'group_locations', 'group_racks', name=_("Options")
         ),
-        FieldSet('id', name="Device"),        
-        FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name="Location"),
-        FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name="Operation"),
-        FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name="Hardware"),
-        FieldSet('tenant_group_id', 'tenant_id', name="Tenant"),
-        FieldSet('contact', 'contact_role', 'contact_group', name="Contacts"),
+        FieldSet('id', name=_("Device")),
+        FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
+        FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name=_("Operation")),
+        FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name=_("Hardware")),
+        FieldSet('tenant_group_id', 'tenant_id', name=_("Tenant")),
+        FieldSet('contact', 'contact_role', 'contact_group', name=_("Contacts")),
         FieldSet(
-            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports', name="Components"
+            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports', name=_("Components")
         ),
         FieldSet(
-            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name="Miscellaneous"
+            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name=_("Miscellaneous")
         ),
     )
     group = forms.ModelChoiceField(
