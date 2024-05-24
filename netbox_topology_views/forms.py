@@ -272,7 +272,6 @@ class DeviceFilterForm(
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('name', 'description', name=_("Group Details")),
     )
 
@@ -287,7 +286,6 @@ class CoordinateGroupsImportForm(NetBoxModelImportForm):
 
 class CircuitCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinate")),
     )
 
@@ -297,7 +295,6 @@ class CircuitCoordinatesForm(NetBoxModelForm):
 
 class PowerPanelCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Power Panel")),
     )
 
@@ -307,7 +304,6 @@ class PowerPanelCoordinatesForm(NetBoxModelForm):
 
 class PowerFeedCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinate")),
     )
 
@@ -317,7 +313,6 @@ class PowerFeedCoordinatesForm(NetBoxModelForm):
 
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Coordinate")),
     )
 
@@ -349,7 +344,7 @@ class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = CircuitCoordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates"))
+        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -374,7 +369,7 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = PowerPanelCoordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates'))
+        FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates')),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -398,8 +393,8 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
 class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
-       FieldSet('q', 'filter_id'),
-       FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates"))
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -424,7 +419,7 @@ class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_("Coordinates"))
+        FieldSet('group', 'device', 'x', 'y', name=_("Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
