@@ -28,6 +28,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag, SavedFilter
 from wireless.models import WirelessLink
+from utilities.htmx import htmx_partial
 from netbox.views.generic import (
     ObjectView, 
     ObjectListView, 
@@ -787,7 +788,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             return HttpResponseRedirect(f"{request.path}?{query_string}")
 
 
-        if request.htmx: 
+        if htmx_partial(request):
             return render(
                 request,
                 "netbox_topology_views/htmx_topology.html",
