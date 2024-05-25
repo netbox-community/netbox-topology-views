@@ -30,26 +30,26 @@ class DeviceFilterForm(
     ContactModelFilterForm,
     NetBoxModelFilterSetForm
 ):
-
+    default_renderer = forms.renderers.DjangoTemplates()
     model = Device
     fieldsets = (
         FieldSet('q', 'filter_id', 'tag'),
         FieldSet(
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
-            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless', 
-            'group_sites', 'group_locations', 'group_racks', name="Options"
+            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
+            'group_sites', 'group_locations', 'group_racks', name=_("Options")
         ),
-        FieldSet('id', name="Device"),        
-        FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name="Location"),
-        FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name="Operation"),
-        FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name="Hardware"),
-        FieldSet('tenant_group_id', 'tenant_id', name="Tenant"),
-        FieldSet('contact', 'contact_role', 'contact_group', name="Contacts"),
+        FieldSet('id', name=_("Device")),
+        FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
+        FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name=_("Operation")),
+        FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name=_("Hardware")),
+        FieldSet('tenant_group_id', 'tenant_id', name=_("Tenant")),
+        FieldSet('contact', 'contact_role', 'contact_group', name=_("Contacts")),
         FieldSet(
-            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports', name="Components"
+            'console_ports', 'console_server_ports', 'power_ports', 'power_outlets', 'interfaces', 'pass_through_ports', name=_("Components")
         ),
         FieldSet(
-            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name="Miscellaneous"
+            'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name=_("Miscellaneous")
         ),
     )
     group = forms.ModelChoiceField(
@@ -73,8 +73,8 @@ class DeviceFilterForm(
         },
     )
     region_id = DynamicModelMultipleChoiceField(
-        queryset=Region.objects.all(), 
-        required=False, 
+        queryset=Region.objects.all(),
+        required=False,
         label=_('Region')
     )
     site_group_id = DynamicModelMultipleChoiceField(
@@ -113,13 +113,13 @@ class DeviceFilterForm(
         label=_('Rack'),
     )
     status = forms.MultipleChoiceField(
-        choices=DeviceStatusChoices, 
-        required=False, 
+        choices=DeviceStatusChoices,
+        required=False,
         label=_('Device Status')
     )
     role_id = DynamicModelMultipleChoiceField(
-        queryset=DeviceRole.objects.all(), 
-        required=False, 
+        queryset=DeviceRole.objects.all(),
+        required=False,
         label=_('Role')
     )
     airflow = forms.MultipleChoiceField(
@@ -138,7 +138,7 @@ class DeviceFilterForm(
     mac_address = forms.CharField(
         required=False,
         label=_('MAC address')
-    )    
+    )
     manufacturer_id = DynamicModelMultipleChoiceField(
         queryset=Manufacturer.objects.all(),
         required=False,
@@ -272,7 +272,6 @@ class DeviceFilterForm(
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('name', 'description', name=_("Group Details")),
     )
 
@@ -287,7 +286,6 @@ class CoordinateGroupsImportForm(NetBoxModelImportForm):
 
 class CircuitCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinate")),
     )
 
@@ -297,7 +295,6 @@ class CircuitCoordinatesForm(NetBoxModelForm):
 
 class PowerPanelCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Power Panel")),
     )
 
@@ -307,7 +304,6 @@ class PowerPanelCoordinatesForm(NetBoxModelForm):
 
 class PowerFeedCoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinate")),
     )
 
@@ -317,7 +313,6 @@ class PowerFeedCoordinatesForm(NetBoxModelForm):
 
 class CoordinatesForm(NetBoxModelForm):
     fieldsets = (
-        FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("Coordinate")),
     )
 
@@ -349,7 +344,7 @@ class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = CircuitCoordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates"))
+        FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -374,7 +369,7 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = PowerPanelCoordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates'))
+        FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates')),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -398,8 +393,8 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
 class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
-       FieldSet('q', 'filter_id'),
-       FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates"))
+        FieldSet('q', 'filter_id'),
+        FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -424,7 +419,7 @@ class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     model = Coordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
-        FieldSet('group', 'device', 'x', 'y', name=_("Coordinates"))
+        FieldSet('group', 'device', 'x', 'y', name=_("Coordinates")),
     )
 
     group = forms.ModelMultipleChoiceField(
@@ -446,7 +441,7 @@ class CoordinatesFilterForm(NetBoxModelFilterSetForm):
     )
 
 class IndividualOptionsForm(NetBoxModelForm):
-    fieldsets = (    
+    fieldsets = (
             FieldSet
             (
                 'user_id',
@@ -472,8 +467,8 @@ class IndividualOptionsForm(NetBoxModelForm):
     user_id = forms.CharField(widget=forms.HiddenInput())
 
     ignore_cable_type = forms.MultipleChoiceField(
-        label=_('Ignore Termination Types'), 
-        required=False, 
+        label=_('Ignore Termination Types'),
+        required=False,
         choices=IndividualOptions.CHOICES,
         help_text=_('Choose Termination Types that you want to be ignored. '
             'If any ignored Termination Type is part of a connection, the '
@@ -494,8 +489,8 @@ class IndividualOptionsForm(NetBoxModelForm):
             'preselected in the filter tab.')
     )
     save_coords = forms.BooleanField(
-        label=_('Save Coordinates'), 
-        required=False, 
+        label=_('Save Coordinates'),
+        required=False,
         initial=False,
         help_text=_('Coordinates of nodes will be saved if dragged to a different '
             'position. This option depends on parameters set in the config file. '
@@ -503,24 +498,24 @@ class IndividualOptionsForm(NetBoxModelForm):
             ' \'always_save_coordinates\' has been set.')
     )
     show_unconnected = forms.BooleanField(
-        label=_('Show Unconnected'), 
-        required=False, 
+        label=_('Show Unconnected'),
+        required=False,
         initial=False,
         help_text=_('Draws devices that have no connections or for which no '
             'connection is displayed. This option depends on other parameters '
             'like \'Show Cables\' and \'Show Logical Connections\'.')
     )
     show_cables = forms.BooleanField(
-        label =_('Show Cables'), 
-        required=False, 
+        label =_('Show Cables'),
+        required=False,
         initial=False,
         help_text=_('Displays connections between interfaces that are connected '
             'with one or more cables. These connections are displayed as solid '
             'lines in the color of the cable.')
     )
     show_logical_connections = forms.BooleanField(
-        label =_('Show Logical Connections'), 
-        required=False, 
+        label =_('Show Logical Connections'),
+        required=False,
         initial=False,
         help_text=_('Displays connections between devices that are not '
             'directly connected (e.g. via patch panels). These connections '
@@ -536,52 +531,52 @@ class IndividualOptionsForm(NetBoxModelForm):
             'has an effect if \'Show Logical Connections\' is activated.')
     )
     show_neighbors = forms.BooleanField(
-        label =_('Show Neighbors'), 
-        required=False, 
+        label =_('Show Neighbors'),
+        required=False,
         initial=False,
         help_text=_('Adds neighbors to the filter result set automatically. '
             'Link peers will be added if \'Show Cables\' is ticked, far-end '
             'terminations will be added if \'Show Logical Connections\' is ticked.')
     )
     show_circuit = forms.BooleanField(
-        label=_('Show Circuit Terminations'), 
-        required=False, 
+        label=_('Show Circuit Terminations'),
+        required=False,
         initial=False,
         help_text=_('Displays connections between circuit terminations. '
             'These connections are displayed as blue dashed lines.')
     )
     show_power = forms.BooleanField(
-        label=_('Show Power Feeds'), 
-        required=False, 
+        label=_('Show Power Feeds'),
+        required=False,
         initial=False,
         help_text=_('Displays connections between power outlets and power '
             'ports. These connections are displayed as solid lines in the '
             'color of the cable. This option depends on \'Show Cables\'.')
     )
     show_wireless = forms.BooleanField(
-        label =_('Show Wireless Links'), 
-        required=False, 
+        label =_('Show Wireless Links'),
+        required=False,
         initial=False,
         help_text=_('Displays wireless connections. These connections are '
             'displayed as blue dotted lines.')
     )
     group_sites = forms.BooleanField(
-        label =_('Group Sites'), 
-        required=False, 
+        label =_('Group Sites'),
+        required=False,
         initial=False,
         help_text=_('Draws a rectangle around Devices that belong to the '
             'same site.')
     )
     group_locations = forms.BooleanField(
-        label =_('Group Locations'), 
-        required=False, 
+        label =_('Group Locations'),
+        required=False,
         initial=False,
         help_text=_('Draws a rectangle around Devices that belong to the '
             'same location.')
     )
     group_racks = forms.BooleanField(
-        label =_('Group Racks'), 
-        required=False, 
+        label =_('Group Racks'),
+        required=False,
         initial=False,
         help_text=_('Draws a rectangle around Devices that belong to the '
             'same rack.')
@@ -597,8 +592,8 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags', 
-            'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections', 
-            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 
+            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags',
+            'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
+            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power',
             'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'draw_default_layout'
-        ]        
+        ]
