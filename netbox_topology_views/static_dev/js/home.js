@@ -396,17 +396,17 @@ const observer = new MutationObserver((mutations) =>
         if (
             !graph ||
             mutation.type !== 'attributes' ||
-            mutation.attributeName !== 'data-netbox-color-mode' ||
+            mutation.attributeName !== 'data-bs-theme' ||
             !(mutation.target instanceof HTMLElement)
         )
             return
-        const { netboxColorMode } = mutation.target.dataset
+        const netboxColorMode = mutation.target.dataset.bsTheme
         options.nodes.font.color = netboxColorMode === 'dark' ? '#fff' : '#000'
         graph.setOptions(options)
     })
 )
 
-observer.observe(document.documentElement, {
+observer.observe(document.body, {
     attributes: true,
-    attributeFilter: ['data-netbox-color-mode']
+    attributeFilter: ['data-bs-theme']
 })
