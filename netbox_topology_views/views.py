@@ -767,22 +767,22 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist("role_id", list(preselected_device_roles))
             q.setlist("tag", list(preselected_tags))
 
-            if individualOptions.save_coords: q['save_coords'] = "on"
-            if individualOptions.show_unconnected: q['show_unconnected'] = "on"
-            if individualOptions.show_cables: q['show_cables'] = "on"
-            if individualOptions.show_logical_connections: q['show_logical_connections'] = "on"
-            if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "on"
-            if individualOptions.show_neighbors: q['show_neighbors'] = "on"
-            if individualOptions.show_circuit: q['show_circuit'] = "on"
-            if individualOptions.show_power: q['show_power'] = "on"
-            if individualOptions.show_wireless: q['show_wireless'] = "on"
-            if individualOptions.group_sites: q['group_sites'] = "on"
-            if individualOptions.group_locations: q['group_locations'] = "on"
-            if individualOptions.group_racks: q['group_racks'] = "on"
+            if individualOptions.save_coords: q['save_coords'] = "True"
+            if individualOptions.show_unconnected: q['show_unconnected'] = "True"
+            if individualOptions.show_cables: q['show_cables'] = "True"
+            if individualOptions.show_logical_connections: q['show_logical_connections'] = "True"
+            if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "True"
+            if individualOptions.show_neighbors: q['show_neighbors'] = "True"
+            if individualOptions.show_circuit: q['show_circuit'] = "True"
+            if individualOptions.show_power: q['show_power'] = "True"
+            if individualOptions.show_wireless: q['show_wireless'] = "True"
+            if individualOptions.group_sites: q['group_sites'] = "True"
+            if individualOptions.group_locations: q['group_locations'] = "True"
+            if individualOptions.group_racks: q['group_racks'] = "True"
             if individualOptions.draw_default_layout: 
-                q['draw_init'] = "true"
+                q['draw_init'] = "True"
             else:
-                q['draw_init'] = "false"
+                q['draw_init'] = "False"
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")

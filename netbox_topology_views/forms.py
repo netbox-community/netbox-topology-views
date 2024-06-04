@@ -30,7 +30,6 @@ class DeviceFilterForm(
     ContactModelFilterForm,
     NetBoxModelFilterSetForm
 ):
-    default_renderer = forms.renderers.DjangoTemplates()
     model = Device
     fieldsets = (
         FieldSet('q', 'filter_id', 'tag'),
@@ -214,7 +213,7 @@ class DeviceFilterForm(
     )
     has_oob_ip = forms.NullBooleanField(
         required=False,
-        label='Has an OOB IP',
+        label=_('Has an OOB IP'),
         widget=forms.Select(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
@@ -230,44 +229,86 @@ class DeviceFilterForm(
     tag = TagFilterField(model)
 
     # options
-    save_coords = forms.BooleanField(
+    save_coords = forms.NullBooleanField(
         label=_('Save Coordinates'),
         required=False,
         disabled=(not settings.PLUGINS_CONFIG['netbox_topology_views']['allow_coordinates_saving'] or settings.PLUGINS_CONFIG['netbox_topology_views']['always_save_coordinates']),
-        initial=(settings.PLUGINS_CONFIG['netbox_topology_views']['always_save_coordinates'])
+        initial=(settings.PLUGINS_CONFIG['netbox_topology_views']['always_save_coordinates']),
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_unconnected = forms.BooleanField(
-        label=_('Show Unconnected'), required=False, initial=False
+    show_unconnected = forms.NullBooleanField(
+        label=_('Show Unconnected'),
+        required=False, 
+        initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_cables = forms.BooleanField(
-        label =_('Show Cables'), required=False, initial=False
+
+    show_cables = forms.NullBooleanField(
+        required=False,
+        initial=False,
+        label=_('Show Cables'),
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_logical_connections = forms.BooleanField(
-        label =_('Show Logical Connections'), required=False, initial=False
+
+    show_logical_connections = forms.NullBooleanField(
+        label =_('Show Logical Connections'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_single_cable_logical_conns = forms.BooleanField(
-        label =_('Show redundant Cable and Logical Connection'), required=False, initial=False
+    show_single_cable_logical_conns = forms.NullBooleanField(
+        label =_('Show redundant Cable and Logical Connection'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_neighbors = forms.BooleanField(
-        label =_('Show Neighbors'), required=False, initial=False
+    show_neighbors = forms.NullBooleanField(
+        label =_('Show Neighbors'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_circuit = forms.BooleanField(
-        label=_('Show Circuit Terminations'), required=False, initial=False
+    show_circuit = forms.NullBooleanField(
+        label=_('Show Circuit Terminations'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_power = forms.BooleanField(
-        label=_('Show Power Feeds'), required=False, initial=False
+    show_power = forms.NullBooleanField(
+        label=_('Show Power Feeds'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    show_wireless = forms.BooleanField(
-        label =_('Show Wireless Links'), required=False, initial=False
+    show_wireless = forms.NullBooleanField(
+        label =_('Show Wireless Links'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    group_sites = forms.BooleanField(
-        label =_('Group Sites'), required=False, initial=False
+    group_sites = forms.NullBooleanField(
+        label =_('Group Sites'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    group_locations = forms.BooleanField(
-        label =_('Group Locations'), required=False, initial=False
+    group_locations = forms.NullBooleanField(
+        label =_('Group Locations'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
-    group_racks = forms.BooleanField(
-        label =_('Group Racks'), required=False, initial=False
+    group_racks = forms.NullBooleanField(
+        label =_('Group Racks'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):
