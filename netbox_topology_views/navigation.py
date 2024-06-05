@@ -1,19 +1,16 @@
-from extras.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
-from utilities.choices import ButtonColorChoices
+from netbox.plugins import PluginMenu, PluginMenuItem, PluginMenuButton
 
 coordinategroup_buttons = (
     PluginMenuButton(
         link='plugins:netbox_topology_views:coordinategroup_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        color=ButtonColorChoices.GREEN,
         permissions=['netbox_topology_views.add_coordinategroup']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:coordinategroup_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        color=ButtonColorChoices.CYAN,
         permissions=['netbox_topology_views.add_coordinategroup']
     )
 )
@@ -23,14 +20,12 @@ circuitcoordinate_buttons = (
         link='plugins:netbox_topology_views:circuitcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        color=ButtonColorChoices.GREEN,
         permissions=['netbox_topology_views.add_coordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:circuitcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        color=ButtonColorChoices.CYAN,
         permissions=['netbox_topology_views.add_coordinate']
     )
 )
@@ -40,14 +35,12 @@ powerpanelcoordinate_buttons = (
         link='plugins:netbox_topology_views:powerpanelcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        color=ButtonColorChoices.GREEN,
         permissions=['netbox_topology_views.add_coordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:powerpanelcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        color=ButtonColorChoices.CYAN,
         permissions=['netbox_topology_views.add_coordinate']
     )
 )
@@ -57,14 +50,12 @@ powerfeedcoordinate_buttons = (
         link='plugins:netbox_topology_views:powerfeedcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        color=ButtonColorChoices.GREEN,
         permissions=['netbox_topology_views.add_coordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:powerfeedcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        color=ButtonColorChoices.CYAN,
         permissions=['netbox_topology_views.add_coordinate']
     )
 )
@@ -74,14 +65,12 @@ coordinate_buttons = (
         link='plugins:netbox_topology_views:coordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        color=ButtonColorChoices.GREEN,
         permissions=['netbox_topology_views.add_coordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:coordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        color=ButtonColorChoices.CYAN,
         permissions=['netbox_topology_views.add_coordinate']
     )
 )
