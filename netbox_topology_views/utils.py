@@ -113,7 +113,7 @@ def get_query_settings(request):
 
     save_coords = False
     if "save_coords" in request.GET:
-        if request.GET["save_coords"] == "on":
+        if request.GET["save_coords"] == "True":
             save_coords = True
     # General options overrides
     if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
@@ -125,57 +125,57 @@ def get_query_settings(request):
     # Individual options
     show_unconnected = False
     if "show_unconnected" in request.GET:
-        if request.GET["show_unconnected"] == "on":
+        if request.GET["show_unconnected"] == "True":
             show_unconnected = True
 
     show_power = False
     if "show_power" in request.GET:
-        if request.GET["show_power"] == "on":
+        if request.GET["show_power"] == "True":
             show_power = True
 
     show_circuit = False
     if "show_circuit" in request.GET:
-        if request.GET["show_circuit"] == "on":
+        if request.GET["show_circuit"] == "True":
             show_circuit = True
 
     show_logical_connections = False
     if "show_logical_connections" in request.GET:
-        if request.GET["show_logical_connections"] == "on" :
+        if request.GET["show_logical_connections"] == "True" :
             show_logical_connections = True
 
     show_single_cable_logical_conns = False
     if "show_single_cable_logical_conns" in request.GET:
-        if request.GET["show_single_cable_logical_conns"] == "on" :
+        if request.GET["show_single_cable_logical_conns"] == "True" :
             show_single_cable_logical_conns = True
 
     show_cables = False
     if "show_cables" in request.GET:
-        if request.GET["show_cables"] == "on" :
+        if request.GET["show_cables"] == "True" :
             show_cables = True
 
     show_wireless = False
     if "show_wireless" in request.GET:
-        if request.GET["show_wireless"] == "on" :
+        if request.GET["show_wireless"] == "True" :
             show_wireless = True
 
     group_sites = False
     if "group_sites" in request.GET:
-        if request.GET["group_sites"] == "on" :
+        if request.GET["group_sites"] == "True" :
             group_sites = True
 
     group_locations = False
     if "group_locations" in request.GET:
-        if request.GET["group_locations"] == "on" :
+        if request.GET["group_locations"] == "True" :
             group_locations = True
 
     group_racks = False
     if "group_racks" in request.GET:
-        if request.GET["group_racks"] == "on" :
+        if request.GET["group_racks"] == "True" :
             group_racks = True
 
     show_neighbors = False
     if "show_neighbors" in request.GET:
-        if request.GET["show_neighbors"] == "on" :
+        if request.GET["show_neighbors"] == "True" :
             show_neighbors = True
 
     straight_cables = False

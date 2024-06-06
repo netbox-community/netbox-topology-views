@@ -4,7 +4,6 @@ from typing import DefaultDict, Dict, Optional, Union
 import time
 from itertools import chain
 
-from utilities.htmx import is_htmx
 from circuits.models import Circuit, CircuitTermination, ProviderNetwork
 from dcim.models import (
     Cable,
@@ -29,6 +28,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag, SavedFilter
 from wireless.models import WirelessLink
+from utilities.htmx import htmx_partial
 from netbox.views.generic import (
     ObjectView, 
     ObjectListView, 
@@ -92,7 +92,7 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
         return RoleImage.objects.get(**query).get_image_url()
     except RoleImage.DoesNotExist:
         return find_image_url(
-            entity.device_role.slug if is_device else get_model_slug(entity.__class__)
+            entity.role.slug if is_device else get_model_slug(entity.__class__)
         )
 
 
@@ -152,9 +152,9 @@ def create_node(
             node_content += (
                 f"<tr><th>Type: </th><td>{device.device_type.model}</td></tr>"
             )
-        if device.device_role.name is not None:
+        if device.role.name is not None:
             node_content += (
-                f"<tr><th>Role: </th><td>{device.device_role.name}</td></tr>"
+                f"<tr><th>Role: </th><td>{device.role.name}</td></tr>"
             )
         if device.serial != "":
             node_content += f"<tr><th>Serial: </th><td>{device.serial}</td></tr>"
@@ -190,8 +190,8 @@ def create_node(
             node["rack"] = device.rack.name
             node["rack_id"] = device.rack_id
 
-        if device.device_role.color != "":
-            node["color.border"] = "#" + device.device_role.color
+        if device.role.color != "":
+            node["color.border"] = "#" + device.role.color
 
     model_class = getattr(netbox_topology_views.models, model_name)
 
@@ -778,29 +778,29 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q.setlist("role_id", list(preselected_device_roles))
             q.setlist("tag", list(preselected_tags))
 
-            if individualOptions.save_coords: q['save_coords'] = "on"
-            if individualOptions.show_unconnected: q['show_unconnected'] = "on"
-            if individualOptions.show_cables: q['show_cables'] = "on"
-            if individualOptions.show_logical_connections: q['show_logical_connections'] = "on"
-            if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "on"
-            if individualOptions.show_neighbors: q['show_neighbors'] = "on"
-            if individualOptions.show_circuit: q['show_circuit'] = "on"
-            if individualOptions.show_power: q['show_power'] = "on"
-            if individualOptions.show_wireless: q['show_wireless'] = "on"
-            if individualOptions.group_sites: q['group_sites'] = "on"
-            if individualOptions.group_locations: q['group_locations'] = "on"
-            if individualOptions.group_racks: q['group_racks'] = "on"
+            if individualOptions.save_coords: q['save_coords'] = "True"
+            if individualOptions.show_unconnected: q['show_unconnected'] = "True"
+            if individualOptions.show_cables: q['show_cables'] = "True"
+            if individualOptions.show_logical_connections: q['show_logical_connections'] = "True"
+            if individualOptions.show_single_cable_logical_conns: q['show_single_cable_logical_conns'] = "True"
+            if individualOptions.show_neighbors: q['show_neighbors'] = "True"
+            if individualOptions.show_circuit: q['show_circuit'] = "True"
+            if individualOptions.show_power: q['show_power'] = "True"
+            if individualOptions.show_wireless: q['show_wireless'] = "True"
+            if individualOptions.group_sites: q['group_sites'] = "True"
+            if individualOptions.group_locations: q['group_locations'] = "True"
+            if individualOptions.group_racks: q['group_racks'] = "True"
             if individualOptions.draw_default_layout: 
-                q['draw_init'] = "true"
+                q['draw_init'] = "True"
             else:
-                q['draw_init'] = "false"
+                q['draw_init'] = "False"
             if individualOptions.straight_cables: q['straight_cables'] = "on"
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
 
 
-        if is_htmx(request): 
+        if htmx_partial(request):
             return render(
                 request,
                 "netbox_topology_views/htmx_topology.html",
