@@ -6,6 +6,6 @@ router = NetBoxRouter()
 
 router.register("save-coords", views.SaveCoordsViewSet)
 router.register("images", views.SaveRoleImageViewSet)
-#router.register("xml-export", views.ExportTopoToXML)
+router.register("xml-export", views.ExportTopoToXML, "xml-export")
 
 urlpatterns = router.urls
