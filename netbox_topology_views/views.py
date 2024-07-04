@@ -697,7 +697,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
     def get(self, request):
         self.filterset = DeviceFilterSet
-        self.queryset = Device.objects.all().select_related(
+        self.queryset = Device.objects.restrict(request.user, 'view').select_related(
             "device_type", "role"
         )
         self.queryset = self.filterset(request.GET, self.queryset).qs
