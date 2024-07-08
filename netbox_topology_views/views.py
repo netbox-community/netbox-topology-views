@@ -238,6 +238,7 @@ def create_edge(
     edge_id: int,
     termination_a: Dict,
     termination_b: Dict,
+    straight_cables: bool,
     circuit: Optional[Dict] = None,
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
@@ -300,6 +301,9 @@ def create_edge(
         if hasattr(cable, 'color') and cable.color != "":
             edge["color"] = "#" + cable.color
 
+    # if straight_cables == True: edge["smooth"] = False
+    edge["smooth"] = not straight_cables
+
     return edge
 
 
@@ -339,6 +343,7 @@ def get_topology_data(
     group_locations: bool,
     group_racks: bool,
     group_id,
+    straight_cables: bool,
 ):
     
     supported_termination_types = []
@@ -436,6 +441,7 @@ def get_topology_data(
                         circuit=circuit_model,
                         termination_a=termination_a,
                         termination_b=termination_b,
+                        straight_cables=straight_cables,
                     )
                 )
 
@@ -505,6 +511,7 @@ def get_topology_data(
                         termination_a=termination_a,
                         termination_b=termination_b,
                         power=True,
+                        straight_cables=straight_cables,
                     )
                 )
 
@@ -543,7 +550,7 @@ def get_topology_data(
                     edge_ids += 1
                     termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
                     termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
-                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface))
+                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface, straight_cables=straight_cables))
                     nodes_devices[interface.device.id] = interface.device
                     nodes_devices[destination.device.id] = destination.device
 
@@ -623,6 +630,7 @@ def get_topology_data(
                             cable=link.cable,
                             termination_a=termination_a,
                             termination_b=termination_b,
+                            straight_cables=straight_cables,
                         )
                     )
 
@@ -662,6 +670,7 @@ def get_topology_data(
                     termination_a=termination_a,
                     termination_b=termination_b,
                     wireless=wireless,
+                    straight_cables=straight_cables,
                 )
             )
 
@@ -710,7 +719,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, straight_cables = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -729,6 +738,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
                     if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
+                    if straight_cables == False and 'straight_cables' in saved_filter_params: straight_cables = saved_filter_params['straight_cables']
                 except SavedFilter.DoesNotExist: # filter_id not found
                     pass
                 except Exception as inst:
@@ -756,6 +766,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_locations=group_locations,
                     group_racks=group_racks,
                     group_id=group_id,
+                    straight_cables=straight_cables,
                 )
             
         else:
@@ -779,6 +790,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_sites: q['group_sites'] = "True"
             if individualOptions.group_locations: q['group_locations'] = "True"
             if individualOptions.group_racks: q['group_racks'] = "True"
+            if individualOptions.straight_cables: q['straight_cables'] = "True"
             if individualOptions.draw_default_layout: 
                 q['draw_init'] = "True"
             else:
@@ -1137,6 +1149,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'group_locations': queryset.group_locations,
                 'group_racks': queryset.group_racks,
                 'draw_default_layout': queryset.draw_default_layout,
+                'straight_cables': queryset.straight_cables,
             },
         )
 
