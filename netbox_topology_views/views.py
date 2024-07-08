@@ -790,11 +790,11 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_sites: q['group_sites'] = "True"
             if individualOptions.group_locations: q['group_locations'] = "True"
             if individualOptions.group_racks: q['group_racks'] = "True"
+            if individualOptions.straight_cables: q['straight_cables'] = "True"
             if individualOptions.draw_default_layout: 
                 q['draw_init'] = "True"
             else:
                 q['draw_init'] = "False"
-            if individualOptions.straight_cables: q['straight_cables'] = "on"
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")

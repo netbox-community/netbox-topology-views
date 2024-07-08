@@ -311,7 +311,10 @@ class DeviceFilterForm(
         )
     )
     straight_cables = forms.BooleanField(
-        label=_('Straight Cables'), required=False, initial=False
+        label=_('Straight Cables'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):

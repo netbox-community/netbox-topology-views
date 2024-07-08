@@ -180,7 +180,7 @@ def get_query_settings(request):
 
     straight_cables = False
     if "straight_cables" in request.GET:
-        if request.GET["straight_cables"] == "on":
+        if request.GET["straight_cables"] == "True":
             straight_cables = True
 
     return filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, straight_cables
