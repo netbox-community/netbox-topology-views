@@ -719,7 +719,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, show_neighbors, straight_cables = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group, show_neighbors, straight_cables = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -745,7 +745,10 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     print(type(inst))
 
             if "group" not in request.GET:
-                group_id = "default"
+                if 'group' in saved_filter_params:
+                    group_id = saved_filter_params['group'][0]
+                else:
+                    group_id = "default"
             else:
                 group_id = request.GET["group"]
 
