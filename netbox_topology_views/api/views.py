@@ -135,7 +135,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                     print(type(inst))
 
             if 'group' not in request.query_params:
-                if 'group' in saved_filter_params:
+                if 'saved_filter_params' in locals() and "group" in saved_filter_params:
                     group_id = saved_filter_params['group'][0]
                 else:
                     group_id = "default"
