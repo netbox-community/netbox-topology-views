@@ -331,12 +331,12 @@ class PowerFeedCoordinate(NetBoxModel):
 class IndividualOptions(NetBoxModel):
     CHOICES = (
         ('interface', 'interface'),
-        ('front port', 'front port'),
-        ('rear port', 'rear port'),
-        ('power outlet', 'power outlet'),
-        ('power port', 'power port'),
-        ('console port', 'console port'),
-        ('console server port', 'console server port'),
+        ('front port', 'frontport'),
+        ('rear port', 'rearport'),
+        ('power outlet', 'poweroutlet'),
+        ('power port', 'powerport'),
+        ('console port', 'consoleport'),
+        ('console server port', 'consoleserverport'),
     )
 
     user_id = models.IntegerField(
