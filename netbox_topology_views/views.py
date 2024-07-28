@@ -189,6 +189,9 @@ def create_node(
         if device.rack is not None:
             node["rack"] = device.rack.name
             node["rack_id"] = device.rack_id
+        if device.virtual_chassis is not None:
+            node["virtual_chassis"] = device.virtual_chassis.name
+            node["virtual_chassis_id"] = device.virtual_chassis_id
 
         if device.role.color != "":
             node["color.border"] = "#" + device.role.color
@@ -680,6 +683,8 @@ def get_topology_data(
         options['group_racks'] = 'on'
     if group_sites:
         options['group_sites'] = 'on'
+#    if group_virtualchassis:
+    options['group_virtualchassis'] = 'on'
 
     for qs_device in queryset:
         if qs_device.pk not in nodes_devices and show_unconnected:
