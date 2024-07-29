@@ -73,6 +73,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const group_sites = topologyData.options.group_sites
     const group_locations = topologyData.options.group_locations
     const group_racks = topologyData.options.group_racks
+    const group_virtualchassis = topologyData.options.group_virtualchassis
 
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
@@ -143,16 +144,17 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         if(group_sites != null && group_sites == 'on') { drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams); }
         if(group_locations != null && group_locations == 'on') { drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams); }
         if(group_racks != null && group_racks == 'on') { drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams); }
+        if(group_virtualchassis != null && group_virtualchassis == 'on') { drawGroupRectangles(canvascontext, groupedNodeVirtualchassis, virtualchassisRectParams); }
     })
 
     graph.on('click', (canvascontext) => {
         allRectangles.forEach(key => {
             // Is the mouse pointer inside of the current rectangle?
-            if(canvascontext.pointer.canvas.x > (key.x1 - key.border / 2 - 1) && canvascontext.pointer.canvas.x < (key.x2 + key.border / 2 + 1)
-                && canvascontext.pointer.canvas.y > (key.y1 - key.border / 2 - 1) && canvascontext.pointer.canvas.y < (key.y2 + key.border / 2 + 1)) {
+            if(canvascontext.pointer.canvas.x > (key.x1 - key.border / 2 - 3) && canvascontext.pointer.canvas.x < (key.x2 + key.border / 2 + 3)
+                && canvascontext.pointer.canvas.y > (key.y1 - key.border / 2 - 3) && canvascontext.pointer.canvas.y < (key.y2 + key.border / 2 + 3)) {
                 // We just want to react when the border has been clicked, not the whole rectangle
-                if (canvascontext.pointer.canvas.x < (key.x1 + key.border / 2 + 1) || canvascontext.pointer.canvas.x > (key.x2 - key.border / 2 - 1)
-                    || canvascontext.pointer.canvas.y < (key.y1 + key.border / 2 + 1) || canvascontext.pointer.canvas.y > (key.y2 - key.border / 2 - 1)) {
+                if (canvascontext.pointer.canvas.x < (key.x1 + key.border / 2 + 3) || canvascontext.pointer.canvas.x > (key.x2 - key.border / 2 - 3)
+                    || canvascontext.pointer.canvas.y < (key.y1 + key.border / 2 + 3) || canvascontext.pointer.canvas.y > (key.y2 - key.border / 2 - 3)) {
                     // Generate an array of affected nodes in order to pass it to the select.Nodes() function
                     let arr = [];
                     if(key.category == "Site") {
@@ -182,13 +184,22 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                             });
                         });
                     }
+                    if(key.category == "Virtual Chassis") {
+                        groupedNodeVirtualchassis.forEach(subArray => {
+                            subArray.forEach(element => {
+                                if (element[1] === key.id) {
+                                    arr.push(element[0]);
+                                }
+                            });
+                        });
+                    }
                     graph.selectNodes(arr);
                 }
             }
         });
     })
 
-    // Add information on which node belongs to which group (site/location/rack).
+    // Add information on which node belongs to which group (site/location/rack/virtualchassis).
     // Create an array for each group in order to loop through that arrays later
     function combineNodeInfo(typeId, type) {
         let nodesArray = [];
@@ -238,7 +249,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         allRectangles.push({category: rectangle.category, id: rectangle.id, x1: rectangle.x, y1: rectangle.y, x2: rectangle.x + rectangle.width, y2: rectangle.y + rectangle.height, border: rectangle.lineWidth})
     }
 
-    /* Draw all rectangles of a given group (site/location/rack)
+    /* Draw all rectangles of a given group (site/location//virtualchassis)
         rectParams expects an object that consists of the following keys:
         lineWidth: border width (string)
         color: border color (string)
@@ -303,8 +314,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         color: "#337ab7",
         paddingX: 77, 
         paddingY: 77, 
-        textPaddingX: 12, 
-        textPaddingY: 22, 
+        textPaddingX: 22, 
+        textPaddingY: 29, 
         font: "14px helvetica",
         category: "Location"
     }
@@ -315,10 +326,22 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         color: "green",
         paddingX: 70, 
         paddingY: 70, 
-        textPaddingX: 8, 
-        textPaddingY: 30, 
+        textPaddingX: 15, 
+        textPaddingY: 36, 
         font: "14px helvetica",
         category: "Rack"
+    }
+
+    let groupedNodeVirtualchassis = combineNodeInfo('virtual_chassis_id', 'virtual_chassis');
+    let virtualchassisRectParams = {
+        lineWidth: "5", 
+        color: "orange",
+        paddingX: 63, 
+        paddingY: 63, 
+        textPaddingX: 8, 
+        textPaddingY: 43, 
+        font: "14px helvetica",
+        category: "Virtual Chassis"
     }
 })()
 

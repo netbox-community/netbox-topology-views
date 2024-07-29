@@ -189,6 +189,9 @@ def create_node(
         if device.rack is not None:
             node["rack"] = device.rack.name
             node["rack_id"] = device.rack_id
+        if device.virtual_chassis is not None:
+            node["virtual_chassis"] = device.virtual_chassis.name
+            node["virtual_chassis_id"] = device.virtual_chassis_id
 
         if device.role.color != "":
             node["color.border"] = "#" + device.role.color
@@ -342,6 +345,7 @@ def get_topology_data(
     group_sites: bool,
     group_locations: bool,
     group_racks: bool,
+    group_virtualchassis: bool,
     group_id,
     straight_cables: bool,
 ):
@@ -680,6 +684,8 @@ def get_topology_data(
         options['group_racks'] = 'on'
     if group_sites:
         options['group_sites'] = 'on'
+    if group_virtualchassis:
+        options['group_virtualchassis'] = 'on'
 
     for qs_device in queryset:
         if qs_device.pk not in nodes_devices and show_unconnected:
@@ -719,7 +725,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group, show_neighbors, straight_cables = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -737,6 +743,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     if group_sites == False and 'group_sites' in saved_filter_params: group_sites = saved_filter_params['group_sites']
                     if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
                     if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
+                    if group_virtualchassis == False and 'group_virtualchassis' in saved_filter_params: group_virtualchassis = saved_filter_params['group_virtualchassis']
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
                     if straight_cables == False and 'straight_cables' in saved_filter_params: straight_cables = saved_filter_params['straight_cables']
                 except SavedFilter.DoesNotExist: # filter_id not found
@@ -768,6 +775,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_sites=group_sites,
                     group_locations=group_locations,
                     group_racks=group_racks,
+                    group_virtualchassis=group_virtualchassis,
                     group_id=group_id,
                     straight_cables=straight_cables,
                 )
@@ -793,6 +801,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_sites: q['group_sites'] = "True"
             if individualOptions.group_locations: q['group_locations'] = "True"
             if individualOptions.group_racks: q['group_racks'] = "True"
+            if individualOptions.group_virtualchassis: q['group_virtualchassis'] = "True"
             if individualOptions.straight_cables: q['straight_cables'] = "True"
             if individualOptions.draw_default_layout: 
                 q['draw_init'] = "True"
@@ -1151,6 +1160,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'group_sites': queryset.group_sites,
                 'group_locations': queryset.group_locations,
                 'group_racks': queryset.group_racks,
+                'group_virtualchassis': queryset.group_virtualchassis,
                 'draw_default_layout': queryset.draw_default_layout,
                 'straight_cables': queryset.straight_cables,
             },

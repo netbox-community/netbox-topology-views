@@ -36,7 +36,7 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
-            'group_sites', 'group_locations', 'group_racks', 'straight_cables', name=_("Options")
+            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', name=_("Options")
         ),
         FieldSet('id', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
@@ -310,6 +310,12 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
+    group_virtualchassis = forms.NullBooleanField(
+        label =_('Group Virtual Chassis'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
     straight_cables = forms.BooleanField(
         label=_('Straight Cables'), required=False, initial=False,
         widget=forms.Select(
@@ -507,6 +513,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'group_sites',
                 'group_locations',
                 'group_racks',
+                'group_virtualchassis',
                 'draw_default_layout',
                 'straight_cables',
             ),
@@ -629,6 +636,13 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_('Draws a rectangle around Devices that belong to the '
             'same rack.')
     )
+    group_virtualchassis = forms.BooleanField(
+        label =_('Group Virtual Chassis'),
+        required=False,
+        initial=False,
+        help_text=_('Draws a rectangle around Devices that belong to the '
+            'same virtual chassis.')
+    )
     draw_default_layout = forms.BooleanField(
         label = ('Draw Default Layout'),
         required=False,
@@ -650,6 +664,6 @@ class IndividualOptionsForm(NetBoxModelForm):
             'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags',
             'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power',
-            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'draw_default_layout',
+            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'draw_default_layout',
             'straight_cables'
         ]

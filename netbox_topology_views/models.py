@@ -395,6 +395,9 @@ class IndividualOptions(NetBoxModel):
     group_racks = models.BooleanField(
         default=False
     )
+    group_virtualchassis = models.BooleanField(
+        default=False
+    )
     draw_default_layout = models.BooleanField(
         default=False
     )
