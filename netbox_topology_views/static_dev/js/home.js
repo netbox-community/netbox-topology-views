@@ -249,7 +249,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         allRectangles.push({category: rectangle.category, id: rectangle.id, x1: rectangle.x, y1: rectangle.y, x2: rectangle.x + rectangle.width, y2: rectangle.y + rectangle.height, border: rectangle.lineWidth})
     }
 
-    /* Draw all rectangles of a given group (site/location/rack)
+    /* Draw all rectangles of a given group (site/location//virtualchassis)
         rectParams expects an object that consists of the following keys:
         lineWidth: border width (string)
         color: border color (string)

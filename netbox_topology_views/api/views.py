@@ -109,7 +109,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group, show_neighbors, straight_cables = get_query_settings(request)
+            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
 
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -127,6 +127,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                     if group_sites == False and 'group_sites' in saved_filter_params: group_sites = saved_filter_params['group_sites']
                     if group_locations == False and 'group_locations' in saved_filter_params: group_locations = saved_filter_params['group_locations']
                     if group_racks == False and 'group_racks' in saved_filter_params: group_racks = saved_filter_params['group_racks']
+                    if group_virtualchassis == False and 'group_virtualchassis' in saved_filter_params: group_virtualchassis = saved_filter_params['group_virtualchassis']
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
                     if straight_cables == False and 'straight_cables' in saved_filter_params: show_neighbors = saved_filter_params['straight_cables']
                 except SavedFilter.DoesNotExist: # filter_id not found
@@ -156,6 +157,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 group_sites=group_sites,
                 group_locations=group_locations,
                 group_racks=group_racks,
+                group_virtualchassis=group_virtualchassis,
                 group_id=group_id,
                 straight_cables=straight_cables,
             )
