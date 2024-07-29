@@ -560,11 +560,11 @@ def get_topology_data(
         ).select_related("termination_type")
 
         for link in links:
-            if link.termination_type.name in ignore_cable_type:
+            if link.termination_type.model in ignore_cable_type:
                 continue
 
             # Normal device cables
-            if link.termination_type.name in supported_termination_types:
+            if link.termination_type.model in supported_termination_types:
                 complete_link = False
                 if link.cable_end == "A":
                     if link.cable_id not in cable_ids:
