@@ -370,8 +370,6 @@ def get_topology_data(
     cable_ids = DefaultDict(dict)
     interface_ids = DefaultDict(dict)
 
-    #ignore_cable_type = individualOptions.ignore_cable_type
-
     device_ids = [d.pk for d in queryset]
     site_ids = [d.site_id for d in queryset]
 
