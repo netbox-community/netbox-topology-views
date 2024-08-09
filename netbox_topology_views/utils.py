@@ -123,6 +123,10 @@ def get_query_settings(request):
         save_coords = True
 
     # Individual options
+    ignore_cable_type = ()
+    if "ignore_cable_type" in request.GET:
+        ignore_cable_type = request.GET.getlist('ignore_cable_type')
+
     show_unconnected = False
     if "show_unconnected" in request.GET:
         if request.GET["show_unconnected"] == "True":
@@ -192,7 +196,7 @@ def get_query_settings(request):
         if request.GET["straight_cables"] == "True":
             straight_cables = True
 
-    return filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables
+    return filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables
 
 class LinePattern():
     wireless = [2, 10, 2, 10]

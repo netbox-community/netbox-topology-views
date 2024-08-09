@@ -109,7 +109,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
+            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
 
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -117,6 +117,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                     saved_filter = SavedFilter.objects.get(pk=filter_id)
                     saved_filter_params = getattr(saved_filter, 'parameters')
 
+                    if ignore_cable_type == False and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
                     if save_coords == False and 'save_coords' in saved_filter_params: save_coords = saved_filter_params['save_coords']
                     if show_power == False and 'show_power' in saved_filter_params: show_power = saved_filter_params['show_power']
                     if show_circuit == False and 'show_circuit' in saved_filter_params: show_circuit = saved_filter_params['show_circuit']
@@ -145,6 +146,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
             topo_data = get_topology_data(
                 queryset=self.queryset,
                 individualOptions=individualOptions,
+                ignore_cable_type=ignore_cable_type,
                 save_coords=save_coords,
                 show_unconnected=show_unconnected,
                 show_cables=show_cables,

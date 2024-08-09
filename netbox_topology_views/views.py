@@ -334,6 +334,7 @@ def get_topology_data(
     queryset: QuerySet,
     individualOptions: IndividualOptions,
     show_unconnected: bool,
+    ignore_cable_type: list,
     save_coords: bool,
     show_cables: bool,
     show_circuit: bool,
@@ -369,7 +370,7 @@ def get_topology_data(
     cable_ids = DefaultDict(dict)
     interface_ids = DefaultDict(dict)
 
-    ignore_cable_type = individualOptions.ignore_cable_type
+    #ignore_cable_type = individualOptions.ignore_cable_type
 
     device_ids = [d.pk for d in queryset]
     site_ids = [d.site_id for d in queryset]
@@ -725,7 +726,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
+            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -733,6 +734,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     saved_filter = SavedFilter.objects.get(pk=filter_id)
                     saved_filter_params = getattr(saved_filter, 'parameters')
 
+                    if ignore_cable_type == False and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
                     if save_coords == False and 'save_coords' in saved_filter_params: save_coords = saved_filter_params['save_coords']
                     if show_power == False and 'show_power' in saved_filter_params: show_power = saved_filter_params['show_power']
                     if show_circuit == False and 'show_circuit' in saved_filter_params: show_circuit = saved_filter_params['show_circuit']
@@ -763,6 +765,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 topo_data = get_topology_data(
                     queryset=self.queryset,
                     individualOptions=individualOptions,
+                    ignore_cable_type=ignore_cable_type,
                     save_coords=save_coords,
                     show_unconnected=show_unconnected,
                     show_cables=show_cables,
@@ -784,10 +787,13 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             # No GET-Request in URL. We most likely came here from the navigation menu.
             preselected_device_roles = IndividualOptions.objects.get(id=individualOptions.id).preselected_device_roles.all().values_list('id', flat=True)
             preselected_tags = IndividualOptions.objects.get(id=individualOptions.id).preselected_tags.all().values_list(Lower('name'), flat=True)
+            ignore_cable_type = IndividualOptions.objects.get(id=individualOptions.id).ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')
+            if ignore_cable_type == ['']: ignore_cable_type = []
 
             q = QueryDict(mutable=True)
             q.setlist("role_id", list(preselected_device_roles))
             q.setlist("tag", list(preselected_tags))
+            q.setlist("ignore_cable_type", ignore_cable_type)
 
             if individualOptions.save_coords: q['save_coords'] = "True"
             if individualOptions.show_unconnected: q['show_unconnected'] = "True"

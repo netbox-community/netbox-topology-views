@@ -34,7 +34,7 @@ class DeviceFilterForm(
     fieldsets = (
         FieldSet('q', 'filter_id', 'tag'),
         FieldSet(
-            'group', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
+            'group', 'ignore_cable_type', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
             'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', name=_("Options")
         ),
@@ -229,6 +229,11 @@ class DeviceFilterForm(
     tag = TagFilterField(model)
 
     # options
+    ignore_cable_type = forms.MultipleChoiceField(
+        label=_('Ignore Termination Types'),
+        required=False,
+        choices=IndividualOptions.CHOICES
+    )
     save_coords = forms.NullBooleanField(
         label=_('Save Coordinates'),
         required=False,
