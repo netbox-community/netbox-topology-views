@@ -117,7 +117,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                     saved_filter = SavedFilter.objects.get(pk=filter_id)
                     saved_filter_params = getattr(saved_filter, 'parameters')
 
-                    if ignore_cable_type == False and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
+                    if ignore_cable_type == () and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
                     if save_coords == False and 'save_coords' in saved_filter_params: save_coords = saved_filter_params['save_coords']
                     if show_power == False and 'show_power' in saved_filter_params: show_power = saved_filter_params['show_power']
                     if show_circuit == False and 'show_circuit' in saved_filter_params: show_circuit = saved_filter_params['show_circuit']
