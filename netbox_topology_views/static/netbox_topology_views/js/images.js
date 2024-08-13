@@ -1,1 +1,97 @@
-(()=>{var l=(e,t,o)=>new Promise((n,r)=>{var c=s=>{try{i(o.next(s))}catch(a){r(a)}},m=s=>{try{i(o.throw(s))}catch(a){r(a)}},i=s=>s.done?n(s.value):Promise.resolve(s.value).then(c,m);i((o=o.apply(e,t)).next())});var d=e=>{if(!document.cookie)return;let t=null,o=document.cookie.split(";");for(let n=0;n<o.length;n++){let r=o[n].trim();if(r.substring(0,e.length+1)===e+"="){t=decodeURIComponent(r.substring(e.length+1));break}}return t};var u={success:e=>{let t=document.querySelector("#topology-plugin-success-toast");if(!t)return console.error("Could not find toast component!");let o=t.querySelector("span");o.textContent=e,new window.Toast(t).show()},error:e=>{let t=document.querySelector("#topology-plugin-error-toast");if(!t)return console.error("Could not find toast component!");let o=t.querySelector("span");o.textContent=e,new window.Toast(t).show()}};var g={},p=d("csrftoken");document.querySelector("form#images").addEventListener("submit",e=>l(void 0,null,function*(){e.preventDefault();try{let t=yield fetch("/"+basePath+"api/plugins/netbox_topology_views/images/save/",{method:"POST",body:JSON.stringify(g),headers:{"X-CSRFToken":p,"Content-Type":"application/json"}});if(!t.ok)throw new Error(yield t.text());u.success("Saved settings")}catch(t){console.dir(t),u.error(t.message)}}));document.querySelectorAll("form#images .dropdown-menu img").forEach(e=>{e.addEventListener("click",t=>{var c;if(!(t.currentTarget instanceof HTMLElement))return;let{dataset:{role:o,image:n}}=t.currentTarget;g[o]=n;let r=(c=t.currentTarget.closest(".dropdown"))==null?void 0:c.querySelector(`#dropdownMenuButton${o}`);r&&(r.innerHTML=`<img src="${n}" />`)})});})();
+(() => {
+  var __async = (__this, __arguments, generator) => {
+    return new Promise((resolve, reject) => {
+      var fulfilled = (value) => {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var rejected = (value) => {
+        try {
+          step(generator.throw(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+      step((generator = generator.apply(__this, __arguments)).next());
+    });
+  };
+
+  // js/csrftoken.js
+  var getCookie = (name) => {
+    if (!document.cookie)
+      return;
+    let cookieValue = null;
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+    return cookieValue;
+  };
+
+  // js/toast.js
+  var toast = {
+    success: (message) => {
+      const el = document.querySelector("#topology-plugin-success-toast");
+      if (!el)
+        return console.error("Could not find toast component!");
+      const content = el.querySelector("span");
+      content.textContent = message;
+      const toast2 = new window.Toast(el);
+      toast2.show();
+    },
+    error: (message) => {
+      const el = document.querySelector("#topology-plugin-error-toast");
+      if (!el)
+        return console.error("Could not find toast component!");
+      const content = el.querySelector("span");
+      content.textContent = message;
+      const toast2 = new window.Toast(el);
+      toast2.show();
+    }
+  };
+
+  // js/images.js
+  var mapping = {};
+  var csrftoken = getCookie("csrftoken");
+  document.querySelector("form#images").addEventListener("submit", (e) => __async(void 0, null, function* () {
+    e.preventDefault();
+    try {
+      const res = yield fetch("/" + basePath + "api/plugins/netbox_topology_views/images/save/", {
+        method: "POST",
+        body: JSON.stringify(mapping),
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!res.ok)
+        throw new Error(yield res.text());
+      toast.success("Saved settings");
+    } catch (err) {
+      console.dir(err);
+      toast.error(err.message);
+    }
+  }));
+  document.querySelectorAll("form#images .dropdown-menu img").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      var _a;
+      if (!(e.currentTarget instanceof HTMLElement))
+        return;
+      const {
+        dataset: { role, image }
+      } = e.currentTarget;
+      mapping[role] = image;
+      const button = (_a = e.currentTarget.closest(".dropdown")) == null ? void 0 : _a.querySelector(`#dropdownMenuButton${role}`);
+      if (button)
+        button.innerHTML = `<img src="${image}" />`;
+    });
+  });
+})();

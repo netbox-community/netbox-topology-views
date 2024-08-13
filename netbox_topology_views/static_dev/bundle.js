@@ -3,7 +3,7 @@ const { sassPlugin } = require('esbuild-sass-plugin')
 
 const options = {
     bundle: true,
-    minify: true,
+    minify: false,
     sourcemap: 'external',
     sourcesContent: false,
     logLevel: 'error'
