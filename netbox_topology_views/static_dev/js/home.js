@@ -75,7 +75,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const group_racks = topologyData.options.group_racks
     const group_virtualchassis = topologyData.options.group_virtualchassis
 
-    const gridSize = 400;
+    const gridSize = parseInt(topologyData.options.grid_size[0]);
     var dragMode = false;
 
     graph = new Network(container, { nodes, edges }, options)
@@ -115,20 +115,90 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         };
     }
 
+    function drawGrid(canvascontext) {
+        // Canvas can be zoomed. It then contains more or less virtual pixels than the real number of pixels
+        const zoomFactor = graph.getScale() * window.devicePixelRatio;
+        const virtualWidth = canvascontext.canvas.width / zoomFactor;
+        const virtualHeight = canvascontext.canvas.height / zoomFactor;
+
+        // Canvas can be moved. Get the center of the virtual canvas. Take the grid into account
+        const virtualCenter = graph.getViewPosition();
+        const rasterizedCenterX = virtualCenter.x - virtualCenter.x % gridSize;
+        const rasterizedCenterY = virtualCenter.y - virtualCenter.y % gridSize;
+
+        // Calculate virtual space for the grid
+        const hSpace = (virtualWidth / 2) - (virtualWidth / 2) % gridSize + gridSize;
+        const vSpace = (virtualHeight / 2) - (virtualHeight / 2) % gridSize + gridSize;
+
+        // Calculate virtual position for the grid
+        const left = rasterizedCenterX - gridSize - hSpace;
+        const right = rasterizedCenterX + gridSize + hSpace;
+        const top = rasterizedCenterY - gridSize - vSpace;
+        const bottom = rasterizedCenterY + gridSize + vSpace;
+
+        // Draw grid
+        canvascontext.beginPath();
+
+        for (let x = left; x < right; x += gridSize) {
+            canvascontext.moveTo(x, top);
+            canvascontext.lineTo(x, bottom);
+        }
+
+        for (let y = top; y < bottom; y += gridSize) {
+            canvascontext.moveTo(left, y);
+            canvascontext.lineTo(right, y);
+        }
+
+        canvascontext.strokeStyle = '#777777';
+        canvascontext.stroke();        
+    }
+
+    function drawGridSnapHint(canvascontext) {
+        // Draw grid hinting line and circle
+        if(gridSize > 0 && dragMode == true && graph.getSelectedNodes().length > 0) {
+            for(i = 0; i < graph.getSelectedNodes().length; i++) {
+                id = graph.getSelectedNodes()[i];
+                if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
+                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+
+                    canvascontext.beginPath();
+                    canvascontext.arc(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y, 5, 0, 2 * Math.PI);
+                    canvascontext.fillStyle = '#FF3D3D';
+                    canvascontext.fill();
+
+                    canvascontext.beginPath();
+                    canvascontext.moveTo(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y);
+                    canvascontext.lineTo(pos.x, pos.y);
+                    canvascontext.strokeStyle = '#FF3D3D';
+                    canvascontext.stroke();
+        
+                    canvascontext.beginPath();
+                    canvascontext.arc(pos.x, pos.y, 10, 0, 2 * Math.PI);
+                    canvascontext.fillStyle = '#9C0000';
+                    canvascontext.fill();
+                }
+            }
+        }
+    }
+
     graph.on('dragStart', (params) => {
         dragMode = true;
     })
 
     graph.on('dragEnd', (params) => {
         dragMode = false;
-        if (coordSaveCheckbox.options[coordSaveCheckbox.selectedIndex].text != "Yes") return
-
-        if(graph.getSelectedNodes().length > 0) {
+        // Place icon on the grid
+        if(gridSize > 0 && graph.getSelectedNodes().length > 0) {
             for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
-                window.nodes.update({id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y});
+                id = graph.getSelectedNodes()[i];
+                if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
+                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+                    window.nodes.update({id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y});
+                }
             }
         }
+
+        if (coordSaveCheckbox.options[coordSaveCheckbox.selectedIndex].text != "Yes") return
 
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
@@ -189,41 +259,9 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     })
 
     graph.on('beforeDrawing', (canvascontext) => {
-        // Canvas can be zoomed. It then contains more or less virtual pixels than the real number of pixels
-        const zoomFactor = graph.getScale() * window.devicePixelRatio;
-        const virtualWidth = canvascontext.canvas.width / zoomFactor;
-        const virtualHeight = canvascontext.canvas.height / zoomFactor;
-
-        // Canvas can be moved. Get the center of the virtual canvas. Take the grid into account
-        const virtualCenter = graph.getViewPosition();
-        const rasterizedCenterX = virtualCenter.x - virtualCenter.x % gridSize;
-        const rasterizedCenterY = virtualCenter.y - virtualCenter.y % gridSize;
-
-        // Calculate virtual space for the grid
-        const hSpace = (virtualWidth / 2) - (virtualWidth / 2) % gridSize + gridSize;
-        const vSpace = (virtualHeight / 2) - (virtualHeight / 2) % gridSize + gridSize;
-
-        // Calculate virtual position for the grid
-        const left = rasterizedCenterX - gridSize - hSpace;
-        const right = rasterizedCenterX + gridSize + hSpace;
-        const top = rasterizedCenterY - gridSize - vSpace;
-        const bottom = rasterizedCenterY + gridSize + vSpace;
-
-        // Draw grid
-        canvascontext.beginPath();
-
-        for (let x = left; x < right; x += gridSize) {
-            canvascontext.moveTo(x, top);
-            canvascontext.lineTo(x, bottom);
+        if (gridSize > 0) {
+            drawGrid(canvascontext);
         }
-
-        for (let y = top; y < bottom; y += gridSize) {
-            canvascontext.moveTo(left, y);
-            canvascontext.lineTo(right, y);
-        }
-
-        canvascontext.strokeStyle = '#777777';
-        canvascontext.stroke();
     })
 
     graph.on('afterDrawing', (canvascontext) => {
@@ -233,28 +271,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         if(group_racks != null && group_racks == 'on') { drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams); }
         if(group_virtualchassis != null && group_virtualchassis == 'on') { drawGroupRectangles(canvascontext, groupedNodeVirtualchassis, virtualchassisRectParams); }
  
-        // Draw grid hinting line and circle
-        if(dragMode == true && graph.getSelectedNodes().length > 0) {
-            for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
-
-                canvascontext.beginPath();
-                canvascontext.arc(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y, 5, 0, 2 * Math.PI);
-                canvascontext.fillStyle = '#FF3D3D';
-                canvascontext.fill();
-
-                canvascontext.beginPath();
-                canvascontext.moveTo(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y);
-                canvascontext.lineTo(pos.x, pos.y);
-                canvascontext.strokeStyle = '#FF3D3D';
-                canvascontext.stroke();
-    
-                canvascontext.beginPath();
-                canvascontext.arc(pos.x, pos.y, 10, 0, 2 * Math.PI);
-                canvascontext.fillStyle = '#9C0000';
-                canvascontext.fill();
-            }
-        }
+        drawGridSnapHint(canvascontext);
     })
 
     graph.on('click', (canvascontext) => {

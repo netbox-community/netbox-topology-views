@@ -36,7 +36,7 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'ignore_cable_type', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
-            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', name=_("Options")
+            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 'grid_size', name=_("Options")
         ),
         FieldSet('id', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
@@ -327,6 +327,14 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
+    grid_size = forms.IntegerField(
+        label=_('Grid Size'),
+        required=False,
+        initial=0,
+        min_value=0,
+        max_value=1000,
+        help_text=_('Show grid and snap dragged icons to grid. Set to 0 to disable grid and snapping.')
+    )
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (
@@ -521,6 +529,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'group_virtualchassis',
                 'draw_default_layout',
                 'straight_cables',
+                'grid_size',
             ),
     )
 
@@ -662,6 +671,16 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_('Enable this option if you want to draw cables as straight lines '
                     'instead of curves.')
     )
+    grid_size = forms.IntegerField(
+        label=_('Grid Size'),
+        required=True,
+        initial=0,
+        min_value=0,
+        max_value=1000,
+        help_text=_('Default grid value. Set to 0 to disable grid. '
+                    'Integers between 0 and 1000 are allowed. Snap to grid will be '
+                    'automatically enabled for values > 0.')
+    )
 
     class Meta:
         model = IndividualOptions
@@ -670,5 +689,5 @@ class IndividualOptionsForm(NetBoxModelForm):
             'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power',
             'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'draw_default_layout',
-            'straight_cables'
+            'straight_cables', 'grid_size'
         ]
