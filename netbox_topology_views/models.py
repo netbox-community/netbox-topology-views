@@ -404,6 +404,9 @@ class IndividualOptions(NetBoxModel):
     straight_cables = models.BooleanField(
         default=False
     )
+    grid_size = models.PositiveSmallIntegerField(
+        default=0
+    )
 
     _netbox_private = True
 
