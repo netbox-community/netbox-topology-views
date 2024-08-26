@@ -1,6 +1,8 @@
 from typing import Dict
 import sys
 
+from netbox.api.viewsets import BaseViewSet
+
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
 from extras.models import SavedFilter
@@ -22,7 +24,7 @@ from netbox_topology_views.views import get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
 from netbox_topology_views.filters import DeviceFilterSet
 
-class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
     permission_required = 'netbox_topology_views.change_coordinate'
 
     queryset = Device.objects.none()
@@ -89,9 +91,7 @@ class SaveCoordsViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
 
         return Response({"status": "saved coords"})
 
-class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
-    permission_required = ("dcim.view_site", "dcim.view_device")
-
+class ExportTopoToXML(BaseViewSet, ViewSet):
     queryset = Device.objects.none()
     serializer_class = TopologyDummySerializer
 
@@ -173,7 +173,7 @@ class ExportTopoToXML(PermissionRequiredMixin, ViewSet):
                 {"status": "Missing or malformed request parameters"}, status=400
             )
 
-class SaveRoleImageViewSet(PermissionRequiredMixin, ReadOnlyModelViewSet):
+class SaveRoleImageViewSet(BaseViewSet, ReadOnlyModelViewSet):
     queryset = DeviceRole.objects.none()
     serializer_class = RoleImageSerializer
     permission_required = (
