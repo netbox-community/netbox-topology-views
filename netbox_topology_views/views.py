@@ -146,7 +146,7 @@ def create_node(
         model_name = 'Coordinate'
         dev_name = device.name
         if dev_name is None:
-            dev_name = device.device_type.get_full_name
+            dev_name = device.device_type.full_name
 
         if device.device_type is not None:
             node_content += (
