@@ -511,12 +511,12 @@ function performXmlDownload() {
         if (curr_url.includes(sites_prefix)) {
             var site_id =  curr_url.split(sites_prefix)[1];
             site_id = site_id.split('/')[0]
-            xml_search_options = 'site_id=' + site_id + '&show_cables=on&show_unconnected=on'
+            xml_search_options = 'site_id=' + site_id + '&show_cables=True&show_unconnected=True'
         }
         else if (curr_url.includes(location_prefix)) {
             var location_id =  curr_url.split(location_prefix)[1];
             location_id = location_id.split('/')[0]
-            xml_search_options = 'location_id=' + location_id + '&show_cables=on&show_unconnected=on'
+            xml_search_options = 'location_id=' + location_id + '&show_cables=True&show_unconnected=True'
         }
     }
     else {
@@ -525,7 +525,7 @@ function performXmlDownload() {
 
     
 
-    fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
+    fetch('/' + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
     .then(data => {
         var blob = new Blob([data ], { type: "text/plain" });
 
