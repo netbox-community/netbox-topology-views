@@ -525,7 +525,7 @@ function performXmlDownload() {
 
     
 
-    fetch('/api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
+    fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
     .then(data => {
         var blob = new Blob([data ], { type: "text/plain" });
 
