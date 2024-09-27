@@ -229,7 +229,15 @@ def create_node(
     dev_title = "<table><tbody> %s</tbody></table>" % (node_content)
     node["title"] = dev_title
     node["name"] = dev_name
-    node["label"] = dev_name
+
+    # Create a list of possible label items. Omit None types
+    label_items = []
+    for var in (dev_name, device.primary_ip4, device.primary_ip6, device.oob_ip):
+        if var is not None:
+            label_items.append(str(var))
+    node_label = '\n'.join(label_items)
+
+    node["label"] = node_label
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)

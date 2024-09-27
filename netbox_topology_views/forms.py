@@ -530,6 +530,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'draw_default_layout',
                 'straight_cables',
                 'grid_size',
+                'node_label_items',
             ),
     )
 
@@ -681,6 +682,12 @@ class IndividualOptionsForm(NetBoxModelForm):
                     'Integers between 0 and 1000 are allowed. Snap to grid will be '
                     'automatically enabled for values > 0.')
     )
+    node_label_items = forms.MultipleChoiceField(
+        label=_('Node Label Items'),
+        required=False,
+        choices=IndividualOptions.NODE_LABEL_ITEMS,
+        help_text=_('Choose Label Items that you want to be displayed.')
+    )
 
     class Meta:
         model = IndividualOptions
@@ -689,5 +696,5 @@ class IndividualOptionsForm(NetBoxModelForm):
             'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power',
             'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'draw_default_layout',
-            'straight_cables', 'grid_size'
+            'straight_cables', 'grid_size', 'node_label_items'
         ]

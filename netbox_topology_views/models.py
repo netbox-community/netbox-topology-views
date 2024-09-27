@@ -339,6 +339,13 @@ class IndividualOptions(NetBoxModel):
         ('consoleserverport', 'consoleserverport'),
     )
 
+    NODE_LABEL_ITEMS = (
+        ('devicename', 'Device Name'),
+        ('primaryipv4', 'Primary IPv4'),
+        ('primaryipv6', 'Primary IPv6'),
+        ('outofbandip', 'Out-of-band IP'),
+    )
+
     user_id = models.IntegerField(
         null=True,
         unique=True
@@ -407,7 +414,12 @@ class IndividualOptions(NetBoxModel):
     grid_size = models.PositiveSmallIntegerField(
         default=0
     )
-
+    node_label_items = models.CharField(
+        max_length=50,
+        choices=NODE_LABEL_ITEMS,
+        blank=True
+    )
+    
     _netbox_private = True
 
     def __str___(self):
