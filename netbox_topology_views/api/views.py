@@ -1,7 +1,7 @@
 from typing import Dict
 import sys
 
-from netbox.api.viewsets import BaseViewSet
+from netbox.api.viewsets import BaseViewSet, NetBoxModelViewSet
 
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerFeed, PowerPanel
@@ -17,6 +17,11 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
 from netbox_topology_views.api.serializers import (
     RoleImageSerializer,
     TopologyDummySerializer,
+    CoordinateGroupSerializer,
+    CoordinateSerializer,
+    CircuitCoordinateSerializer,
+    PowerPanelCoordinateSerializer,
+    PowerFeedCoordinateSerializer,
 )
 import netbox_topology_views.models
 from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
@@ -251,3 +256,23 @@ class SaveRoleImageViewSet(BaseViewSet, ReadOnlyModelViewSet):
             )
 
         return JsonResponse({"status": "Ok"})
+
+class CoordinateGroupViewSet(NetBoxModelViewSet):
+    queryset = CoordinateGroup.objects.all()
+    serializer_class = CoordinateGroupSerializer
+
+class CoordinateViewSet(NetBoxModelViewSet):
+    queryset = Coordinate.objects.all()
+    serializer_class = CoordinateSerializer
+
+class CircuitCoordinateViewSet(NetBoxModelViewSet):
+    queryset = CircuitCoordinate.objects.all()
+    serializer_class = CircuitCoordinateSerializer
+
+class PowerPanelCoordinateViewSet(NetBoxModelViewSet):
+    queryset = PowerPanelCoordinate.objects.all()
+    serializer_class = PowerPanelCoordinateSerializer
+
+class PowerFeedCoordinateViewSet(NetBoxModelViewSet):
+    queryset = PowerFeedCoordinate.objects.all()
+    serializer_class = PowerFeedCoordinateSerializer
