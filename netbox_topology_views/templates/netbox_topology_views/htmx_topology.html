@@ -40,5 +40,6 @@
     var is_htmx = true;
     var brokenImage = '{{ broken_image }}';
     var topologyData = {{ topology_data | safe }};
+    const basePath = '{{ basepath }}';
 </script>
 <script src="{% static 'netbox_topology_views/js/app.js' %}?ver={{ epoch }} " defer></script>
