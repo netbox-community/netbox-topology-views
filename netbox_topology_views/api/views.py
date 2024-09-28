@@ -114,7 +114,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
 
         if request.GET:
 
-            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size = get_query_settings(request)
+            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size, node_label_items = get_query_settings(request)
 
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -137,6 +137,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
                     if straight_cables == False and 'straight_cables' in saved_filter_params: show_neighbors = saved_filter_params['straight_cables']
                     if grid_size == 0 and 'grid_size' in saved_filter_params: grid_size = saved_filter_params['grid_size']
+                    if node_label_items == () and 'node_label_items' in saved_filter_params: node_label_items = saved_filter_params['node_label_items']
                 except SavedFilter.DoesNotExist: # filter_id not found
                     pass
                 except Exception as inst:
@@ -169,6 +170,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
                 group_id=group_id,
                 straight_cables=straight_cables,
                 grid_size=grid_size,
+                node_label_items=node_label_items,
             )
             xml_data = export_data_to_xml(topo_data).decode('utf-8')
 

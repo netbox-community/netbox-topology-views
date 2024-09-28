@@ -200,7 +200,11 @@ def get_query_settings(request):
     if "grid_size" in request.GET:
         grid_size = request.GET.getlist('grid_size')
 
-    return filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size
+    node_label_items = ()
+    if "node_label_items" in request.GET:
+        node_label_items = request.GET.getlist('node_label_items')
+
+    return filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size, node_label_items
 
 class LinePattern():
     wireless = [2, 10, 2, 10]

@@ -25,6 +25,7 @@ from netbox_topology_views.utils import (
     image_static_url,
 )
 
+from .choices import NodeLabelItems
 
 class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
@@ -339,13 +340,6 @@ class IndividualOptions(NetBoxModel):
         ('consoleserverport', 'consoleserverport'),
     )
 
-    NODE_LABEL_ITEMS = (
-        ('devicename', 'Device Name'),
-        ('primaryipv4', 'Primary IPv4'),
-        ('primaryipv6', 'Primary IPv6'),
-        ('outofbandip', 'Out-of-band IP'),
-    )
-
     user_id = models.IntegerField(
         null=True,
         unique=True
@@ -415,8 +409,7 @@ class IndividualOptions(NetBoxModel):
         default=0
     )
     node_label_items = models.CharField(
-        max_length=50,
-        choices=NODE_LABEL_ITEMS,
+        max_length=255,
         blank=True
     )
     

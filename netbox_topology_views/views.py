@@ -78,7 +78,7 @@ from netbox_topology_views.utils import (
     IMAGE_FILETYPES
 )
 
-
+from netbox_topology_views.choices import NodeLabelItems
 
 def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
     is_device = isinstance(entity, Device)
@@ -97,7 +97,10 @@ def get_image_for_entity(entity: Union[Device, Circuit, PowerPanel, PowerFeed]):
 
 
 def create_node(
-    device: Union[Device, Circuit, PowerPanel, PowerFeed], save_coords: bool, group_id="default"
+    device: Union[Device, Circuit, PowerPanel, PowerFeed], 
+    save_coords: bool, 
+    node_label_items: list,
+    group_id="default"
 ):
     node = {}
     node_content = ""
@@ -231,10 +234,17 @@ def create_node(
     node["name"] = dev_name
 
     # Create a list of possible label items. Omit None types
+    label_mapping = {
+        NodeLabelItems.DEVICE_NAME: dev_name,
+        NodeLabelItems.PRIMARY_IPV4: device.primary_ip4, 
+        NodeLabelItems.PRIMARY_IPV6: device.primary_ip6,
+        NodeLabelItems.OUT_OF_BAND_IP: device.oob_ip,
+    }
+
     label_items = []
-    for var in (dev_name, device.primary_ip4, device.primary_ip6, device.oob_ip):
-        if var is not None:
-            label_items.append(str(var))
+    for item in node_label_items:
+        if label_mapping[item] is not None:
+            label_items.append(str(label_mapping[item]))
     node_label = '\n'.join(label_items)
 
     node["label"] = node_label
@@ -358,6 +368,7 @@ def get_topology_data(
     group_id,
     straight_cables: bool,
     grid_size: list,
+    node_label_items: list,
 ):
     
     supported_termination_types = []
@@ -706,7 +717,7 @@ def get_topology_data(
     results = {}
 
     for d in nodes_devices.values():
-        nodes.append(create_node(d, save_coords, group_id))
+        nodes.append(create_node(d, save_coords, node_label_items, group_id))
 
     results["nodes"] = nodes
     results["edges"] = edges
@@ -737,7 +748,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size = get_query_settings(request)
+            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size, node_label_items = get_query_settings(request)
             
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
@@ -760,6 +771,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
                     if straight_cables == False and 'straight_cables' in saved_filter_params: straight_cables = saved_filter_params['straight_cables']
                     if grid_size == 0 and 'grid_size' in saved_filter_params: grid_size = saved_filter_params['grid_size']
+                    if node_label_items == () and 'node_label_items' in saved_filter_params: node_label_items = saved_filter_params['node_label_items']
                 except SavedFilter.DoesNotExist: # filter_id not found
                     pass
                 except Exception as inst:
@@ -794,6 +806,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_id=group_id,
                     straight_cables=straight_cables,
                     grid_size=grid_size,
+                    node_label_items=node_label_items,
                 )
             
         else:
@@ -823,6 +836,10 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_virtualchassis: q['group_virtualchassis'] = "True"
             if individualOptions.straight_cables: q['straight_cables'] = "True"
             if individualOptions.grid_size: q['grid_size'] = individualOptions.grid_size
+            node_label_items = IndividualOptions.objects.get(id=individualOptions.id).node_label_items.translate({ord(i): None for i in '[]\''}).split(', ')
+            if node_label_items == ['']: node_label_items = []
+            q.setlist("node_label_items", node_label_items)
+
             if individualOptions.draw_default_layout: 
                 q['draw_init'] = "True"
             else:
@@ -1184,6 +1201,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'draw_default_layout': queryset.draw_default_layout,
                 'straight_cables': queryset.straight_cables,
                 'grid_size': queryset.grid_size,
+                'node_label_items': tuple(queryset.node_label_items.translate({ord(i): None for i in '[]\''}).split(', ')),
             },
         )
 

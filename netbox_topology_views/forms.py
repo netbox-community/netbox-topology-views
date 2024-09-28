@@ -24,6 +24,8 @@ from utilities.forms.fields import (
 
 from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 
+from .choices import NodeLabelItems
+
 class DeviceFilterForm(
     LocalConfigContextFilterForm,
     TenancyFilterForm,
@@ -36,7 +38,7 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'ignore_cable_type', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
             'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
-            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 'grid_size', name=_("Options")
+            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 'grid_size', 'node_label_items', name=_("Options")
         ),
         FieldSet('id', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
@@ -334,6 +336,11 @@ class DeviceFilterForm(
         min_value=0,
         max_value=1000,
         help_text=_('Show grid and snap dragged icons to grid. Set to 0 to disable grid and snapping.')
+    )
+    node_label_items = forms.MultipleChoiceField(
+        label=_('Node Label Items'),
+        required=False,
+        choices=NodeLabelItems
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):
@@ -685,7 +692,7 @@ class IndividualOptionsForm(NetBoxModelForm):
     node_label_items = forms.MultipleChoiceField(
         label=_('Node Label Items'),
         required=False,
-        choices=IndividualOptions.NODE_LABEL_ITEMS,
+        choices=NodeLabelItems,
         help_text=_('Choose Label Items that you want to be displayed.')
     )
 

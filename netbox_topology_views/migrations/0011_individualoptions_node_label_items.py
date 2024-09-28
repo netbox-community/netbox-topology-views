@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='individualoptions',
             name='node_label_items',
-            field=models.CharField(blank=True, max_length=50),
+            field=models.CharField(blank=True, max_length=255),
         ),
     ]
