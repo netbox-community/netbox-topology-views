@@ -172,7 +172,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
                 grid_size=grid_size,
                 node_label_items=node_label_items,
             )
-            xml_data = export_data_to_xml(topo_data).decode('utf-8')
+            xml_data = export_data_to_xml(topo_data).decode('utf-8').replace('\n', '&#xa;')
 
             return HttpResponse(xml_data, content_type="application/xml; charset=utf-8")
         else:

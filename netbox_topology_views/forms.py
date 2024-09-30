@@ -23,8 +23,7 @@ from utilities.forms.fields import (
 )
 
 from netbox_topology_views.models import IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
-
-from .choices import NodeLabelItems
+from netbox_topology_views.choices import NodeLabelItems
 
 class DeviceFilterForm(
     LocalConfigContextFilterForm,

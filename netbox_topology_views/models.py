@@ -25,7 +25,7 @@ from netbox_topology_views.utils import (
     image_static_url,
 )
 
-from .choices import NodeLabelItems
+from netbox_topology_views.choices import NodeLabelItems
 
 class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
