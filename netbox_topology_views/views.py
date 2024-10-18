@@ -739,6 +739,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
                     if ignore_cable_type == () and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
                     if save_coords == False and 'save_coords' in saved_filter_params: save_coords = saved_filter_params['save_coords']
+                    if show_unconnected == False and 'show_unconnected' in saved_filter_params: show_unconnected = saved_filter_params['show_unconnected']
                     if show_power == False and 'show_power' in saved_filter_params: show_power = saved_filter_params['show_power']
                     if show_circuit == False and 'show_circuit' in saved_filter_params: show_circuit = saved_filter_params['show_circuit']
                     if show_logical_connections == False and 'show_logical_connections' in saved_filter_params: show_logical_connections = saved_filter_params['show_logical_connections']
