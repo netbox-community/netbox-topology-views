@@ -25,6 +25,7 @@ from netbox_topology_views.utils import (
     image_static_url,
 )
 
+from netbox_topology_views.choices import NodeLabelItems
 
 class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
@@ -407,7 +408,11 @@ class IndividualOptions(NetBoxModel):
     grid_size = models.PositiveSmallIntegerField(
         default=0
     )
-
+    node_label_items = models.CharField(
+        max_length=255,
+        blank=True
+    )
+    
     _netbox_private = True
 
     def __str___(self):
