@@ -48,22 +48,19 @@ python3 manage.py collectstatic --no-input
 
 ### Versions
 
+> [!NOTE]  
+> If the version of netbox is not listed here the plugin will most likely not work. Remove the plugin if you want to update netbox before this plugin has released an update for that netbox version.
+
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
-| >= 4.2.0       | >= v4.2.0                     |
-| >= 4.1.0       | >= v4.1.0                     |
-| >= 4.0.0       | >= v4.0.0                     |
-| >= 3.7.0       | >= v3.9.0                     |
-| >= 3.6.4       | >= v3.8.1                     |
-| >= 3.6.0       | >= v3.7.X                     |
-| >= 3.5.0       | >= v3.4.X                     |
-| >= 3.4.0       | >= v3.X.X                     |
-| >= 3.3.0       | >= v3.0.0                     |
-| >= 3.2.0       | >= v1.1.0                     |
-| >= 3.1.8       | >= v1.0.0                     |
-| >= 2.11.1      | >= v0.5.3                     |
-| >= 2.10.0      | >= v0.5.0                     |
-| < 2.10.0       | =< v0.4.10                    |
+| = 4.2.0        | = v4.2.0                      |
+| = 4.1.X        | = v4.1.0                      |
+| = 4.0.X        | = v4.0.0                      |
+| = 3.7.0        | = v3.9.0                      |
+| = 3.6.4        | = v3.8.1                      |
+| = 3.6.0        | = v3.7.0                      |
+| = 3.5.0        | = v3.6.2                      |
+
 
 ### Update
 
