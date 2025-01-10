@@ -236,9 +236,9 @@ def create_node(
     # Create a list of possible label items. Omit None types
     label_mapping = {
         NodeLabelItems.DEVICE_NAME: dev_name,
-        NodeLabelItems.PRIMARY_IPV4: device.primary_ip4, 
-        NodeLabelItems.PRIMARY_IPV6: device.primary_ip6,
-        NodeLabelItems.OUT_OF_BAND_IP: device.oob_ip,
+        NodeLabelItems.PRIMARY_IPV4: getattr(device, 'primary_ip4', None), 
+        NodeLabelItems.PRIMARY_IPV6: getattr(device, 'primary_ip6', None),
+        NodeLabelItems.OUT_OF_BAND_IP: getattr(device, 'oob_ip', None), 
     }
 
     label_items = []
@@ -421,8 +421,8 @@ def get_topology_data(
 
     if show_circuit:
         circuit_terminations = CircuitTermination.objects.filter(
-            Q(site_id__in=site_ids) | Q(provider_network__isnull=False)
-        ).prefetch_related("provider_network", "circuit")
+            Q(_site_id__in=site_ids) | Q(_provider_network__isnull=False)
+        )
         for circuit_termination in circuit_terminations:
             circuit_termination: CircuitTermination
             if (
@@ -491,7 +491,7 @@ def get_topology_data(
                         ] = circuit_termination.circuit
 
         for d in nodes_circuits.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, node_label_items, group_id))
 
     if show_power:
         power_panels_ids = PowerPanel.objects.filter(
@@ -542,10 +542,10 @@ def get_topology_data(
                     cable_ids[power_feed.cable_id][power_feed.cable_end] = termination_b
 
         for d in nodes_powerfeed.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, node_label_items ,group_id))
 
         for d in nodes_powerpanel.values():
-            nodes.append(create_node(d, save_coords, group_id))
+            nodes.append(create_node(d, save_coords, node_label_items, group_id))
 
     if show_logical_connections:
         interfaces = Interface.objects.filter(
