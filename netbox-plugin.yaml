@@ -6,7 +6,7 @@ compatibility:
     netbox_max: 4.2.1
   - release: 4.1.0
     netbox_min: 4.1.0
-    netbox_max: 4.1.4
+    netbox_max: 4.1.11
   - release: 4.0.1
     netbox_min: 4.0.9
     netbox_max: 4.0.11
