@@ -3,7 +3,7 @@ from netbox.plugins import PluginTemplateExtension
 from django.conf import settings
 from packaging import version
 
-NETBOX_CURRENT_VERSION = version.parse(settings.VERSION)
+NETBOX_CURRENT_VERSION = version.parse(settings.RELEASE.version)
 
 
 class SiteButtons(PluginTemplateExtension):
