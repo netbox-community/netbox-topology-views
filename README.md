@@ -53,6 +53,7 @@ python3 manage.py collectstatic --no-input
 
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
+| = 4.2.1        | = v4.2.1                      |
 | = 4.2.0        | = v4.2.0                      |
 | = 4.1.X        | = v4.1.0                      |
 | = 4.0.X        | = v4.0.0                      |
