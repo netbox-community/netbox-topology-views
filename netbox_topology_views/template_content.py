@@ -7,12 +7,12 @@ NETBOX_CURRENT_VERSION = version.parse(settings.RELEASE.version)
 
 
 class SiteButtons(PluginTemplateExtension):
-    model = 'dcim.site'
+    models = ('dcim.site', )
     def buttons(self):
         return self.render('netbox_topology_views/site_button.html')
 
 class LocationButtons(PluginTemplateExtension):
-    model = 'dcim.location'
+    models = ('dcim.location', )
     def buttons(self):
         return self.render('netbox_topology_views/location_button.html')
 
