@@ -516,7 +516,6 @@ class IndividualOptionsForm(NetBoxModelForm):
     fieldsets = (
             FieldSet
             (
-                'user_id',
                 'ignore_cable_type',
                 'preselected_device_roles',
                 'preselected_tags',
