@@ -333,7 +333,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         // Extract node ids and node type ids from all nodes
         for (let [key, value] of nodes._data) {
             if (value[typeId] != undefined) {
-                nodesArray.push([value.id, value[typeId], value[type]]);
+                nodesArray.push([value.id, value[typeId], value[type], value.label_num_lines]);
             }
         }
         // Split single array above into arrays grouped by node id
@@ -390,16 +390,24 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             const rectangles = [];
             const xValues = [];
             const yValues = [];
+            const yValuesWithLabel = [];
+            const labelLineHeight = 16;
 
-            for(let val of value[1]) { 
+            // Get coordinates for every node in a given group
+            for(let val of value[1]) {
                 xValues.push(graph.getPosition(val[0]).x);
                 yValues.push(graph.getPosition(val[0]).y);
+                yValuesWithLabel.push(yValues[yValues.length -1] + val[3] * labelLineHeight);
             }
 
-            const rectX = Math.min(...xValues) - rectParams.paddingX;
-            const rectY = Math.min(...yValues) - rectParams.paddingY;
-            const rectSizeX = Math.max(...xValues) - Math.min(...xValues) + 2*rectParams.paddingX;
-            const rectSizeY = Math.max(...yValues) - Math.min(...yValues) + 2*rectParams.paddingY;
+            const minX = Math.min(...xValues);
+            const maxX = Math.max(...xValues);
+            const minY = Math.min(...yValues);
+            const maxY = Math.max(...yValuesWithLabel);
+            const rectX = minX - rectParams.paddingX;
+            const rectY = minY - rectParams.paddingY;
+            const rectSizeX = maxX - minX + 2*rectParams.paddingX;
+            const rectSizeY = maxY - minY + 2*rectParams.paddingY;
 
             rectangles.push({
                 ctx: canvascontext, 

@@ -251,6 +251,7 @@ def create_node(
     node["shape"] = "image"
     node["href"] = device.get_absolute_url()
     node["image"] = get_image_for_entity(device)
+    node["label_num_lines"] = len(label_items)
 
     return node
 
