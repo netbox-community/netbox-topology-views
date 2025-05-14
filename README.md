@@ -14,36 +14,37 @@ Options to export to xml (for draw.io/diagrams.net) or png.
 
 ## Install
 
-**_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
+**_NOTE:_** For Docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
 
-**_NOTE:_** Add `RUN mkdir -p /opt/netbox/netbox/static/netbox_topology_views/img` to the Dockerfile-Plugins file to create the image folder
+**_NOTE:_** Add `RUN mkdir -p /opt/netbox/netbox/static/netbox_topology_views/img` to the Dockerfile-Plugins file to create the image folder.
 
 The plugin is available as a Python package and can be installed with pip.
 
-Run `pip install netbox-topology-views` in your virtual env.
-
-To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
-
-```no-highlight
-# echo netbox-topology-views >> local_requirements.txt
-```
-
-Once installed, the plugin needs to be enabled in your `configuration.py`
-
-```python
-# In your configuration.py
-PLUGINS = ["netbox_topology_views"]
-```
-
 First run `source /opt/netbox/venv/bin/activate` to enter the Python virtual environment.
 
-
-Then run 
+Then run:
 ```bash
 cd /opt/netbox/netbox
 pip3 install netbox-topology-views
 python3 manage.py migrate netbox_topology_views
 python3 manage.py collectstatic --no-input
+```
+
+To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
+
+```no-highlight
+echo netbox-topology-views >> local_requirements.txt
+```
+
+Once installed, the plugin needs to be enabled in your `configuration.py`:
+
+```python
+PLUGINS = ["netbox_topology_views"]
+```
+
+Finally, restart NetBox:
+```no-highlight
+systemctl restart netbox
 ```
 
 ### Versions
