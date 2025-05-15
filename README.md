@@ -33,10 +33,13 @@ python3 manage.py collectstatic --no-input
 To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
 
 ```no-highlight
-echo netbox-topology-views >> local_requirements.txt
+echo netbox-topology-views >> /opt/netbox/local_requirements.txt
 ```
 
 Once installed, the plugin needs to be enabled in your `configuration.py`:
+```no-highlight
+vim /opt/netbox/netbox/netbox/configuration.py
+```
 
 ```python
 PLUGINS = ["netbox_topology_views"]
