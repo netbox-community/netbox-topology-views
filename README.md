@@ -54,6 +54,7 @@ systemctl restart netbox
 
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
+| = 4.3.X        | = v4.2.1                      |
 | = 4.2.1        | = v4.2.1                      |
 | = 4.2.0        | = v4.2.0                      |
 | = 4.1.X        | = v4.1.0                      |
