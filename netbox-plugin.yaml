@@ -1,6 +1,9 @@
 version: 0.1
 package_name: netbox-topology-views
 compatibility:
+  - release: 4.3.0
+    netbox_min: 4.3.0
+    netbox_max: 4.3.1
   - release: 4.2.0
     netbox_min: 4.2.0
     netbox_max: 4.2.1
