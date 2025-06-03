@@ -437,7 +437,7 @@ def get_topology_data(
             termination_a = {}
             termination_b = {}
             circuit_model = {}
-            if circuit_termination.cable is not None:
+            if circuit_termination.cable is not None and bool(circuit_termination.cable.a_terminations) and bool(circuit_termination.cable.b_terminations):
                 termination_a = create_circuit_termination(
                     circuit_termination.cable.a_terminations[0]
                 )
