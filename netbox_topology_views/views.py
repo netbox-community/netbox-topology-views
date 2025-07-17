@@ -236,14 +236,24 @@ def create_node(
     # Create a list of possible label items. Omit None types
     label_mapping = {
         NodeLabelItems.DEVICE_NAME: dev_name,
+        NodeLabelItems.DEVICE_TYPE: getattr(device, 'device_type', None), 
+        NodeLabelItems.ROLE: getattr(device, 'role', None), 
+        NodeLabelItems.DESCRIPTION: getattr(device, 'description', None),
         NodeLabelItems.PRIMARY_IPV4: getattr(device, 'primary_ip4', None), 
         NodeLabelItems.PRIMARY_IPV6: getattr(device, 'primary_ip6', None),
         NodeLabelItems.OUT_OF_BAND_IP: getattr(device, 'oob_ip', None), 
+        NodeLabelItems.PLATFORM: getattr(device, 'platform', None), 
+        NodeLabelItems.SERIAL: getattr(device, 'serial', None), 
+        NodeLabelItems.TENANT: getattr(device, 'tenant', None), 
+        NodeLabelItems.SITE: getattr(device, 'site', None), 
+        NodeLabelItems.LOCATION: getattr(device, 'location', None), 
+        NodeLabelItems.RACK: getattr(device, 'rack', None), 
+        NodeLabelItems.VIRTUAL_CHASSIS: getattr(device, 'virtual_chassis', None), 
     }
 
     label_items = []
     for item in node_label_items:
-        if label_mapping[item] is not None:
+        if label_mapping[item] and label_mapping[item] is not None:
             label_items.append(str(label_mapping[item]))
     node_label = '\n'.join(label_items)
 
