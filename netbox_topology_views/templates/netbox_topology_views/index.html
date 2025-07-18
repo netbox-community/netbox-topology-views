@@ -61,6 +61,13 @@
 
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
         <div class="panel-body">
+          {% if filter_required %}
+            <div class="bg-warning text-white p-2">Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.</div>
+          {% endif %}
+          {% if empty_result %}
+            <div class="bg-warning text-white p-2">Empty result set! Please review your filter settings.</div>
+            <div class="bg-info text-white p-2">Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".</div>
+          {% endif %}
           <div id="visgraph"></div>
         </div>
       </div>

@@ -761,6 +761,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, grid_size, node_label_items = get_query_settings(request)
             
+            filter_required = True
+            empty_result = False
+            
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
                 try:
@@ -798,6 +801,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 group_id = request.GET["group"]
 
             if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
+                filter_required = False
+
                 topo_data = get_topology_data(
                     queryset=self.queryset,
                     individualOptions=individualOptions,
@@ -820,6 +825,9 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     grid_size=grid_size,
                     node_label_items=node_label_items,
                 )
+
+                if not topo_data["nodes"]:
+                    empty_result = True
             
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
@@ -883,6 +891,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "broken_image": find_image_url("role-unknown"),
                 "model": self.model,
                 "basepath": settings.BASE_PATH,
+                "filter_required": filter_required,
+                "empty_result": empty_result,
             },
         )
 
