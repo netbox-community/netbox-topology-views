@@ -1,6 +1,5 @@
 import { DataSet } from 'vis-data/esnext'
 import { Network } from 'vis-network/esnext'
-import { getCookie } from './csrftoken.js'
 
 const options = {
     interaction: {
@@ -35,9 +34,6 @@ const options = {
         solver: 'forceAtlas2Based'
     }
 }
-
-// Load CSRF token
-const csrftoken = getCookie('csrftoken')
 
 // Render vis graph
 let graph = null // vis graph instance
@@ -228,7 +224,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                         {
                             method: 'PATCH',
                             headers: {
-                                'X-CSRFToken': csrftoken,
+                                'X-CSRFToken': window.CSRF_TOKEN,
                                 Accept: 'application/json',
                                 'Content-Type': 'application/json'
                             },

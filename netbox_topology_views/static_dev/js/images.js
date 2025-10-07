@@ -1,8 +1,6 @@
-import { getCookie } from './csrftoken.js'
 import { toast } from './toast.js'
 
 const mapping = {}
-const csrftoken = getCookie('csrftoken')
 
 document.querySelector('form#images').addEventListener('submit', async (e) => {
     e.preventDefault()
@@ -11,7 +9,7 @@ document.querySelector('form#images').addEventListener('submit', async (e) => {
             method: 'POST',
             body: JSON.stringify(mapping),
             headers: {
-                'X-CSRFToken': csrftoken,
+                'X-CSRFToken': window.CSRF_TOKEN,
                 'Content-Type': 'application/json'
             }
         })
