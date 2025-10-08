@@ -323,10 +323,15 @@ def create_edge(
         edge["dashes"] = LinePattern().logical
         edge["color"] = '#f1c232'
         edge["href"] = interface.get_absolute_url() + "trace"
-        
+    
+    if cable is not None and cable.label:
+        cable_label = "<br>Label: " + cable.label
+    else:
+        cable_label = ""
+
     edge[
         "title"
-    ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}]"
+    ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}] {cable_label}"
 
     if cable is not None:
         edge["href"] = cable.get_absolute_url()
