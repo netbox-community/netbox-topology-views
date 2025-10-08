@@ -1,7 +1,6 @@
 import json
 from functools import reduce
 from typing import DefaultDict, Dict, Optional, Union
-import time
 from itertools import chain
 
 from circuits.models import Circuit, CircuitTermination, ProviderNetwork
@@ -28,7 +27,6 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag, SavedFilter
 from wireless.models import WirelessLink
-from utilities.htmx import htmx_partial
 from netbox.views.generic import (
     ObjectView, 
     ObjectListView, 
@@ -872,20 +870,6 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
             query_string = q.urlencode()
             return HttpResponseRedirect(f"{request.path}?{query_string}")
-
-
-        if htmx_partial(request):
-            return render(
-                request,
-                "netbox_topology_views/htmx_topology.html",
-                {
-                    "filter_form": DeviceFilterForm(request.GET, label_suffix=""),
-                    "topology_data": json.dumps(topo_data),
-                    "broken_image": find_image_url("role-unknown"),
-                    "epoch": int(time.time()),
-                    "basepath": settings.BASE_PATH,
-                },
-            )
 
         return render(
             request,
