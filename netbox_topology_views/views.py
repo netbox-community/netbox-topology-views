@@ -322,9 +322,10 @@ def create_edge(
         edge["color"] = '#f1c232'
         edge["href"] = interface.get_absolute_url() + "trace"
     
-    cable_label = ""
     if cable is not None and hasattr(cable, "label") and cable.label:
         cable_label = "<br>Label: " + cable.label
+    else:
+        cable_label = ""
 
     edge[
         "title"
