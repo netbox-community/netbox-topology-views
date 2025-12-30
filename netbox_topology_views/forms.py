@@ -36,8 +36,11 @@ class DeviceFilterForm(
         FieldSet('q', 'filter_id', 'tag'),
         FieldSet(
             'group', 'ignore_cable_type', 'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
-            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power', 'show_wireless',
+            'show_single_cable_logical_conns', 'show_neighbors',
             'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 'grid_size', 'node_label_items', name=_("Options")
+        ),
+        FieldSet(
+            'show_circuit', 'show_power', 'show_wireless', name=_("Additional filter-independent types (non-devices)")
         ),
         FieldSet('id', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
@@ -280,24 +283,6 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
-    show_circuit = forms.NullBooleanField(
-        label=_('Show Circuit Terminations'), required=False, initial=False,
-        widget=forms.Select(
-            choices=BOOLEAN_WITH_BLANK_CHOICES
-        )
-    )
-    show_power = forms.NullBooleanField(
-        label=_('Show Power Feeds'), required=False, initial=False,
-        widget=forms.Select(
-            choices=BOOLEAN_WITH_BLANK_CHOICES
-        )
-    )
-    show_wireless = forms.NullBooleanField(
-        label =_('Show Wireless Links'), required=False, initial=False,
-        widget=forms.Select(
-            choices=BOOLEAN_WITH_BLANK_CHOICES
-        )
-    )
     group_sites = forms.NullBooleanField(
         label =_('Group Sites'), required=False, initial=False,
         widget=forms.Select(
@@ -340,6 +325,29 @@ class DeviceFilterForm(
         label=_('Node Label Items'),
         required=False,
         choices=NodeLabelItems
+    )
+
+    # Additional types (non-devices)
+    show_circuit = forms.NullBooleanField(
+        label=_('Show Circuit Terminations'), required=False, initial=False,
+        help_text=_('All Circuits will be displayed. Circuits cannot be filtered.'),
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
+    show_power = forms.NullBooleanField(
+        label=_('Show Power Feeds'), required=False, initial=False,
+        help_text=_('All Power Feeds will be displayed. Power Feeds cannot be filtered.'),
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
+    show_wireless = forms.NullBooleanField(
+        label =_('Show Wireless Links'), required=False, initial=False,
+        help_text=_('All Wireless Links will be displayed. Wireless Links cannot be filtered.'),
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
     )
 
 class CoordinateGroupsForm(NetBoxModelForm):
@@ -525,9 +533,6 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'show_logical_connections',
                 'show_single_cable_logical_conns',
                 'show_neighbors',
-                'show_circuit',
-                'show_power',
-                'show_wireless',
                 'group_sites',
                 'group_locations',
                 'group_racks',
@@ -536,6 +541,13 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'straight_cables',
                 'grid_size',
                 'node_label_items',
+            ),
+           FieldSet
+           (
+                'show_circuit',
+                'show_power',
+                'show_wireless',
+                name=_("Additional filter-independent types (non-devices)")
             ),
     )
 
@@ -613,28 +625,6 @@ class IndividualOptionsForm(NetBoxModelForm):
             'Link peers will be added if \'Show Cables\' is ticked, far-end '
             'terminations will be added if \'Show Logical Connections\' is ticked.')
     )
-    show_circuit = forms.BooleanField(
-        label=_('Show Circuit Terminations'),
-        required=False,
-        initial=False,
-        help_text=_('Displays connections between circuit terminations. '
-            'These connections are displayed as blue dashed lines.')
-    )
-    show_power = forms.BooleanField(
-        label=_('Show Power Feeds'),
-        required=False,
-        initial=False,
-        help_text=_('Displays connections between power outlets and power '
-            'ports. These connections are displayed as solid lines in the '
-            'color of the cable. This option depends on \'Show Cables\'.')
-    )
-    show_wireless = forms.BooleanField(
-        label =_('Show Wireless Links'),
-        required=False,
-        initial=False,
-        help_text=_('Displays wireless connections. These connections are '
-            'displayed as blue dotted lines.')
-    )
     group_sites = forms.BooleanField(
         label =_('Group Sites'),
         required=False,
@@ -693,13 +683,39 @@ class IndividualOptionsForm(NetBoxModelForm):
         choices=NodeLabelItems,
         help_text=_('Choose Label Items that you want to be displayed.')
     )
+    show_circuit = forms.BooleanField(
+        label=_('Show Circuit Terminations'),
+        required=False,
+        initial=False,
+        help_text=_('Displays connections between circuit terminations. '
+            'These connections are displayed as blue dashed lines. '
+            'Be aware that Circuits cannot be filtered.')
+    )
+    show_power = forms.BooleanField(
+        label=_('Show Power Feeds'),
+        required=False,
+        initial=False,
+        help_text=_('Displays connections between power outlets and power '
+            'ports. These connections are displayed as solid lines in the '
+            'color of the cable. This option depends on \'Show Cables\'. '
+            'Be aware that Power Feeds cannot be filtered.')
+    )
+    show_wireless = forms.BooleanField(
+        label =_('Show Wireless Links'),
+        required=False,
+        initial=False,
+        help_text=_('Displays wireless connections. These connections are '
+            'displayed as blue dotted lines. '
+            'Be aware that Wireless Links cannot be filtered.')
+    )
 
     class Meta:
         model = IndividualOptions
         fields = [
             'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags',
             'save_coords', 'show_unconnected', 'show_cables', 'show_logical_connections',
-            'show_single_cable_logical_conns', 'show_neighbors', 'show_circuit', 'show_power',
-            'show_wireless', 'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'draw_default_layout',
-            'straight_cables', 'grid_size', 'node_label_items'
+            'show_single_cable_logical_conns', 'show_neighbors',
+            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis',
+            'draw_default_layout', 'straight_cables', 'grid_size', 'node_label_items', 
+            'show_circuit', 'show_power', 'show_wireless'
         ]
