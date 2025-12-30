@@ -324,7 +324,7 @@ def create_edge(
     
     cable_label = ""
     if cable is not None and hasattr(cable, "label") and cable.label:
-        cable_label = "<br>Label: " + str(cable.label)
+        cable_label = "<br>Label: " + cable.label
 
     edge[
         "title"
