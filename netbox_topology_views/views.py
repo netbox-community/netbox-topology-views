@@ -829,7 +829,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     node_label_items=node_label_items,
                 )
 
-                if not topo_data["nodes"]:
+                if topo_data is None or not topo_data["nodes"]:
                     empty_result = True
             
         else:
