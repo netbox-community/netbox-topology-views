@@ -1,6 +1,44 @@
 import { DataSet } from 'vis-data/esnext'
 import { Network } from 'vis-network/esnext'
 
+function generatePortSVG(text) {
+    // pre-calculate text width
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+    const fontFamily = 'helvetica';
+    const fontSize = 14;
+    textEl.textContent = text;
+    textEl.setAttribute('font-family', fontFamily);
+    textEl.setAttribute('font-size', fontSize + 'px');
+    svg.appendChild(textEl);
+    document.body.appendChild(svg);
+
+    const textWidth = textEl.getComputedTextLength();
+    textEl.remove();
+    svg.remove();
+
+    const rectPadding = 2;
+    const rectBorderWidth = 2;
+    const rectX = rectBorderWidth / 2;
+    const rectY = rectBorderWidth / 2;
+    const rectWidth = textWidth + rectBorderWidth + rectPadding * 2;
+    const rectHeight = fontSize + rectBorderWidth + rectPadding * 2;
+    const svgHeight = rectHeight + rectY + rectBorderWidth / 2;
+    const svgWidth = rectWidth + rectX + rectBorderWidth / 2;
+    const textX = svgWidth / 2 ;
+    const textY = svgHeight / 2;
+
+    // generate SVG
+	return 'data:image/svg+xml;charset=utf-8,' + 
+    encodeURIComponent( 
+        '<svg xmlns="http://www.w3.org/2000/svg" width="' + (svgWidth) + '" height="' + (svgHeight) + '">' +
+        '<rect x="' + rectX + '" y="' + rectY + '" rx="4" ry="4" width="' + (rectWidth) + '" height="' + (rectHeight) + '" fill="#ffdf3f" stroke="#ffc93f" stroke-width="' + (rectBorderWidth) + '" style="opacity:0.5"/>' +
+        '<text x="' + textX + '" y="' + textY + '" font-family="' + fontFamily + '" font-size="' + (fontSize) + '" fill="black" text-anchor="middle" dominant-baseline="middle">' + text + '</text>' +
+        '</svg>'
+        )
+}
+
 const options = {
     interaction: {
         hover: true,
@@ -62,7 +100,21 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const edges = new DataSet(
         topologyData.edges.map((node) => ({
             ...node,
-            title: htmlTitle(node.title)
+            title: htmlTitle(node.title),
+            ...(node.drawTerminationLabel && {
+                arrows: {
+                    from: {
+                        enabled: true,
+                        type: "image",
+                        src: generatePortSVG(node.cable_a_name)
+                    },
+                    to: {
+                        enabled: true,
+                        type: "image",
+                        src: generatePortSVG(node.cable_b_name)
+                    }
+                }
+            })
         }))
     )
 
