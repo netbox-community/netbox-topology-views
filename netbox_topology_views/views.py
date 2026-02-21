@@ -849,7 +849,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         else:
             # No GET-Request in URL. We most likely came here from the navigation menu.
             preselected_device_roles = IndividualOptions.objects.get(id=individualOptions.id).preselected_device_roles.all().values_list('id', flat=True)
-            preselected_tags = IndividualOptions.objects.get(id=individualOptions.id).preselected_tags.all().values_list(Lower('name'), flat=True)
+            preselected_tags = IndividualOptions.objects.get(id=individualOptions.id).preselected_tags.all().values_list('slug', flat=True)
             ignore_cable_type = IndividualOptions.objects.get(id=individualOptions.id).ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')
             if ignore_cable_type == ['']: ignore_cable_type = []
 
