@@ -15,6 +15,7 @@ class NodeLabelItems(ChoiceSet):
     LOCATION = 'location'
     RACK = 'rack'
     VIRTUAL_CHASSIS = 'virtualchassis'
+    ASSET_TAG = 'assettag'
 
     CHOICES = [
         (DEVICE_NAME, 'Device Name'),
@@ -31,4 +32,5 @@ class NodeLabelItems(ChoiceSet):
         (LOCATION, 'Location'),
         (RACK, 'Rack'),
         (VIRTUAL_CHASSIS, 'Virtual Chassis'),
+        (ASSET_TAG, 'Asset Tag'),
     ]

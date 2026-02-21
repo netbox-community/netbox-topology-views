@@ -247,6 +247,7 @@ def create_node(
         NodeLabelItems.LOCATION: getattr(device, 'location', None), 
         NodeLabelItems.RACK: getattr(device, 'rack', None), 
         NodeLabelItems.VIRTUAL_CHASSIS: getattr(device, 'virtual_chassis', None), 
+        NodeLabelItems.ASSET_TAG: getattr(device, 'asset_tag', None),
     }
 
     label_items = []
