@@ -271,6 +271,7 @@ def create_edge(
     termination_b: Dict,
     straight_cables: bool,
     draw_termination_labels: bool,
+    draw_cable_labels: bool,
     circuit: Optional[Dict] = None,
     cable: Optional[Cable] = None,
     wireless: Optional[Dict] = None,
@@ -326,6 +327,8 @@ def create_edge(
     
     if cable is not None and hasattr(cable, "label") and cable.label:
         cable_label = "<br>Label: " + cable.label
+        if draw_cable_labels is True:
+            edge["label"] = cable.label
     else:
         cable_label = ""
 
@@ -390,6 +393,7 @@ def get_topology_data(
     group_id,
     straight_cables: bool,
     draw_termination_labels: bool,
+    draw_cable_labels: bool,
     grid_size: list,
     node_label_items: list,
 ):
@@ -489,6 +493,7 @@ def get_topology_data(
                         termination_b=termination_b,
                         straight_cables=straight_cables,
                         draw_termination_labels=draw_termination_labels,
+                        draw_cable_labels=draw_cable_labels,
                     )
                 )
 
@@ -560,6 +565,7 @@ def get_topology_data(
                         power=True,
                         straight_cables=straight_cables,
                         draw_termination_labels=draw_termination_labels,
+                        draw_cable_labels=draw_cable_labels,
                     )
                 )
 
@@ -598,7 +604,7 @@ def get_topology_data(
                     edge_ids += 1
                     termination_a = { "termination_name": interface.name, "termination_device_name": interface.device.name, "device_id": interface.device.id }
                     termination_b = { "termination_name": destination.name, "termination_device_name": destination.device.name, "device_id": destination.device.id }
-                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface, straight_cables=straight_cables, draw_termination_labels=draw_termination_labels))
+                    edges.append(create_edge(edge_id=edge_ids, termination_a=termination_a, termination_b=termination_b, interface=interface, straight_cables=straight_cables, draw_termination_labels=draw_termination_labels, draw_cable_labels=draw_cable_labels))
                     nodes_devices[interface.device.id] = interface.device
                     nodes_devices[destination.device.id] = destination.device
 
@@ -680,6 +686,7 @@ def get_topology_data(
                             termination_b=termination_b,
                             straight_cables=straight_cables,
                             draw_termination_labels=draw_termination_labels,
+                            draw_cable_labels=draw_cable_labels,
                         )
                     )
 
@@ -721,6 +728,7 @@ def get_topology_data(
                     wireless=wireless,
                     straight_cables=straight_cables,
                     draw_termination_labels=draw_termination_labels,
+                    draw_cable_labels=draw_cable_labels,
                 )
             )
 
@@ -775,7 +783,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
         if request.GET:
 
-            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, draw_termination_labels, grid_size, node_label_items = get_query_settings(request)
+            filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, draw_termination_labels, draw_cable_labels, grid_size, node_label_items = get_query_settings(request)
             
             filter_required = True
             empty_result = False
@@ -802,6 +810,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     if show_neighbors == False and 'show_neighbors' in saved_filter_params: show_neighbors = saved_filter_params['show_neighbors']
                     if straight_cables == False and 'straight_cables' in saved_filter_params: straight_cables = saved_filter_params['straight_cables']
                     if draw_termination_labels == False and 'draw_termination_labels' in saved_filter_params: draw_termination_labels = saved_filter_params['draw_termination_labels']
+                    if draw_cable_labels == False and 'draw_cable_labels' in saved_filter_params: draw_cable_labels = saved_filter_params['draw_cable_labels']
                     if grid_size == 0 and 'grid_size' in saved_filter_params: grid_size = saved_filter_params['grid_size']
                     if node_label_items == () and 'node_label_items' in saved_filter_params: node_label_items = saved_filter_params['node_label_items']
                 except SavedFilter.DoesNotExist: # filter_id not found
@@ -840,6 +849,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                     group_id=group_id,
                     straight_cables=straight_cables,
                     draw_termination_labels=draw_termination_labels,
+                    draw_cable_labels=draw_cable_labels,
                     grid_size=grid_size,
                     node_label_items=node_label_items,
                 )
@@ -874,6 +884,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             if individualOptions.group_virtualchassis: q['group_virtualchassis'] = "True"
             if individualOptions.straight_cables: q['straight_cables'] = "True"
             if individualOptions.draw_termination_labels: q['draw_termination_labels'] = "True"
+            if individualOptions.draw_cable_labels: q['draw_cable_labels'] = "True"
             if individualOptions.grid_size: q['grid_size'] = individualOptions.grid_size
             node_label_items = IndividualOptions.objects.get(id=individualOptions.id).node_label_items.translate({ord(i): None for i in '[]\''}).split(', ')
             if node_label_items == ['']: node_label_items = []
@@ -1228,6 +1239,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
                 'draw_default_layout': queryset.draw_default_layout,
                 'straight_cables': queryset.straight_cables,
                 'draw_termination_labels': queryset.draw_termination_labels,
+                'draw_cable_labels': queryset.draw_cable_labels,
                 'grid_size': queryset.grid_size,
                 'node_label_items': tuple(queryset.node_label_items.translate({ord(i): None for i in '[]\''}).split(', ')),
             },

@@ -408,6 +408,9 @@ class IndividualOptions(NetBoxModel):
     draw_termination_labels = models.BooleanField(
         default=False
     )
+    draw_cable_labels = models.BooleanField(
+        default=False
+    )
     grid_size = models.PositiveSmallIntegerField(
         default=0
     )

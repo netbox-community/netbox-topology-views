@@ -37,7 +37,8 @@ class DeviceFilterForm(
         FieldSet(
             'group', 'ignore_cable_type', 'save_coords', 'show_unconnected', 'show_cables', 'show_wireless',
             'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors',
-            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 'draw_termination_labels', 'grid_size', 'node_label_items', name=_("Options")
+            'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis', 'straight_cables', 
+            'draw_termination_labels', 'draw_cable_labels', 'grid_size', 'node_label_items', name=_("Options")
         ),
         FieldSet(
             'show_circuit', 'show_power', name=_("Additional filter-independent types (non-devices)")
@@ -324,6 +325,12 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
+    draw_cable_labels = forms.BooleanField(
+        label=_('Cable Labels'), required=False, initial=False,
+        widget=forms.Select(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
     grid_size = forms.IntegerField(
         label=_('Grid Size'),
         required=False,
@@ -545,6 +552,7 @@ class IndividualOptionsForm(NetBoxModelForm):
                 'draw_default_layout',
                 'straight_cables',
                 'draw_termination_labels',
+                'draw_cable_labels',
                 'grid_size',
                 'node_label_items',
             ),
@@ -686,6 +694,12 @@ class IndividualOptionsForm(NetBoxModelForm):
         help_text=_('Enable this option if you want to draw a label on each '
                     'cable end.')
     )
+    draw_cable_labels = forms.BooleanField(
+        label=('Cable Labels'),
+        required=False,
+        initial=False,
+        help_text=_('Enable this option if you want to draw a cable labels.')
+    )
     grid_size = forms.IntegerField(
         label=_('Grid Size'),
         required=True,
@@ -727,6 +741,6 @@ class IndividualOptionsForm(NetBoxModelForm):
             'save_coords', 'show_unconnected', 'show_cables', 'show_wireless',
             'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors',
             'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis',
-            'draw_default_layout', 'straight_cables', 'draw_termination_labels', 'grid_size', 'node_label_items', 
-            'show_circuit', 'show_power'
+            'draw_default_layout', 'straight_cables', 'draw_termination_labels', 'draw_cable_labels', 
+            'grid_size', 'node_label_items', 'show_circuit', 'show_power'
         ]
