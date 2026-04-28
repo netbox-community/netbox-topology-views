@@ -129,6 +129,50 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
 
+    // Highlight nodes (?highlight_node=1234) and path edges (?highlight_path=1234) from URL params
+    const urlParams = new URLSearchParams(window.location.search)
+    const nodeIdSet = new Set(nodes.getIds())
+
+    function resolveIds(paramName) {
+        return urlParams.getAll(paramName).reduce((acc, raw) => {
+            const id = !isNaN(parseInt(raw)) ? parseInt(raw) : raw
+            if (nodeIdSet.has(id)) acc.push(id)
+            return acc
+        }, [])
+    }
+
+    const highlightIds = resolveIds('highlight_node')
+    if (highlightIds.length) {
+        setTimeout(() => highlightIds.forEach(id => nodes.update({
+            id,
+            borderWidth: 4,
+            borderWidthSelected: 4,
+            color: { border: '#FFD700', highlight: { border: '#FFD700' } },
+            shadow: { enabled: true, color: 'rgba(255, 215, 0, 0.9)', size: 20, x: 0, y: 0 },
+            shapeProperties: { useBorderWithImage: true }
+        })), 0)
+
+        graph.once('stabilized', () =>
+            graph.fit({ nodes: highlightIds, animation: { duration: 500, easingFunction: 'easeInOutQuad' } })
+        )
+    }
+
+    const pathNodeSet = new Set(resolveIds('highlight_path'))
+    if (pathNodeSet.size) {
+        setTimeout(() => edges.getIds()
+            .filter(eid => {
+                const e = edges.get(eid)
+                return pathNodeSet.has(e.from) && pathNodeSet.has(e.to)
+            })
+            .forEach(eid => edges.update({
+                id: eid,
+                color: { color: '#FFD700', highlight: '#FFD700' },
+                width: 4,
+                shadow: { enabled: true, color: 'rgba(255, 215, 0, 0.9)', size: 10, x: 0, y: 0 }
+            }))
+        , 0)
+    }
+
     function getGridPosition(nodeId, gridSize) {
         x = graph.getPosition(nodeId).x;
         y = graph.getPosition(nodeId).y;
