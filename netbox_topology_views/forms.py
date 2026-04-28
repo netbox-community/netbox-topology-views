@@ -43,7 +43,7 @@ class DeviceFilterForm(
         FieldSet(
             'show_circuit', 'show_power', name=_("Additional filter-independent types (non-devices)")
         ),
-        FieldSet('id', name=_("Device")),
+        FieldSet('id', 'highlight_node', 'highlight_path', name=_("Device")),
         FieldSet('region_id', 'site_group_id', 'site_id', 'location_id', 'rack_id', name=_("Location")),
         FieldSet('status', 'role_id', 'airflow', 'serial', 'asset_tag', 'mac_address', name=_("Operation")),
         FieldSet('manufacturer_id', 'device_type_id', 'platform_id', name=_("Hardware")),
@@ -75,6 +75,18 @@ class DeviceFilterForm(
             'contact_role': '$contact_role',
             'contact_group': '$contact_group',
         },
+    )
+    highlight_node = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        label=_('Highlight Node(s)'),
+        help_text=_('Selected devices will be highlighted in the topology view.'),
+    )
+    highlight_path = DynamicModelMultipleChoiceField(
+        queryset=Device.objects.all(),
+        required=False,
+        label=_('Highlight Path'),
+        help_text=_('Edges between selected devices will be highlighted in the topology view.'),
     )
     region_id = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(),
