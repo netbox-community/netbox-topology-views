@@ -611,7 +611,7 @@ const observer = new MutationObserver((mutations) =>
     })
 )
 
-observer.observe(document.body, {
+observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-bs-theme']
 })
