@@ -69,7 +69,19 @@ const options = {
         }
     },
     physics: {
-        solver: 'forceAtlas2Based'
+        solver: 'forceAtlas2Based',
+        // forceAtlas2Based can leave nodes orbiting each other indefinitely
+        // instead of settling below vis-network's stabilization velocity
+        // threshold, especially for larger/denser graphs (see GitHub #634 -
+        // "Spinning topology"). Cap the initial layout pass at a fixed
+        // number of iterations so it can never run forever, and explicitly
+        // turn physics off once that pass ends (see the
+        // stabilizationIterationsDone handler below) so the simulation
+        // doesn't keep running indefinitely in the background afterward.
+        stabilization: {
+            enabled: true,
+            iterations: 1000
+        }
     }
 }
 
@@ -128,6 +140,13 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
 
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
+
+    // Once the initial layout pass finishes (whether it fully converged or
+    // hit the iteration cap above), turn physics off so unfixed nodes stop
+    // moving instead of continuing to simulate forces indefinitely.
+    graph.once('stabilizationIterationsDone', () => {
+        graph.setOptions({ physics: false })
+    })
 
     function getGridPosition(nodeId, gridSize) {
         x = graph.getPosition(nodeId).x;
