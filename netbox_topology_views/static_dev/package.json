@@ -19,6 +19,6 @@
     "esbuild-sass-plugin": "^3.3.1",
     "keycharm": "^0.4.0",
     "timsort": "^0.3.0",
-    "uuid": "^8.0.0"
+    "uuid": "^14.0.0"
   }
 }
