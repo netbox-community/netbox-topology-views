@@ -9,6 +9,7 @@ from extras.models import SavedFilter
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
+from django.db.utils import DataError, IntegrityError
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -40,7 +41,7 @@ class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
         if not settings.PLUGINS_CONFIG["netbox_topology_views"][
             "allow_coordinates_saving"
         ]:
-            return Response({"status": "not allowed to save coords"}, status=500)
+            return Response({"status": "not allowed to save coords"}, status=403)
 
         device_id: str = request.data.get("node_id", None)
         x_coord = request.data.get("x", None)
@@ -89,9 +90,14 @@ class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
                     # Unique group/device pair already exists. Update data
                     coords = model_class(pk=model_class.objects.get(group=group, device=actual_device).pk, group=group, device=actual_device, x=x_coord, y=y_coord)  
                 coords.save()
-        except:
+        except (IntegrityError, DataError, ValueError, TypeError):
+            # Expected failure modes for bad/malformed coordinate data: a
+            # unique_together violation, an out-of-range or non-numeric x/y,
+            # or a missing/invalid value coercing to the IntegerField. Anything
+            # else is an unexpected bug and should propagate rather than be
+            # reported back as a generic save failure.
             return Response(
-                {"status": "Coordinates could not be saved."}, status=500
+                {"status": "Coordinates could not be saved."}, status=400
             )
 
         return Response({"status": "saved coords"})
