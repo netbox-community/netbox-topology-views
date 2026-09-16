@@ -8,9 +8,9 @@
     "bundle:scripts": "node bundle.js --scripts"
   },
   "dependencies": {
-    "vis-data": "^7.1.9",
-    "vis-network": "^9.1.9",
-    "vis-util": "^5.0.7"
+    "vis-data": "^8.0.5",
+    "vis-network": "^10.1.2",
+    "vis-util": "^6.0.2"
   },
   "devDependencies": {
     "@egjs/hammerjs": "^2.0.0",
