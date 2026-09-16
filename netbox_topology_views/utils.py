@@ -8,6 +8,7 @@ import xml.dom.minidom
 import sys
 
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
@@ -304,8 +305,18 @@ def export_data_to_xml(data: dict):
     noPositionX = 0
     noPositionY = 1000
     for node in data['nodes']:
-        with open(settings.STATIC_ROOT + '/' + get_image_from_url(node['image']), "rb") as img:
-            svg = base64.b64encode(img.read()).decode('utf-8')
+        try:
+            with staticfiles_storage.open(get_image_from_url(node['image']), "rb") as img:
+                svg = base64.b64encode(img.read()).decode('utf-8')
+        except Exception:
+            # Icon isn't reachable through the configured staticfiles storage.
+            # Caught broadly on purpose: which exception this raises depends on
+            # the storage backend (e.g. FileNotFoundError for local disk, but
+            # boto3/botocore's ClientError etc. for an S3-backed STORAGES
+            # config, none of which share a common base other than Exception).
+            # Degrade the same way RoleImage.get_image() does elsewhere: skip
+            # the image rather than failing the whole export.
+            svg = ''
         mxcell = doc.createElement('mxCell')
         mxcell.setAttribute('id', 'node_' + str(node['id']))
         mxcell.setAttribute('value', str(node['label']))
