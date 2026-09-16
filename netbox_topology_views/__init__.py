@@ -9,6 +9,7 @@ class TopologyViewsConfig(PluginConfig):
     author = "Mattijs Vanhaverbeke"
     author_email = "author@example.com"
     base_url = "netbox_topology_views"
+    min_version = "4.7.0"
     required_settings = []
     default_settings = {
         "static_image_directory": "netbox_topology_views/img",
