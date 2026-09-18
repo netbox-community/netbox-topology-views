@@ -329,15 +329,15 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         if (gridSize > 0) {
             drawGrid(canvascontext);
         }
-    })
-
-    graph.on('afterDrawing', (canvascontext) => {
+            
         allRectangles = [];
         if(group_sites != null && group_sites == 'on') { drawGroupRectangles(canvascontext, groupedNodeSites, siteRectParams); }
         if(group_locations != null && group_locations == 'on') { drawGroupRectangles(canvascontext, groupedNodeLocations, locationRectParams); }
         if(group_racks != null && group_racks == 'on') { drawGroupRectangles(canvascontext, groupedNodeRacks, rackRectParams); }
-        if(group_virtualchassis != null && group_virtualchassis == 'on') { drawGroupRectangles(canvascontext, groupedNodeVirtualchassis, virtualchassisRectParams); }
- 
+        if(group_virtualchassis != null && group_virtualchassis == 'on') { drawGroupRectangles(canvascontext, groupedNodeVirtualchassis, virtualchassisRectParams); } 
+    })
+
+    graph.on('afterDrawing', (canvascontext) => {
         drawGridSnapHint(canvascontext);
     })
 
