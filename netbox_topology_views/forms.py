@@ -19,6 +19,7 @@ from utilities.forms.rendering import FieldSet
 from utilities.forms import BOOLEAN_WITH_BLANK_CHOICES, add_blank_choice
 from utilities.forms.fields import (
     TagFilterField,
+    DynamicModelChoiceField,
     DynamicModelMultipleChoiceField
 )
 
@@ -56,7 +57,7 @@ class DeviceFilterForm(
             'has_primary_ip', 'has_oob_ip', 'virtual_chassis_member', 'config_template_id', 'local_context_data', name=_("Miscellaneous")
         ),
     )
-    group = forms.ModelChoiceField(
+    group = DynamicModelChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False,
         label=_('Coordinate group'),
@@ -438,7 +439,7 @@ class CircuitCoordinatesFilterForm(NetBoxModelFilterSetForm):
         FieldSet('group', 'device', 'x', 'y', name=_("Circuit Coordinates")),
     )
 
-    group = forms.ModelMultipleChoiceField(
+    group = DynamicModelMultipleChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False
     )
@@ -463,7 +464,7 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
         FieldSet('group', 'device', 'x', 'y', name=_('PowerPanel Coordinates')),
     )
 
-    group = forms.ModelMultipleChoiceField(
+    group = DynamicModelMultipleChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False
     )
@@ -488,7 +489,7 @@ class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
         FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates")),
     )
 
-    group = forms.ModelMultipleChoiceField(
+    group = DynamicModelMultipleChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False
     )
@@ -513,7 +514,7 @@ class CoordinatesFilterForm(NetBoxModelFilterSetForm):
         FieldSet('group', 'device', 'x', 'y', name=_("Coordinates")),
     )
 
-    group = forms.ModelMultipleChoiceField(
+    group = DynamicModelMultipleChoiceField(
         queryset=CoordinateGroup.objects.all(),
         required=False
     )

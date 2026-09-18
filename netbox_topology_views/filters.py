@@ -165,7 +165,20 @@ class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilter
     def _virtual_chassis_member(self, queryset, name, value):
         return queryset.exclude(virtual_chassis__isnull=value)
 
-class CircuitCoordinatesFilterSet(NetBoxModelFilterSet):
+class RestrictCoordinateGroupMixin:
+    """
+    Restrict the `group` filter's choices to CoordinateGroups the requesting
+    user has permission to view, instead of exposing every group's name
+    regardless of the user's configured object permissions.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.request is not None:
+            self.filters['group'].extra['queryset'] = CoordinateGroup.objects.restrict(
+                self.request.user, 'view'
+            )
+
+class CircuitCoordinatesFilterSet(RestrictCoordinateGroupMixin, NetBoxModelFilterSet):
     group = django_filters.ModelMultipleChoiceFilter(
         queryset = CoordinateGroup.objects.all(),
     )
@@ -187,7 +200,7 @@ class CircuitCoordinatesFilterSet(NetBoxModelFilterSet):
             Q(device__name__icontains=value)
         )
 
-class PowerPanelCoordinatesFilterSet(NetBoxModelFilterSet):
+class PowerPanelCoordinatesFilterSet(RestrictCoordinateGroupMixin, NetBoxModelFilterSet):
     group = django_filters.ModelMultipleChoiceFilter(
         queryset = CoordinateGroup.objects.all(),
     )
@@ -209,7 +222,7 @@ class PowerPanelCoordinatesFilterSet(NetBoxModelFilterSet):
             Q(device__name__icontains=value)
         )
 
-class PowerFeedCoordinatesFilterSet(NetBoxModelFilterSet):
+class PowerFeedCoordinatesFilterSet(RestrictCoordinateGroupMixin, NetBoxModelFilterSet):
     group = django_filters.ModelMultipleChoiceFilter(
         queryset = CoordinateGroup.objects.all(),
     )
@@ -231,7 +244,7 @@ class PowerFeedCoordinatesFilterSet(NetBoxModelFilterSet):
             Q(device__name__icontains=value)
         )
 
-class CoordinatesFilterSet(NetBoxModelFilterSet):
+class CoordinatesFilterSet(RestrictCoordinateGroupMixin, NetBoxModelFilterSet):
     group = django_filters.ModelMultipleChoiceFilter(
         queryset = CoordinateGroup.objects.all(),
     )

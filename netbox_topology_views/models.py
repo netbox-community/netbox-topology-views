@@ -114,8 +114,6 @@ class CoordinateGroup(NetBoxModel):
         blank = True,
     )
 
-    _netbox_private = True
-
     class Meta:
         ordering = ['name']
 
@@ -143,8 +141,6 @@ class Coordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    _netbox_private = True
-
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -155,7 +151,7 @@ class Coordinate(NetBoxModel):
                 group_id = group.pk
             else:
                 group = CoordinateGroup(
-                    name="default", 
+                    name="default",
                     description="Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
                         "the group itself will be re-created."
@@ -194,8 +190,6 @@ class CircuitCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    _netbox_private = True
-
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -206,7 +200,7 @@ class CircuitCoordinate(NetBoxModel):
                 group_id = group.pk
             else:
                 group = CoordinateGroup(
-                    name="default", 
+                    name="default",
                     description="Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
                         "the group itself will be re-created."
@@ -245,8 +239,6 @@ class PowerPanelCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    _netbox_private = True
-
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -257,7 +249,7 @@ class PowerPanelCoordinate(NetBoxModel):
                 group_id = group.pk
             else:
                 group = CoordinateGroup(
-                    name="default", 
+                    name="default",
                     description="Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
                         "the group itself will be re-created."
@@ -296,8 +288,6 @@ class PowerFeedCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    _netbox_private = True
-
     def get_or_create_default_group(group_id):
         # Default group named "default" must always exist in order to make sure
         # that coordinate values can be stored even if no coordinate group has been
@@ -308,7 +298,7 @@ class PowerFeedCoordinate(NetBoxModel):
                 group_id = group.pk
             else:
                 group = CoordinateGroup(
-                    name="default", 
+                    name="default",
                     description="Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
                         "the group itself will be re-created."
