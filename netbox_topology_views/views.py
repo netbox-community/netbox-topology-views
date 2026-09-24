@@ -1228,7 +1228,6 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
 
         form = IndividualOptionsForm(
             initial={
-                'user_id': request.user.id,
                 'ignore_cable_type': tuple(queryset.ignore_cable_type.translate({ord(i): None for i in '[]\''}).split(', ')),
                 'preselected_device_roles': IndividualOptions.objects.get(id=queryset.id).preselected_device_roles.all(),
                 'preselected_tags': IndividualOptions.objects.get(id=queryset.id).preselected_tags.all(),
