@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Type
 import base64
@@ -70,6 +71,7 @@ def find_image_in_dir(glob: str, dir: Path):
     )
 
 
+@lru_cache(maxsize=50)
 def find_image_url(glob: str, dir: Path = CONF_IMAGE_DIR):
     """
     will attempt to find a file that matches glob in given directory with any file extension,
