@@ -78,9 +78,13 @@ const options = {
         // turn physics off once that pass ends (see the
         // stabilizationIterationsDone handler below) so the simulation
         // doesn't keep running indefinitely in the background afterward.
+        // 1000 iterations made the initial render pass noticeably heavy
+        // (long tab unresponsiveness on load); 150 is enough to settle a
+        // typical layout and the stabilizationIterationsDone handler still
+        // hard-stops the simulation either way.
         stabilization: {
             enabled: true,
-            iterations: 1000
+            iterations: 150
         }
     }
 }
