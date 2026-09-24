@@ -57,6 +57,8 @@ systemctl restart netbox
 
 | netbox version | netbox-topology-views version |
 | -------------- | ----------------------------- |
+| = 4.7.X        | = v4.7.0                      |
+| = 4.6.X        | = v4.5.1                      |
 | = 4.5.X        | = v4.5.1                      |
 | = 4.4.X        | = v4.4.0                      |
 | = 4.3.X        | = v4.3.0                      |
@@ -201,6 +203,31 @@ To view `/plugins/netbox_topology-views/images`:
  + dcim | device role | view
  + dcim | device role | add
  + dcim | device role | change
+
+#### Permissions for neighbours, circuits, power and cables
+
+The permissions above are enough to see your own devices on the topology map, but
+each *additional* type of connection or object drawn on top of those devices needs
+its own view permission too - the topology view checks NetBox's normal
+[object permissions](https://netboxlabs.com/docs/netbox/administration/permissions/)
+for every object it adds to the diagram, not just for the devices you searched for.
+If a user is missing the permission for a given type, that type is simply left off
+the diagram (and off the XML/PNG export) rather than causing an error.
+
+| To show on the map...                                   | the viewing user also needs...      |
+|-----------------------------------------------------------|--------------------------------------|
+| Neighbouring devices (`Show Neighbors`)                    | dcim \| interface \| view, dcim \| front port \| view, dcim \| rear port \| view |
+| Cables between devices (`Show Cables`)                      | dcim \| cable termination \| view    |
+| Logical/traced connections (`Show Logical Connections`)     | dcim \| interface \| view            |
+| Circuits (`Show Circuits`)                                   | circuits \| circuit termination \| view |
+| Power panels/feeds (`Show Power`)                            | dcim \| power panel \| view, dcim \| power feed \| view |
+| Wireless links (`Show Wireless`)                              | wireless \| wireless link \| view    |
+
+> **_Note:_** if a role is constrained to specific sites, tenants, or other
+> object-level conditions, that same constraint is applied to neighbours,
+> circuits, cables, and power objects too - a user won't see a neighbouring
+> device, circuit, or power feed that their permissions don't otherwise allow
+> them to view, even if it's connected to a device they can see.
 
 To view `/plugins/netbox_topology-views/individualoptions`:
  + netbox_topology_views | individual options | change

@@ -161,6 +161,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
                 group_id = request.query_params["group"]
             topo_data = get_topology_data(
                 queryset=self.queryset,
+                user=request.user,
                 individualOptions=individualOptions,
                 ignore_cable_type=ignore_cable_type,
                 save_coords=save_coords,
