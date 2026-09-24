@@ -375,6 +375,7 @@ def create_circuit_termination(termination):
 
 def get_topology_data(
     queryset: QuerySet,
+    user,
     individualOptions: IndividualOptions,
     show_unconnected: bool,
     ignore_cable_type: list,
@@ -421,13 +422,13 @@ def get_topology_data(
     site_ids = [d.site_id for d in queryset]
 
     if show_neighbors:
-        interfaces = Interface.objects.filter(
+        interfaces = Interface.objects.restrict(user, 'view').filter(
             Q(device_id__in=device_ids)
         )
-        frontports = FrontPort.objects.filter(
+        frontports = FrontPort.objects.restrict(user, 'view').filter(
             Q(device_id__in=device_ids)
         )
-        rearports = RearPort.objects.filter(
+        rearports = RearPort.objects.restrict(user, 'view').filter(
             Q(device_id__in=device_ids)
         )
 
@@ -438,7 +439,7 @@ def get_topology_data(
                     device_ids.append(link_peer.device.id)
 
         if show_logical_connections:
-            path_complete_interfaces = Interface.objects.filter(
+            path_complete_interfaces = Interface.objects.restrict(user, 'view').filter(
                 Q(_path__is_complete=True) & Q(device_id__in=device_ids)
             )
             for path_complete_interface in path_complete_interfaces:
@@ -446,8 +447,15 @@ def get_topology_data(
                     if type(connected_endpoint) != ProviderNetwork:
                         device_ids.append(connected_endpoint.device.id)
 
+        # Neighbour discovery above walks link_peers/connected_endpoints directly and can
+        # pull in devices the user has no view permission for. Re-narrow device_ids to what
+        # the user can actually see before it's used to gate any further data.
+        device_ids = list(
+            Device.objects.restrict(user, 'view').filter(pk__in=device_ids).values_list('pk', flat=True)
+        )
+
     if show_circuit:
-        circuit_terminations = CircuitTermination.objects.filter(
+        circuit_terminations = CircuitTermination.objects.restrict(user, 'view').filter(
             Q(_site_id__in=site_ids) | Q(_provider_network__isnull=False)
         )
         for circuit_termination in circuit_terminations:
@@ -523,10 +531,10 @@ def get_topology_data(
             nodes.append(create_node(d, save_coords, node_label_items, group_id))
 
     if show_power:
-        power_panels_ids = PowerPanel.objects.filter(
+        power_panels_ids = PowerPanel.objects.restrict(user, 'view').filter(
             Q(site_id__in=site_ids)
         ).values_list("pk", flat=True)
-        power_feeds: QuerySet[PowerFeed] = PowerFeed.objects.filter(
+        power_feeds: QuerySet[PowerFeed] = PowerFeed.objects.restrict(user, 'view').filter(
             Q(power_panel_id__in=power_panels_ids)
         )
 
@@ -579,7 +587,7 @@ def get_topology_data(
             nodes.append(create_node(d, save_coords, node_label_items, group_id))
 
     if show_logical_connections:
-        interfaces = Interface.objects.filter(
+        interfaces = Interface.objects.restrict(user, 'view').filter(
             Q(_path__is_complete=True) & Q(device_id__in=device_ids)
         )
 
@@ -609,7 +617,7 @@ def get_topology_data(
                     nodes_devices[destination.device.id] = destination.device
 
     if show_cables:
-        links: QuerySet[CableTermination] = CableTermination.objects.filter(
+        links: QuerySet[CableTermination] = CableTermination.objects.restrict(user, 'view').filter(
             Q(_device_id__in=device_ids)
         ).select_related("termination_type")
 
@@ -691,7 +699,7 @@ def get_topology_data(
                     )
 
     if show_wireless:
-        wlan_links: QuerySet[WirelessLink] = WirelessLink.objects.filter(
+        wlan_links: QuerySet[WirelessLink] = WirelessLink.objects.restrict(user, 'view').filter(
             Q(_interface_a_device_id__in=device_ids)
             & Q(_interface_b_device_id__in=device_ids)
         )
@@ -831,6 +839,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
 
                 topo_data = get_topology_data(
                     queryset=self.queryset,
+                    user=request.user,
                     individualOptions=individualOptions,
                     ignore_cable_type=ignore_cable_type,
                     save_coords=save_coords,
