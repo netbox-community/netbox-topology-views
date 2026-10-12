@@ -24,6 +24,7 @@ from django.db.models import Q, QuerySet, Count
 from django.db.models.functions import Lower
 from django.http import Http404, HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django.views.generic import View
 from extras.models import Tag
@@ -641,7 +642,8 @@ class TopologyHomeView(PermissionRequiredMixin, View):
     def get(self, request):
         if not request.GET:
             # We most likely came here from the navigation menu.
-            return HttpResponseRedirect(f"{request.path}?{get_default_query(request.user).urlencode()}")
+            url = reverse("plugins:netbox_topology_views:home")
+            return HttpResponseRedirect(f"{url}?{get_default_query(request.user).urlencode()}")
 
         queryset = DeviceFilterSet(
             request.GET,
