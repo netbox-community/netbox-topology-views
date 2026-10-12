@@ -70,26 +70,26 @@ const options = {
     },
     physics: {
         solver: 'forceAtlas2Based',
-        // forceAtlas2Based can leave nodes orbiting each other indefinitely
-        // instead of settling below vis-network's stabilization velocity
-        // threshold, especially for larger/denser graphs (see GitHub #634 -
-        // "Spinning topology"). Cap the initial layout pass at a fixed
-        // number of iterations so it can never run forever, and explicitly
-        // turn physics off once that pass ends (see the
-        // stabilizationIterationsDone handler below) so the simulation
-        // doesn't keep running indefinitely in the background afterward.
+        // Nothing is drawn during the stabilization pass, so keep it short and let
+        // the layout settle on screen afterwards. forceAtlas2Based can leave nodes
+        // orbiting indefinitely (GitHub #634 - "Spinning topology"), so physics is
+        // turned off once stable or when a layout limit is reached (see below).
         stabilization: {
             enabled: true,
-            iterations: 1000
+            iterations: 100
         }
     }
 }
+
+const PHYSICS_ITERATION_LIMIT = 1000
+const PHYSICS_TIME_LIMIT_MS = 15000
 
 // Render vis graph
 let graph = null // vis graph instance
 
 const container = document.querySelector('#visgraph')
 const coordSaveCheckbox = document.querySelector('#id_save_coords')
+const layoutProgress = document.querySelector('#layout-progress')
 ;(function handleLoadData() {
     if (!topologyData) return
 
@@ -138,15 +138,37 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const gridSize = parseInt(topologyData.options.grid_size) || 0;
     var dragMode = false;
 
+    const layoutStart = performance.now()
+    if (layoutProgress) layoutProgress.style.display = 'flex'
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
 
-    // Once the initial layout pass finishes (whether it fully converged or
-    // hit the iteration cap above), turn physics off so unfixed nodes stop
-    // moving instead of continuing to simulate forces indefinitely.
-    graph.once('stabilizationIterationsDone', () => {
+    // Keep simulating on screen after the stabilization pass, but turn physics
+    // off once the layout is stable or a layout limit is reached.
+    let physicsRunning = true
+    const stopPhysics = () => {
+        if (!physicsRunning) return
+        physicsRunning = false
         graph.setOptions({ physics: false })
+        if (layoutProgress) layoutProgress.style.display = 'none'
+    }
+    const updateLayoutProgress = (iterations) => {
+        const progress = Math.max(
+            iterations / PHYSICS_ITERATION_LIMIT,
+            (performance.now() - layoutStart) / PHYSICS_TIME_LIMIT_MS
+        )
+        if (progress >= 1) return stopPhysics()
+        if (!layoutProgress) return
+        const percent = Math.round(progress * 100)
+        layoutProgress.querySelector('.progress-bar').style.width = `${percent}%`
+        layoutProgress.querySelector('small').textContent = `Laying out\u2026 ${percent}%`
+    }
+    graph.on('stabilizationProgress', (params) => updateLayoutProgress(params.iterations))
+    // vis-network has no public event per simulation step, so read its internal step counter
+    graph.on('afterDrawing', () => {
+        if (physicsRunning) updateLayoutProgress(graph.physics.stabilizationIterations)
     })
+    graph.once('stabilized', stopPhysics)
 
     function getGridPosition(nodeId, gridSize) {
         let x = graph.getPosition(nodeId).x;

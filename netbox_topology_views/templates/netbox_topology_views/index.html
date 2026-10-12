@@ -60,7 +60,7 @@
       {% endif %}
 
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
-        <div class="panel-body">
+        <div class="panel-body position-relative">
           {% if filter_required %}
             <div class="bg-warning text-white p-2">Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.</div>
           {% endif %}
@@ -68,6 +68,12 @@
             <div class="bg-warning text-white p-2">Empty result set! Please review your filter settings.</div>
             <div class="bg-info text-white p-2">Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".</div>
           {% endif %}
+          <div id="layout-progress" class="position-absolute m-2 align-items-center gap-2" style="display: none; z-index: 1; width: 25%">
+            <div class="progress flex-grow-1">
+              <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+            <small class="text-nowrap">Laying out&hellip;</small>
+          </div>
           <div id="visgraph"></div>
         </div>
       </div>
