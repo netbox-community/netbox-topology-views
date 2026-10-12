@@ -135,7 +135,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const group_racks = topologyData.options.group_racks
     const group_virtualchassis = topologyData.options.group_virtualchassis
 
-    const gridSize = parseInt(topologyData.options.grid_size[0]);
+    const gridSize = parseInt(topologyData.options.grid_size) || 0;
     var dragMode = false;
 
     graph = new Network(container, { nodes, edges }, options)
@@ -149,8 +149,8 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     })
 
     function getGridPosition(nodeId, gridSize) {
-        x = graph.getPosition(nodeId).x;
-        y = graph.getPosition(nodeId).y;
+        let x = graph.getPosition(nodeId).x;
+        let y = graph.getPosition(nodeId).y;
 
         if(x >= 0) {
             if((x % gridSize) > (gridSize / 2)) {
@@ -223,10 +223,10 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     function drawGridSnapHint(canvascontext) {
         // Draw grid hinting line and circle
         if(gridSize > 0 && dragMode == true && graph.getSelectedNodes().length > 0) {
-            for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                id = graph.getSelectedNodes()[i];
+            for(let i = 0; i < graph.getSelectedNodes().length; i++) {
+                const id = graph.getSelectedNodes()[i];
                 if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+                    const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
 
                     canvascontext.beginPath();
                     canvascontext.arc(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y, 5, 0, 2 * Math.PI);
@@ -256,26 +256,21 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         dragMode = false;
         // Place icon on the grid
         if(gridSize > 0 && graph.getSelectedNodes().length > 0) {
-            for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                id = graph.getSelectedNodes()[i];
+            for(let i = 0; i < graph.getSelectedNodes().length; i++) {
+                const id = graph.getSelectedNodes()[i];
                 if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+                    const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
                     window.nodes.update({id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y});
                 }
             }
         }
 
-        if (coordSaveCheckbox.options[coordSaveCheckbox.selectedIndex].text != "Yes") return
+        if (!coordSaveCheckbox || coordSaveCheckbox.value !== 'True') return
 
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
-                    if(!isNaN(parseInt(nodeId))) { 
-                        nodeKey = parseInt(nodeId);
-                    }
-                    else {
-                        nodeKey = nodeId;
-                    }
+                    const nodeKey = isNaN(parseInt(nodeId)) ? nodeId : parseInt(nodeId);
 
                     try {
                         window.nodes.update({id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y});
@@ -307,6 +302,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                             })
                         }
                     )
+                    if (!res.ok) console.error('Saving coordinates failed', nodeId, await res.text())
                 }
             )
         )
@@ -320,7 +316,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         }
         else {
             params.edges.forEach((edge) => {
-                window.open(edges.get(edge).href, '_blank')
+                if (edges.get(edge).href) window.open(edges.get(edge).href, '_blank')
             })
         }
     })
@@ -577,28 +573,7 @@ function performXmlDownload() {
 
     const tempDownloadLink = document.createElement('a');
 
-    let xml_search_options = '';
-
-    if (typeof is_htmx !== 'undefined') {
-        var curr_url = window.location.href;
-        const sites_prefix = '/sites/'
-        const location_prefix = '/locations/'
-        if (curr_url.includes(sites_prefix)) {
-            var site_id =  curr_url.split(sites_prefix)[1];
-            site_id = site_id.split('/')[0]
-            xml_search_options = 'site_id=' + site_id + '&show_cables=True&show_unconnected=True'
-        }
-        else if (curr_url.includes(location_prefix)) {
-            var location_id =  curr_url.split(location_prefix)[1];
-            location_id = location_id.split('/')[0]
-            xml_search_options = 'location_id=' + location_id + '&show_cables=True&show_unconnected=True'
-        }
-    }
-    else {
-        xml_search_options = new URLSearchParams(window.location.search);
-    }
-
-    
+    const xml_search_options = new URLSearchParams(window.location.search);
 
     fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
     .then(data => {

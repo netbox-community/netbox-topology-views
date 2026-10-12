@@ -83,16 +83,17 @@
 {% endblock content %}
 
 {% block javascript %}
+  {{ topology_data|json_script:"topology-data" }}
   <script type="text/javascript">
     const brokenImage = '{{ broken_image }}';
-    const topologyData = {{ topology_data | safe }};
+    const topologyData = JSON.parse(document.getElementById('topology-data').textContent);
     const basePath = '{{ basepath }}';
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
     function resizeCanvas() {
-      heightToSubtract = getElementHeight('.page-header') +
+      const heightToSubtract = getElementHeight('.page-header') +
         getElementHeight('#tabswrapper') +
         getElementHeight('#filterwrapper') +
         getElementHeight('.footer') +
@@ -102,17 +103,17 @@
     }
 
     function getElementPadding(element) {
-      el = document.querySelector(element);
-      els = getComputedStyle(el);
-      padding = parseInt(els.paddingTop) + parseInt(els.paddingBottom);
+      const el = document.querySelector(element);
+      const els = getComputedStyle(el);
+      const padding = parseInt(els.paddingTop) + parseInt(els.paddingBottom);
 
       return padding;
     }
 
     function getElementHeight(element) {
-      el = document.querySelector(element);
-      els = getComputedStyle(el);
-      height = el.offsetHeight + parseInt(els.marginTop) + parseInt(els.marginBottom);
+      const el = document.querySelector(element);
+      const els = getComputedStyle(el);
+      const height = el.offsetHeight + parseInt(els.marginTop) + parseInt(els.marginBottom);
 
       return height;
     }

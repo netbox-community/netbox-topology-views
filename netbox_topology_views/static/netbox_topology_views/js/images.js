@@ -93,7 +93,11 @@
           } = e.currentTarget;
           mapping[role] = image;
           const button = (_a = e.currentTarget.closest(".dropdown")) == null ? void 0 : _a.querySelector(`#dropdownMenuButton${role}`);
-          if (button) button.innerHTML = `<img src="${image}" />`;
+          if (button) {
+            const img = document.createElement("img");
+            img.src = image;
+            button.replaceChildren(img);
+          }
         });
       });
     }

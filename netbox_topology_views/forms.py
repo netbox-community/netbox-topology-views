@@ -1,4 +1,3 @@
-from cProfile import label
 from django import forms
 from django.conf import settings
 
@@ -565,8 +564,6 @@ class IndividualOptionsForm(NetBoxModelForm):
             ),
     )
 
-    user_id = forms.CharField(widget=forms.HiddenInput())
-
     ignore_cable_type = forms.MultipleChoiceField(
         label=_('Ignore Termination Types'),
         required=False,
@@ -738,7 +735,7 @@ class IndividualOptionsForm(NetBoxModelForm):
     class Meta:
         model = IndividualOptions
         fields = [
-            'user_id', 'ignore_cable_type', 'preselected_device_roles', 'preselected_tags',
+            'ignore_cable_type', 'preselected_device_roles', 'preselected_tags',
             'save_coords', 'show_unconnected', 'show_cables', 'show_wireless',
             'show_logical_connections', 'show_single_cable_logical_conns', 'show_neighbors',
             'group_sites', 'group_locations', 'group_racks', 'group_virtualchassis',

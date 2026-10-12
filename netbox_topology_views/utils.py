@@ -1,11 +1,9 @@
-from dataclasses import dataclass
-from functools import lru_cache
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Type
 import base64
+import mimetypes
 import xml.dom.minidom
-
-import sys
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -13,37 +11,29 @@ from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
 from django.contrib import messages
+from extras.models import SavedFilter
+from utilities.querydict import dict_to_querydict
 
+PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["netbox_topology_views"]
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
-if sys.version_info >= (3,9,0):
-    CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / settings.PLUGINS_CONFIG[
-        "netbox_topology_views"
-    ]["static_image_directory"].removeprefix("/")
-else:
-    prefix = "/"
-    plugin_path = settings.PLUGINS_CONFIG["netbox_topology_views"]["static_image_directory"]
-    if plugin_path.startswith(prefix):
-        plugin_path_new = plugin_path[len(prefix):]
-        CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / plugin_path_new
-    else:
-        CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / plugin_path
+CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / PLUGIN_SETTINGS["static_image_directory"].removeprefix("/")
 
 
 def image_static_url(path: Path) -> str:
     return static(
-        f"/{path.relative_to(Path(settings.STATIC_ROOT))}"
+        str(path.relative_to(Path(settings.STATIC_ROOT)))
     )
 
 
 def get_image_from_url(url: str) -> str:
-    if sys.version_info >= (3,9,0):
-        return url.removeprefix(settings.STATIC_URL)
-    else:
-        if url.startswith(settings.STATIC_URL):
-            url_new = url[len(settings.STATIC_URL):]
-            return url_new
-        else:
-            return url
+    return url.removeprefix(settings.STATIC_URL)
+
+
+def is_allowed_image(image: str) -> bool:
+    path = (Path(settings.STATIC_ROOT) / image).resolve()
+    return path.suffix.lstrip(".").lower() in IMAGE_FILETYPES and any(
+        path.is_relative_to(d.resolve()) for d in (CONF_IMAGE_DIR, IMAGE_DIR)
+    )
 
 
 IMAGE_FILETYPES = (
@@ -71,7 +61,6 @@ def find_image_in_dir(glob: str, dir: Path):
     )
 
 
-@lru_cache(maxsize=50)
 def find_image_url(glob: str, dir: Path = CONF_IMAGE_DIR):
     """
     will attempt to find a file that matches glob in given directory with any file extension,
@@ -107,115 +96,62 @@ def get_model_role(model: Type[Model]) -> Role:
         name=re_camel_case.sub(r" \1", model.__name__),
     )
 
-def get_query_settings(request):
-    filter_id = ''
-    if "filter_id" in request.GET:
-        filter_id = request.GET["filter_id"]
+@dataclass
+class TopologyOptions:
+    ignore_cable_type: list = field(default_factory=list)
+    show_unconnected: bool = False
+    show_cables: bool = False
+    show_logical_connections: bool = False
+    show_single_cable_logical_conns: bool = False
+    show_neighbors: bool = False
+    show_circuit: bool = False
+    show_power: bool = False
+    show_wireless: bool = False
+    group_sites: bool = False
+    group_locations: bool = False
+    group_racks: bool = False
+    group_virtualchassis: bool = False
+    straight_cables: bool = False
+    draw_termination_labels: bool = False
+    draw_cable_labels: bool = False
+    grid_size: int = 0
+    node_label_items: list = field(default_factory=list)
+    group_id: str = "default"
 
-    save_coords = False
-    if "save_coords" in request.GET:
-        if request.GET["save_coords"] == "True":
-            save_coords = True
-    # General options overrides
-    if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
-        save_coords = False
+
+BOOLEAN_OPTIONS = [f.name for f in fields(TopologyOptions) if f.type is bool]
+
+
+def get_query_settings(request) -> TopologyOptions:
+    params = request.GET.copy()
+
+    # Read options from saved filters as NetBox does not handle custom plugin filters.
+    # Explicit query parameters take precedence over the saved filter.
+    filter_id = params.get("filter_id", "")
+    if filter_id.isdigit():
+        saved_filter = SavedFilter.objects.restrict_to_shared(request.user).filter(pk=filter_id).first()
+        if saved_filter is not None:
+            merged = dict_to_querydict(saved_filter.parameters)
+            for key in params:
+                merged.setlist(key, params.getlist(key))
+            params = merged
+
+    if str(params.get("save_coords")) == "True" and not PLUGIN_SETTINGS["allow_coordinates_saving"]:
         messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
-    elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
-        save_coords = True
 
-    # Individual options
-    ignore_cable_type = ()
-    if "ignore_cable_type" in request.GET:
-        ignore_cable_type = request.GET.getlist('ignore_cable_type')
+    options = TopologyOptions(
+        ignore_cable_type=params.getlist("ignore_cable_type"),
+        node_label_items=params.getlist("node_label_items"),
+        group_id=params.get("group") or "default",
+    )
+    for name in BOOLEAN_OPTIONS:
+        setattr(options, name, str(params.get(name)) == "True")
+    try:
+        options.grid_size = max(0, int(params.get("grid_size", 0)))
+    except (TypeError, ValueError):
+        pass
 
-    show_unconnected = False
-    if "show_unconnected" in request.GET:
-        if request.GET["show_unconnected"] == "True":
-            show_unconnected = True
-
-    show_power = False
-    if "show_power" in request.GET:
-        if request.GET["show_power"] == "True":
-            show_power = True
-
-    show_circuit = False
-    if "show_circuit" in request.GET:
-        if request.GET["show_circuit"] == "True":
-            show_circuit = True
-
-    show_logical_connections = False
-    if "show_logical_connections" in request.GET:
-        if request.GET["show_logical_connections"] == "True" :
-            show_logical_connections = True
-
-    show_single_cable_logical_conns = False
-    if "show_single_cable_logical_conns" in request.GET:
-        if request.GET["show_single_cable_logical_conns"] == "True" :
-            show_single_cable_logical_conns = True
-
-    show_cables = False
-    if "show_cables" in request.GET:
-        if request.GET["show_cables"] == "True" :
-            show_cables = True
-
-    show_wireless = False
-    if "show_wireless" in request.GET:
-        if request.GET["show_wireless"] == "True" :
-            show_wireless = True
-
-    group_sites = False
-    if "group_sites" in request.GET:
-        if request.GET["group_sites"] == "True" :
-            group_sites = True
-
-    group_locations = False
-    if "group_locations" in request.GET:
-        if request.GET["group_locations"] == "True" :
-            group_locations = True
-
-    group_racks = False
-    if "group_racks" in request.GET:
-        if request.GET["group_racks"] == "True" :
-            group_racks = True
-
-    group_virtualchassis = False
-    if "group_virtualchassis" in request.GET:
-        if request.GET["group_virtualchassis"] == "True" :
-            group_virtualchassis = True
-
-    group = False
-    if "group" in request.GET:
-        group = request.GET["group"]
-
-    show_neighbors = False
-    if "show_neighbors" in request.GET:
-        if request.GET["show_neighbors"] == "True" :
-            show_neighbors = True
-
-    straight_cables = False
-    if "straight_cables" in request.GET:
-        if request.GET["straight_cables"] == "True":
-            straight_cables = True
-
-    draw_termination_labels = False
-    if "draw_termination_labels" in request.GET:
-        if request.GET["draw_termination_labels"] == "True":
-            draw_termination_labels = True
-
-    draw_cable_labels = False
-    if "draw_cable_labels" in request.GET:
-        if request.GET["draw_cable_labels"] == "True":
-            draw_cable_labels = True
-
-    grid_size = 0
-    if "grid_size" in request.GET:
-        grid_size = request.GET.getlist('grid_size')
-
-    node_label_items = ()
-    if "node_label_items" in request.GET:
-        node_label_items = request.GET.getlist('node_label_items')
-
-    return filter_id, ignore_cable_type, save_coords, show_unconnected, show_power, show_circuit, show_logical_connections, show_single_cable_logical_conns, show_cables, show_wireless, group_sites, group_locations, group_racks, group_virtualchassis, group, show_neighbors, straight_cables, draw_termination_labels, draw_cable_labels, grid_size, node_label_items
+    return options
 
 class LinePattern():
     wireless = [2, 10, 2, 10]
@@ -225,7 +161,7 @@ class LinePattern():
     
 def export_data_to_xml(data: dict):
     if data is None:
-        return ''
+        data = {"nodes": [], "edges": []}
 
     # static xml header
     doc = xml.dom.minidom.Document()
@@ -305,9 +241,11 @@ def export_data_to_xml(data: dict):
     noPositionX = 0
     noPositionY = 1000
     for node in data['nodes']:
+        image_path = get_image_from_url(node['image'])
+        mime_type = mimetypes.guess_type(image_path)[0] or 'image/svg+xml'
         try:
-            with staticfiles_storage.open(get_image_from_url(node['image']), "rb") as img:
-                svg = base64.b64encode(img.read()).decode('utf-8')
+            with staticfiles_storage.open(image_path, "rb") as img:
+                image_data = base64.b64encode(img.read()).decode('utf-8')
         except Exception:
             # Icon isn't reachable through the configured staticfiles storage.
             # Caught broadly on purpose: which exception this raises depends on
@@ -316,11 +254,11 @@ def export_data_to_xml(data: dict):
             # config, none of which share a common base other than Exception).
             # Degrade the same way RoleImage.get_image() does elsewhere: skip
             # the image rather than failing the whole export.
-            svg = ''
+            image_data = ''
         mxcell = doc.createElement('mxCell')
         mxcell.setAttribute('id', 'node_' + str(node['id']))
         mxcell.setAttribute('value', str(node['label']))
-        mxcell.setAttribute('style', 'shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,' + svg + ';perimeter=elippsePerimeter;fontSize=10;strokeWidth=1;fontColor=#000000;')
+        mxcell.setAttribute('style', 'shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:' + mime_type + ',' + image_data + ';perimeter=elippsePerimeter;fontSize=10;strokeWidth=1;fontColor=#000000;')
         mxcell.setAttribute('vertex', '1')
         mxcell.setAttribute('parent', '1')
 

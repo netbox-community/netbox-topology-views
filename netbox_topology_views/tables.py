@@ -14,7 +14,7 @@ class CoordinateGroupListTable(NetBoxTable):
         fields = ('pk', 'id', 'name', 'description', 'devices')
         default_columns = ('name', 'description', 'devices')
 
-class CircuitCoordinateListTable(NetBoxTable):
+class CoordinateListTableBase(NetBoxTable):
     group = tables.Column(
         linkify=True
     )
@@ -24,48 +24,21 @@ class CircuitCoordinateListTable(NetBoxTable):
     )
 
     class Meta(NetBoxTable.Meta):
+        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
+        default_columns = ('id', 'group', 'device', 'x', 'y')
+
+class CircuitCoordinateListTable(CoordinateListTableBase):
+    class Meta(CoordinateListTableBase.Meta):
         model = CircuitCoordinate
-        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
-        default_columns = ('id', 'group', 'device', 'x', 'y')
 
-class PowerPanelCoordinateListTable(NetBoxTable):
-    group = tables.Column(
-        linkify=True
-    )
-
-    device = tables.Column(
-        linkify=True
-    )
-
-    class Meta(NetBoxTable.Meta):
+class PowerPanelCoordinateListTable(CoordinateListTableBase):
+    class Meta(CoordinateListTableBase.Meta):
         model = PowerPanelCoordinate
-        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
-        default_columns = ('id', 'group', 'device', 'x', 'y')
 
-class PowerFeedCoordinateListTable(NetBoxTable):
-    group = tables.Column(
-        linkify=True
-    )
-
-    device = tables.Column(
-        linkify=True
-    )
-
-    class Meta(NetBoxTable.Meta):
+class PowerFeedCoordinateListTable(CoordinateListTableBase):
+    class Meta(CoordinateListTableBase.Meta):
         model = PowerFeedCoordinate
-        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
-        default_columns = ('id', 'group', 'device', 'x', 'y')
 
-class CoordinateListTable(NetBoxTable):
-    group = tables.Column(
-        linkify=True
-    )
-
-    device = tables.Column(
-        linkify=True
-    )
-
-    class Meta(NetBoxTable.Meta):
+class CoordinateListTable(CoordinateListTableBase):
+    class Meta(CoordinateListTableBase.Meta):
         model = Coordinate
-        fields = ('pk', 'id', 'group', 'device', 'x', 'y')
-        default_columns = ('id', 'group', 'device', 'x', 'y')

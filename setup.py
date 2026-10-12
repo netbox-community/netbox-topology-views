@@ -7,7 +7,7 @@ long_description = readme.read_text()
 
 setup(
     name="netbox-topology-views",
-    version="4.7.0",
+    version="5.0.0-beta",
     description="A NetBox plugin to create Topology maps",
     long_description=long_description,
     long_description_content_type="text/markdown",

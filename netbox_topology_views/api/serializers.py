@@ -22,6 +22,11 @@ class DeviceRoleSerializer(ModelSerializer):
         model = DeviceRole
         fields = ("name", "slug", "color", "vm_role", "description")
 
+COORDINATE_FIELDS = (
+    "id", "url", "display_url", "display", "device", "group", "x", "y",
+    "tags", "custom_fields", "created", "last_updated",
+)
+
 class CoordinateGroupSerializer(NetBoxModelSerializer):
     class Meta:
         model = CoordinateGroup
@@ -33,34 +38,22 @@ class CoordinateGroupSerializer(NetBoxModelSerializer):
 class CoordinateSerializer(NetBoxModelSerializer):
     class Meta:
         model = Coordinate
-        fields = (
-            "id", "url", "display_url", "display", "device", "group", "x", "y",
-            "tags", "custom_fields", "created", "last_updated",
-        )
+        fields = COORDINATE_FIELDS
 
 class CircuitCoordinateSerializer(NetBoxModelSerializer):
     class Meta:
         model = CircuitCoordinate
-        fields = (
-            "id", "url", "display_url", "display", "device", "group", "x", "y",
-            "tags", "custom_fields", "created", "last_updated",
-        )
+        fields = COORDINATE_FIELDS
 
 class PowerPanelCoordinateSerializer(NetBoxModelSerializer):
     class Meta:
         model = PowerPanelCoordinate
-        fields = (
-            "id", "url", "display_url", "display", "device", "group", "x", "y",
-            "tags", "custom_fields", "created", "last_updated",
-        )
+        fields = COORDINATE_FIELDS
 
 class PowerFeedCoordinateSerializer(NetBoxModelSerializer):
     class Meta:
         model = PowerFeedCoordinate
-        fields = (
-            "id", "url", "display_url", "display", "device", "group", "x", "y",
-            "tags", "custom_fields", "created", "last_updated",
-        )
+        fields = COORDINATE_FIELDS
 
 class IndividualOptionsSerializer(NetBoxModelSerializer):
     class Meta:
