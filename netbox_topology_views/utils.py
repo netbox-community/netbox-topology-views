@@ -64,6 +64,13 @@ IMAGE_FILETYPES = (
 )
 
 
+def is_allowed_image(image: str) -> bool:
+    path = (Path(settings.STATIC_ROOT) / image).resolve()
+    return path.suffix.lstrip(".").lower() in IMAGE_FILETYPES and any(
+        path.is_relative_to(d.resolve()) for d in (CONF_IMAGE_DIR, IMAGE_DIR)
+    )
+
+
 def find_image_in_dir(glob: str, dir: Path):
     return next(
         (f for f in dir.glob(f"{glob}.*") if f.suffix.lstrip(".") in IMAGE_FILETYPES),

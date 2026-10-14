@@ -34,6 +34,10 @@ document.querySelectorAll('form#images .dropdown-menu img').forEach((el) => {
         const button = e.currentTarget
             .closest('.dropdown')
             ?.querySelector(`#dropdownMenuButton${role}`)
-        if (button) button.innerHTML = `<img src="${image}" />`
+        if (button) {
+            const img = document.createElement('img')
+            img.src = image
+            button.replaceChildren(img)
+        }
     })
 })

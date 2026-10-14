@@ -83,9 +83,10 @@
 {% endblock content %}
 
 {% block javascript %}
+  {{ topology_data|json_script:"topology-data" }}
   <script type="text/javascript">
     const brokenImage = '{{ broken_image }}';
-    const topologyData = {{ topology_data | safe }};
+    const topologyData = JSON.parse(document.getElementById('topology-data').textContent);
     const basePath = '{{ basepath }}';
 
     window.addEventListener("resize", resizeCanvas);
