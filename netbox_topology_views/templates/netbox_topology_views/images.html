@@ -18,7 +18,7 @@
           <div class="image-dropdown dropdown">
             <button class="btn btn-secondary" type="button" id="dropdownMenuButton{{ role.id }}" data-bs-toggle="dropdown" aria-expanded="false">
               {% if role.image %}
-                <img src="{{ role.image }}" />
+                <img src="{{ role.image }}" alt="{{ role.name }}" />
               {% else %}
                 Image
               {% endif %}
@@ -26,7 +26,7 @@
             <div class="dropdown-menu mt-2" aria-labelledby="dropdownMenuButton{{ role.id }}">
               <div class="image-dropdown-content">
               {% for image in images %}
-                <img src="{{ image.url }}" title="{{ image.title }}" width="64" data-role="{{ role.id }}" data-image="{{ image.url }}"/>
+                <img src="{{ image.url }}" title="{{ image.title }}" alt="{{ image.title }}" width="64" data-role="{{ role.id }}" data-image="{{ image.url }}"/>
               {% endfor %}
               </div>
             </div>

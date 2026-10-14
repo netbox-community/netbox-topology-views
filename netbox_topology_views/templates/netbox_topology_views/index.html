@@ -1,8 +1,5 @@
 {% extends 'generic/_base.html' %}
-{% load buttons %}
-{% load render_table from django_tables2 %}
 {% load static %}
-{% load perms %}
 {% load helpers %}
 
 {% block title %}Topology Views{% endblock %}
@@ -16,14 +13,14 @@
   <div class="controls">
     	<div class="control-group">
 			{% block extra_controls %}{% endblock %}
-			<a id="btnDownloadXml" class="btn btn-info" href="#">
+			<button type="button" id="btnDownloadXml" class="btn btn-info">
 				<i class="mdi mdi-download"></i>
 				Download XML
-			</a>
-			<a id="btnDownloadImage" class="btn btn-info" href="#">
+			</button>
+			<button type="button" id="btnDownloadImage" class="btn btn-info">
 				<i class="mdi mdi-download"></i>
 				Download PNG
-			</a>
+			</button>
     	</div>
 	</div>
 {% endblock controls %}
@@ -49,7 +46,6 @@
 {% endblock tabs %}
 
 {% block content %}
-  {% with config=settings.PLUGINS_CONFIG.netbox_topology_views %}
     <div class="tab-content" id="tabcontentwrapper">
 
       {# Applied filters #}
@@ -60,7 +56,7 @@
       {% endif %}
 
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
-        <div class="panel-body">
+        <div class="panel-body position-relative">
           {% if filter_required %}
             <div class="bg-warning text-white p-2">Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.</div>
           {% endif %}
@@ -68,6 +64,12 @@
             <div class="bg-warning text-white p-2">Empty result set! Please review your filter settings.</div>
             <div class="bg-info text-white p-2">Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".</div>
           {% endif %}
+          <div id="layout-progress" class="position-absolute m-2 align-items-center gap-2" style="display: none">
+            <div class="progress flex-grow-1">
+              <div class="progress-bar" role="progressbar" aria-label="Layout progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%"></div>
+            </div>
+            <small class="text-nowrap">Laying out&hellip;</small>
+          </div>
           <div id="visgraph"></div>
         </div>
       </div>
@@ -79,7 +81,7 @@
       {% endif %}
 
     </div>
-  {% endwith %}
+  {% include 'netbox_topology_views/toasts.html' %}
 {% endblock content %}
 
 {% block javascript %}
@@ -93,7 +95,7 @@
     resizeCanvas();
 
     function resizeCanvas() {
-      heightToSubtract = getElementHeight('.page-header') +
+      const heightToSubtract = getElementHeight('.page-header') +
         getElementHeight('#tabswrapper') +
         getElementHeight('#filterwrapper') +
         getElementHeight('.footer') +
@@ -103,17 +105,17 @@
     }
 
     function getElementPadding(element) {
-      el = document.querySelector(element);
-      els = getComputedStyle(el);
-      padding = parseInt(els.paddingTop) + parseInt(els.paddingBottom);
+      const el = document.querySelector(element);
+      const els = getComputedStyle(el);
+      const padding = parseInt(els.paddingTop) + parseInt(els.paddingBottom);
 
       return padding;
     }
 
     function getElementHeight(element) {
-      el = document.querySelector(element);
-      els = getComputedStyle(el);
-      height = el.offsetHeight + parseInt(els.marginTop) + parseInt(els.marginBottom);
+      const el = document.querySelector(element);
+      const els = getComputedStyle(el);
+      const height = el.offsetHeight + parseInt(els.marginTop) + parseInt(els.marginBottom);
 
       return height;
     }

@@ -46,16 +46,14 @@
           if (!el) return console.error("Could not find toast component!");
           const content = el.querySelector("span");
           content.textContent = message;
-          const toast2 = new window.Toast(el);
-          toast2.show();
+          window.Toast.getOrCreateInstance(el).show();
         },
         error: (message) => {
           const el = document.querySelector("#topology-plugin-error-toast");
           if (!el) return console.error("Could not find toast component!");
           const content = el.querySelector("span");
           content.textContent = message;
-          const toast2 = new window.Toast(el);
-          toast2.show();
+          window.Toast.getOrCreateInstance(el).show();
         }
       };
     }
@@ -66,6 +64,16 @@
     "js/images.js"(exports) {
       init_toast();
       var mapping = {};
+      function errorMessage(res) {
+        return __async(this, null, function* () {
+          var _a;
+          try {
+            return (_a = (yield res.json()).status) != null ? _a : res.statusText;
+          } catch (e) {
+            return res.statusText;
+          }
+        });
+      }
       document.querySelector("form#images").addEventListener("submit", (e) => __async(null, null, function* () {
         e.preventDefault();
         try {
@@ -77,7 +85,7 @@
               "Content-Type": "application/json"
             }
           });
-          if (!res.ok) throw new Error(yield res.text());
+          if (!res.ok) throw new Error(yield errorMessage(res));
           toast.success("Saved settings");
         } catch (err) {
           console.dir(err);

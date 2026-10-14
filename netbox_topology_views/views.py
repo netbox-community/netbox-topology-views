@@ -395,7 +395,7 @@ def get_topology_data(
     straight_cables: bool,
     draw_termination_labels: bool,
     draw_cable_labels: bool,
-    grid_size: list,
+    grid_size,
     node_label_items: list,
 ):
     
@@ -760,10 +760,13 @@ def get_topology_data(
         options['group_sites'] = 'on'
     if group_virtualchassis:
         options['group_virtualchassis'] = 'on'
-    if grid_size:
-        options['grid_size'] = grid_size
-    else:
-        options['grid_size'] = list('0')
+    # grid_size arrives as a query-string list, or as whatever a saved filter stored
+    if isinstance(grid_size, (list, tuple)):
+        grid_size = grid_size[0] if grid_size else 0
+    try:
+        options['grid_size'] = max(int(grid_size), 0)
+    except (TypeError, ValueError):
+        options['grid_size'] = 0
 
     for qs_device in queryset:
         if qs_device.pk not in nodes_devices and show_unconnected:

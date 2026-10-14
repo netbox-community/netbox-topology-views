@@ -1,11 +1,13 @@
 /* css/app.scss */
 #visgraph {
   height: 64vh;
-  border: 1px solid #ced4da;
+  background-color: var(--tblr-body-bg);
+  border: 1px solid var(--tblr-border-color);
 }
-html[data-netbox-color-mode=dark] #visgraph {
-  background-color: #212529;
-  border: 1px solid #495057;
+#layout-progress {
+  z-index: 1;
+  width: 25%;
+  min-width: 12rem;
 }
 .image-dropdown img {
   width: 64px;

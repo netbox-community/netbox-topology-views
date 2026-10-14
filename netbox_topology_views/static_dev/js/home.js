@@ -1,5 +1,9 @@
 import { DataSet } from 'vis-data/esnext'
 import { Network } from 'vis-network/esnext'
+import { toast } from './toast.js'
+
+const labelColor = () =>
+    document.documentElement.dataset.bsTheme === 'dark' ? '#fff' : '#000'
 
 function escapeXml(text) {
     return String(text).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
@@ -56,10 +60,7 @@ const options = {
         font: {
             multi: 'md',
             face: 'helvetica',
-            color:
-                document.documentElement.dataset.netboxColorMode === 'dark'
-                    ? '#fff'
-                    : '#000'
+            color: labelColor()
         }
     },
     edges: {
@@ -74,26 +75,26 @@ const options = {
     },
     physics: {
         solver: 'forceAtlas2Based',
-        // forceAtlas2Based can leave nodes orbiting each other indefinitely
-        // instead of settling below vis-network's stabilization velocity
-        // threshold, especially for larger/denser graphs (see GitHub #634 -
-        // "Spinning topology"). Cap the initial layout pass at a fixed
-        // number of iterations so it can never run forever, and explicitly
-        // turn physics off once that pass ends (see the
-        // stabilizationIterationsDone handler below) so the simulation
-        // doesn't keep running indefinitely in the background afterward.
+        // Nothing is drawn during the stabilization pass, so keep it short and let
+        // the layout settle on screen afterwards. forceAtlas2Based can leave nodes
+        // orbiting indefinitely (GitHub #634 - "Spinning topology"), so physics is
+        // turned off once stable or when a layout limit is reached (see below).
         stabilization: {
             enabled: true,
-            iterations: 1000
+            iterations: 100
         }
     }
 }
+
+const PHYSICS_ITERATION_LIMIT = 1000
+const PHYSICS_TIME_LIMIT_MS = 15000
 
 // Render vis graph
 let graph = null // vis graph instance
 
 const container = document.querySelector('#visgraph')
 const coordSaveCheckbox = document.querySelector('#id_save_coords')
+const layoutProgress = document.querySelector('#layout-progress')
 ;(function handleLoadData() {
     if (!topologyData) return
 
@@ -109,9 +110,6 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
             title: htmlTitle(node.title)
         }))
     )
-
-    // make nodes object available globally in order to update their physics and positions later
-    window.nodes = nodes;
 
     const edges = new DataSet(
         topologyData.edges.map((node) => ({
@@ -139,22 +137,51 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     const group_racks = topologyData.options.group_racks
     const group_virtualchassis = topologyData.options.group_virtualchassis
 
-    const gridSize = parseInt(topologyData.options.grid_size[0]);
+    const gridSize = topologyData.options.grid_size;
     var dragMode = false;
 
+    // Nodes with stored coordinates are fixed, so only show progress if something will move
+    const needsLayout = topologyData.nodes.some((node) => node.physics !== false)
+    const progressBar = layoutProgress?.querySelector('.progress-bar')
+    const progressLabel = layoutProgress?.querySelector('small')
+
+    const layoutStart = performance.now()
+    if (layoutProgress && needsLayout) layoutProgress.style.display = 'flex'
     graph = new Network(container, { nodes, edges }, options)
     graph.fit()
 
-    // Once the initial layout pass finishes (whether it fully converged or
-    // hit the iteration cap above), turn physics off so unfixed nodes stop
-    // moving instead of continuing to simulate forces indefinitely.
-    graph.once('stabilizationIterationsDone', () => {
+    // Keep simulating on screen after the stabilization pass, but turn physics
+    // off once the layout is stable or a layout limit is reached.
+    let physicsRunning = true
+    const stopPhysics = () => {
+        if (!physicsRunning) return
+        physicsRunning = false
         graph.setOptions({ physics: false })
+        graph.fit()
+        if (layoutProgress) layoutProgress.style.display = 'none'
+    }
+    const updateLayoutProgress = (iterations) => {
+        const progress = Math.max(
+            iterations / PHYSICS_ITERATION_LIMIT,
+            (performance.now() - layoutStart) / PHYSICS_TIME_LIMIT_MS
+        )
+        if (progress >= 1) return stopPhysics()
+        if (!progressBar) return
+        const percent = Math.round(progress * 100)
+        progressBar.style.width = `${percent}%`
+        progressBar.setAttribute('aria-valuenow', percent)
+        progressLabel.textContent = `Laying out\u2026 ${percent}%`
+    }
+    graph.on('stabilizationProgress', (params) => updateLayoutProgress(params.iterations))
+    // vis-network has no public event per simulation step, so read its internal step counter
+    graph.on('afterDrawing', () => {
+        if (physicsRunning) updateLayoutProgress(graph.physics.stabilizationIterations)
     })
+    graph.once('stabilized', stopPhysics)
 
     function getGridPosition(nodeId, gridSize) {
-        x = graph.getPosition(nodeId).x;
-        y = graph.getPosition(nodeId).y;
+        let x = graph.getPosition(nodeId).x;
+        let y = graph.getPosition(nodeId).y;
 
         if(x >= 0) {
             if((x % gridSize) > (gridSize / 2)) {
@@ -227,10 +254,10 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     function drawGridSnapHint(canvascontext) {
         // Draw grid hinting line and circle
         if(gridSize > 0 && dragMode == true && graph.getSelectedNodes().length > 0) {
-            for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                id = graph.getSelectedNodes()[i];
-                if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+            for(let i = 0; i < graph.getSelectedNodes().length; i++) {
+                const id = graph.getSelectedNodes()[i];
+                if(nodes.get(id).x != graph.getPosition(id).x || nodes.get(id).y != graph.getPosition(id).y) {
+                    const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
 
                     canvascontext.beginPath();
                     canvascontext.arc(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y, 5, 0, 2 * Math.PI);
@@ -260,33 +287,28 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         dragMode = false;
         // Place icon on the grid
         if(gridSize > 0 && graph.getSelectedNodes().length > 0) {
-            for(i = 0; i < graph.getSelectedNodes().length; i++) {
-                id = graph.getSelectedNodes()[i];
-                if(window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-                    pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
-                    window.nodes.update({id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y});
+            for(let i = 0; i < graph.getSelectedNodes().length; i++) {
+                const id = graph.getSelectedNodes()[i];
+                if(nodes.get(id).x != graph.getPosition(id).x || nodes.get(id).y != graph.getPosition(id).y) {
+                    const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+                    nodes.update({id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y});
                 }
             }
         }
 
-        if (coordSaveCheckbox.options[coordSaveCheckbox.selectedIndex].text != "Yes") return
+        if (coordSaveCheckbox?.value !== 'True') return
 
         Promise.allSettled(
             Object.entries(graph.getPositions(params.nodes)).map(
                 async ([nodeId, nodePosition]) => {
-                    if(!isNaN(parseInt(nodeId))) { 
-                        nodeKey = parseInt(nodeId);
-                    }
-                    else {
-                        nodeKey = nodeId;
-                    }
+                    const nodeKey = isNaN(parseInt(nodeId)) ? nodeId : parseInt(nodeId);
 
                     try {
-                        window.nodes.update({id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y});
+                        nodes.update({id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y});
                     }
                     catch (e) {
                         console.log([
-                            'Error while executing window.nodes.update()', 
+                            'Error while executing nodes.update()', 
                             'nodeId: ' + nodeId, 
                             'nodeKey: ' + nodeKey, 
                             'x: ' + nodePosition.x, 
@@ -311,9 +333,15 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
                             })
                         }
                     )
+                    if (!res.ok) throw new Error(`${nodeId}: ${res.status} ${res.statusText}`)
                 }
             )
-        )
+        ).then((results) => {
+            const failed = results.filter((result) => result.status === 'rejected')
+            if (failed.length === 0) return
+            console.error('Saving coordinates failed', failed.map((result) => result.reason))
+            toast.error(`Saving coordinates failed for ${failed.length} node(s)`)
+        })
     })
 
     graph.on('doubleClick', (params) => {
@@ -324,7 +352,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
         }
         else {
             params.edges.forEach((edge) => {
-                window.open(edges.get(edge).href, '_blank')
+                if (edges.get(edge).href) window.open(edges.get(edge).href, '_blank')
             })
         }
     })
@@ -402,7 +430,7 @@ const coordSaveCheckbox = document.querySelector('#id_save_coords')
     function combineNodeInfo(typeId, type) {
         let nodesArray = [];
         // Extract node ids and node type ids from all nodes
-        for (let [key, value] of nodes._data) {
+        for (const value of nodes.get()) {
             if (value[typeId] != undefined) {
                 nodesArray.push([value.id, value[typeId], value[type], value.label_num_lines]);
             }
@@ -581,41 +609,33 @@ function performXmlDownload() {
 
     const tempDownloadLink = document.createElement('a');
 
-    let xml_search_options = '';
+    const xml_search_options = new URLSearchParams(window.location.search);
 
-    if (typeof is_htmx !== 'undefined') {
-        var curr_url = window.location.href;
-        const sites_prefix = '/sites/'
-        const location_prefix = '/locations/'
-        if (curr_url.includes(sites_prefix)) {
-            var site_id =  curr_url.split(sites_prefix)[1];
-            site_id = site_id.split('/')[0]
-            xml_search_options = 'site_id=' + site_id + '&show_cables=True&show_unconnected=True'
-        }
-        else if (curr_url.includes(location_prefix)) {
-            var location_id =  curr_url.split(location_prefix)[1];
-            location_id = location_id.split('/')[0]
-            xml_search_options = 'location_id=' + location_id + '&show_cables=True&show_unconnected=True'
-        }
-    }
-    else {
-        xml_search_options = new URLSearchParams(window.location.search);
-    }
-
-    
-
-    fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options).then(response => response.text())
+    fetch('/' + basePath + 'api/plugins/netbox_topology_views/xml-export/?' + xml_search_options)
+    .then(response => {
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
+        return response.text()
+    })
     .then(data => {
-        var blob = new Blob([data ], { type: "text/plain" });
+        const blob = new Blob([data], { type: "application/xml" });
+        const url = window.URL.createObjectURL(blob);
 
-        tempDownloadLink.setAttribute("href", window.URL.createObjectURL(blob));
+        tempDownloadLink.setAttribute("href", url);
         tempDownloadLink.setAttribute("download", 'topology.xml');
 
-        tempDownloadLink.dataset.downloadurl = ["text/plain", tempDownloadLink.download, tempDownloadLink.href].join(":");
-
         tempDownloadLink.click();
-
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        console.error(err);
+        toast.error(`XML export failed: ${err.message}`);
     });
+}
+
+// Nothing to download until a topology has been drawn
+if (!graph) {
+    downloadButton.disabled = true
+    downloadXmlButton.disabled = true
 }
 
 // Theme switching
@@ -628,9 +648,8 @@ const observer = new MutationObserver((mutations) =>
             !(mutation.target instanceof HTMLElement)
         )
             return
-        const netboxColorMode = mutation.target.dataset.bsTheme
-        options.nodes.font.color = netboxColorMode === 'dark' ? '#fff' : '#000'
-        graph.setOptions(options)
+        // Only touch the font: passing the full options object would re-enable physics
+        graph.setOptions({ nodes: { font: { color: labelColor() } } })
     })
 )
 

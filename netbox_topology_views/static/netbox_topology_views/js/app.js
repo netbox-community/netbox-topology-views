@@ -69,7 +69,7 @@
           reject(e);
         }
       };
-      var step = (x2) => x2.done ? resolve(x2.value) : Promise.resolve(x2.value).then(fulfilled, rejected);
+      var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
       step((generator = generator.apply(__this, __arguments)).next());
     });
   };
@@ -116,10 +116,10 @@
           return this;
         }
         var cb;
-        for (var i2 = 0; i2 < callbacks.length; i2++) {
-          cb = callbacks[i2];
+        for (var i = 0; i < callbacks.length; i++) {
+          cb = callbacks[i];
           if (cb === fn || cb.fn === fn) {
-            callbacks.splice(i2, 1);
+            callbacks.splice(i, 1);
             break;
           }
         }
@@ -131,13 +131,13 @@
       Emitter3.prototype.emit = function(event) {
         this._callbacks = this._callbacks || {};
         var args = new Array(arguments.length - 1), callbacks = this._callbacks["$" + event];
-        for (var i2 = 1; i2 < arguments.length; i2++) {
-          args[i2 - 1] = arguments[i2];
+        for (var i = 1; i < arguments.length; i++) {
+          args[i - 1] = arguments[i];
         }
         if (callbacks) {
           callbacks = callbacks.slice(0);
-          for (var i2 = 0, len = callbacks.length; i2 < len; ++i2) {
-            callbacks[i2].apply(this, args);
+          for (var i = 0, len = callbacks.length; i < len; ++i) {
+            callbacks[i].apply(this, args);
           }
         }
         return this;
@@ -158,8 +158,8 @@
   // node_modules/@egjs/hammerjs/dist/hammer.esm.js
   function _extends() {
     _extends = Object.assign || function(target) {
-      for (var i2 = 1; i2 < arguments.length; i2++) {
-        var source = arguments[i2];
+      for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
         for (var key in source) {
           if (Object.prototype.hasOwnProperty.call(source, key)) {
             target[key] = source[key];
@@ -216,14 +216,14 @@
     var prefix;
     var prop;
     var camelProp = property[0].toUpperCase() + property.slice(1);
-    var i2 = 0;
-    while (i2 < VENDOR_PREFIXES.length) {
-      prefix = VENDOR_PREFIXES[i2];
+    var i = 0;
+    while (i < VENDOR_PREFIXES.length) {
+      prefix = VENDOR_PREFIXES[i];
       prop = prefix ? prefix + camelProp : property;
       if (prop in obj) {
         return prop;
       }
-      i2++;
+      i++;
     }
     return void 0;
   }
@@ -277,21 +277,21 @@
   var PROPS_XY = ["x", "y"];
   var PROPS_CLIENT_XY = ["clientX", "clientY"];
   function each(obj, iterator, context) {
-    var i2;
+    var i;
     if (!obj) {
       return;
     }
     if (obj.forEach) {
       obj.forEach(iterator, context);
     } else if (obj.length !== void 0) {
-      i2 = 0;
-      while (i2 < obj.length) {
-        iterator.call(context, obj[i2], i2, obj);
-        i2++;
+      i = 0;
+      while (i < obj.length) {
+        iterator.call(context, obj[i], i, obj);
+        i++;
       }
     } else {
-      for (i2 in obj) {
-        obj.hasOwnProperty(i2) && iterator.call(context, obj[i2], i2, obj);
+      for (i in obj) {
+        obj.hasOwnProperty(i) && iterator.call(context, obj[i], i, obj);
       }
     }
   }
@@ -397,28 +397,28 @@
         y: round(pointers[0].clientY)
       };
     }
-    var x2 = 0;
-    var y2 = 0;
-    var i2 = 0;
-    while (i2 < pointersLength) {
-      x2 += pointers[i2].clientX;
-      y2 += pointers[i2].clientY;
-      i2++;
+    var x = 0;
+    var y = 0;
+    var i = 0;
+    while (i < pointersLength) {
+      x += pointers[i].clientX;
+      y += pointers[i].clientY;
+      i++;
     }
     return {
-      x: round(x2 / pointersLength),
-      y: round(y2 / pointersLength)
+      x: round(x / pointersLength),
+      y: round(y / pointersLength)
     };
   }
   function simpleCloneInputData(input) {
     var pointers = [];
-    var i2 = 0;
-    while (i2 < input.pointers.length) {
-      pointers[i2] = {
-        clientX: round(input.pointers[i2].clientX),
-        clientY: round(input.pointers[i2].clientY)
+    var i = 0;
+    while (i < input.pointers.length) {
+      pointers[i] = {
+        clientX: round(input.pointers[i].clientX),
+        clientY: round(input.pointers[i].clientY)
       };
-      i2++;
+      i++;
     }
     return {
       timeStamp: now(),
@@ -432,26 +432,26 @@
     if (!props) {
       props = PROPS_XY;
     }
-    var x2 = p2[props[0]] - p1[props[0]];
-    var y2 = p2[props[1]] - p1[props[1]];
-    return Math.sqrt(x2 * x2 + y2 * y2);
+    var x = p2[props[0]] - p1[props[0]];
+    var y = p2[props[1]] - p1[props[1]];
+    return Math.sqrt(x * x + y * y);
   }
   function getAngle(p1, p2, props) {
     if (!props) {
       props = PROPS_XY;
     }
-    var x2 = p2[props[0]] - p1[props[0]];
-    var y2 = p2[props[1]] - p1[props[1]];
-    return Math.atan2(y2, x2) * 180 / Math.PI;
+    var x = p2[props[0]] - p1[props[0]];
+    var y = p2[props[1]] - p1[props[1]];
+    return Math.atan2(y, x) * 180 / Math.PI;
   }
-  function getDirection(x2, y2) {
-    if (x2 === y2) {
+  function getDirection(x, y) {
+    if (x === y) {
       return DIRECTION_NONE;
     }
-    if (abs(x2) >= abs(y2)) {
-      return x2 < 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
+    if (abs(x) >= abs(y)) {
+      return x < 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
     }
-    return y2 < 0 ? DIRECTION_UP : DIRECTION_DOWN;
+    return y < 0 ? DIRECTION_UP : DIRECTION_DOWN;
   }
   function computeDeltaXY(session, input) {
     var center = input.center;
@@ -471,10 +471,10 @@
     input.deltaX = prevDelta.x + (center.x - offset.x);
     input.deltaY = prevDelta.y + (center.y - offset.y);
   }
-  function getVelocity(deltaTime, x2, y2) {
+  function getVelocity(deltaTime, x, y) {
     return {
-      x: x2 / deltaTime || 0,
-      y: y2 / deltaTime || 0
+      x: x / deltaTime || 0,
+      y: y / deltaTime || 0
     };
   }
   function getScale(start, end) {
@@ -620,12 +620,12 @@
     if (src.indexOf && !findByKey) {
       return src.indexOf(find);
     } else {
-      var i2 = 0;
-      while (i2 < src.length) {
-        if (findByKey && src[i2][findByKey] == find || !findByKey && src[i2] === find) {
-          return i2;
+      var i = 0;
+      while (i < src.length) {
+        if (findByKey && src[i][findByKey] == find || !findByKey && src[i] === find) {
+          return i;
         }
-        i2++;
+        i++;
       }
       return -1;
     }
@@ -700,14 +700,14 @@
   function uniqueArray(src, key, sort) {
     var results = [];
     var values = [];
-    var i2 = 0;
-    while (i2 < src.length) {
-      var val = key ? src[i2][key] : src[i2];
+    var i = 0;
+    while (i < src.length) {
+      var val = key ? src[i][key] : src[i];
       if (inArray(values, val) < 0) {
-        results.push(src[i2]);
+        results.push(src[i]);
       }
-      values[i2] = val;
-      i2++;
+      values[i] = val;
+      i++;
     }
     if (sort) {
       if (!key) {
@@ -759,7 +759,7 @@
       targetIds[allTouches[0].identifier] = true;
       return [allTouches, allTouches];
     }
-    var i2;
+    var i;
     var targetTouches;
     var changedTouches = toArray(ev.changedTouches);
     var changedTargetTouches = [];
@@ -768,21 +768,21 @@
       return hasParent(touch.target, target);
     });
     if (type === INPUT_START) {
-      i2 = 0;
-      while (i2 < targetTouches.length) {
-        targetIds[targetTouches[i2].identifier] = true;
-        i2++;
+      i = 0;
+      while (i < targetTouches.length) {
+        targetIds[targetTouches[i].identifier] = true;
+        i++;
       }
     }
-    i2 = 0;
-    while (i2 < changedTouches.length) {
-      if (targetIds[changedTouches[i2].identifier]) {
-        changedTargetTouches.push(changedTouches[i2]);
+    i = 0;
+    while (i < changedTouches.length) {
+      if (targetIds[changedTouches[i].identifier]) {
+        changedTargetTouches.push(changedTouches[i]);
       }
       if (type & (INPUT_END | INPUT_CANCEL)) {
-        delete targetIds[changedTouches[i2].identifier];
+        delete targetIds[changedTouches[i].identifier];
       }
-      i2++;
+      i++;
     }
     if (!changedTargetTouches.length) {
       return;
@@ -847,9 +847,9 @@
       var lts = this.lastTouches;
       this.lastTouches.push(lastTouch);
       var removeLastTouch = function removeLastTouch2() {
-        var i2 = lts.indexOf(lastTouch);
-        if (i2 > -1) {
-          lts.splice(i2, 1);
+        var i = lts.indexOf(lastTouch);
+        if (i > -1) {
+          lts.splice(i, 1);
         }
       };
       setTimeout(removeLastTouch, DEDUP_TIMEOUT);
@@ -864,12 +864,12 @@
     }
   }
   function isSyntheticEvent(eventData) {
-    var x2 = eventData.srcEvent.clientX;
-    var y2 = eventData.srcEvent.clientY;
-    for (var i2 = 0; i2 < this.lastTouches.length; i2++) {
-      var t = this.lastTouches[i2];
-      var dx = Math.abs(x2 - t.x);
-      var dy = Math.abs(y2 - t.y);
+    var x = eventData.srcEvent.clientX;
+    var y = eventData.srcEvent.clientY;
+    for (var i = 0; i < this.lastTouches.length; i++) {
+      var t = this.lastTouches[i];
+      var dx = Math.abs(x - t.x);
+      var dy = Math.abs(y - t.y);
       if (dx <= DEDUP_DISTANCE && dy <= DEDUP_DISTANCE) {
         return true;
       }
@@ -1056,12 +1056,12 @@
       this.state = STATE_FAILED;
     };
     _proto.canEmit = function canEmit() {
-      var i2 = 0;
-      while (i2 < this.requireFail.length) {
-        if (!(this.requireFail[i2].state & (STATE_FAILED | STATE_POSSIBLE))) {
+      var i = 0;
+      while (i < this.requireFail.length) {
+        if (!(this.requireFail[i].state & (STATE_FAILED | STATE_POSSIBLE))) {
           return false;
         }
-        i2++;
+        i++;
       }
       return true;
     };
@@ -1255,16 +1255,16 @@
       var hasMoved = true;
       var distance = input.distance;
       var direction = input.direction;
-      var x2 = input.deltaX;
-      var y2 = input.deltaY;
+      var x = input.deltaX;
+      var y = input.deltaY;
       if (!(direction & options2.direction)) {
         if (options2.direction & DIRECTION_HORIZONTAL) {
-          direction = x2 === 0 ? DIRECTION_NONE : x2 < 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
-          hasMoved = x2 !== this.pX;
+          direction = x === 0 ? DIRECTION_NONE : x < 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
+          hasMoved = x !== this.pX;
           distance = Math.abs(input.deltaX);
         } else {
-          direction = y2 === 0 ? DIRECTION_NONE : y2 < 0 ? DIRECTION_UP : DIRECTION_DOWN;
-          hasMoved = y2 !== this.pY;
+          direction = y === 0 ? DIRECTION_NONE : y < 0 ? DIRECTION_UP : DIRECTION_DOWN;
+          hasMoved = y !== this.pY;
           distance = Math.abs(input.deltaY);
         }
       }
@@ -1612,9 +1612,9 @@
         session.curRecognizer = null;
         curRecognizer = null;
       }
-      var i2 = 0;
-      while (i2 < recognizers.length) {
-        recognizer = recognizers[i2];
+      var i = 0;
+      while (i < recognizers.length) {
+        recognizer = recognizers[i];
         if (session.stopped !== FORCED_STOP && // 1
         (!curRecognizer || recognizer === curRecognizer || // 2
         recognizer.canRecognizeWith(curRecognizer))) {
@@ -1626,7 +1626,7 @@
           session.curRecognizer = recognizer;
           curRecognizer = recognizer;
         }
-        i2++;
+        i++;
       }
     };
     _proto.get = function get(recognizer) {
@@ -1634,9 +1634,9 @@
         return recognizer;
       }
       var recognizers = this.recognizers;
-      for (var i2 = 0; i2 < recognizers.length; i2++) {
-        if (recognizers[i2].options.event === recognizer) {
-          return recognizers[i2];
+      for (var i = 0; i < recognizers.length; i++) {
+        if (recognizers[i].options.event === recognizer) {
+          return recognizers[i];
         }
       }
       return null;
@@ -1706,10 +1706,10 @@
       data.preventDefault = function() {
         data.srcEvent.preventDefault();
       };
-      var i2 = 0;
-      while (i2 < handlers.length) {
-        handlers[i2](data);
-        i2++;
+      var i = 0;
+      while (i < handlers.length) {
+        handlers[i](data);
+        i++;
       }
     };
     _proto.destroy = function destroy() {
@@ -1784,12 +1784,12 @@
   }
   var extend = deprecate(function(dest, src, merge3) {
     var keys = Object.keys(src);
-    var i2 = 0;
-    while (i2 < keys.length) {
-      if (!merge3 || merge3 && dest[keys[i2]] === void 0) {
-        dest[keys[i2]] = src[keys[i2]];
+    var i = 0;
+    while (i < keys.length) {
+      if (!merge3 || merge3 && dest[keys[i]] === void 0) {
+        dest[keys[i]] = src[keys[i]];
       }
-      i2++;
+      i++;
     }
     return dest;
   }, "extend", "Use `assign`.");
@@ -1968,16 +1968,16 @@
     let s0 = mash(" ");
     let s1 = mash(" ");
     let s2 = mash(" ");
-    for (let i2 = 0; i2 < seed.length; i2++) {
-      s0 -= mash(seed[i2]);
+    for (let i = 0; i < seed.length; i++) {
+      s0 -= mash(seed[i]);
       if (s0 < 0) {
         s0 += 1;
       }
-      s1 -= mash(seed[i2]);
+      s1 -= mash(seed[i]);
       if (s1 < 0) {
         s1 += 1;
       }
-      s2 -= mash(seed[i2]);
+      s2 -= mash(seed[i]);
       if (s2 < 0) {
         s2 += 1;
       }
@@ -1988,8 +1988,8 @@
     let n = 4022871197;
     return function(data) {
       const string2 = data.toString();
-      for (let i2 = 0; i2 < string2.length; i2++) {
-        n += string2.charCodeAt(i2);
+      for (let i = 0; i < string2.length; i++) {
+        n += string2.charCodeAt(i);
         let h = 0.02519603282416938 * n;
         n = h >>> 0;
         h -= n;
@@ -2203,8 +2203,8 @@
         }
       } else if (Array.isArray(b[prop])) {
         a[prop] = [];
-        for (let i2 = 0; i2 < b[prop].length; i2++) {
-          a[prop].push(b[prop][i2]);
+        for (let i = 0; i < b[prop].length; i++) {
+          a[prop].push(b[prop][i]);
         }
       } else {
         copyOrDelete(a, b, prop, allowDeletion);
@@ -2247,8 +2247,8 @@
   function forEach(object2, callback) {
     if (Array.isArray(object2)) {
       const len = object2.length;
-      for (let i2 = 0; i2 < len; i2++) {
-        callback(object2[i2], i2, object2);
+      for (let i = 0; i < len; i++) {
+        callback(object2[i], i, object2);
       }
     } else {
       for (const key in object2) {
@@ -2412,12 +2412,12 @@
     let r;
     let g;
     let b;
-    const i2 = Math.floor(h * 6);
-    const f = h * 6 - i2;
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
     const p = v * (1 - s);
     const q = v * (1 - f * s);
     const t = v * (1 - (1 - f) * s);
-    switch (i2 % 6) {
+    switch (i % 6) {
       case 0:
         r = v, g = t, b = p;
         break;
@@ -2472,10 +2472,10 @@
       return referenceObject;
     }
     const objectTo = Object.create(referenceObject);
-    for (const i2 in referenceObject) {
-      if (Object.prototype.hasOwnProperty.call(referenceObject, i2)) {
-        if (typeof referenceObject[i2] == "object") {
-          objectTo[i2] = bridgeObject(referenceObject[i2]);
+    for (const i in referenceObject) {
+      if (Object.prototype.hasOwnProperty.call(referenceObject, i)) {
+        if (typeof referenceObject[i] == "object") {
+          objectTo[i] = bridgeObject(referenceObject[i]);
         }
       }
     }
@@ -2489,8 +2489,8 @@
       return obj !== null && typeof obj === "object";
     };
     const isEmpty = function(obj) {
-      for (const x2 in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, x2)) {
+      for (const x in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, x)) {
           return false;
         }
       }
@@ -2669,9 +2669,9 @@
     for (const member of pile) {
       if (member) {
         candidate = member[accessors[0]];
-        for (let i2 = 1; i2 < accessors.length; i2++) {
+        for (let i = 1; i < accessors.length; i++) {
           if (candidate) {
-            candidate = candidate[accessors[i2]];
+            candidate = candidate[accessors[i]];
           }
         }
         if (typeof candidate !== "undefined") {
@@ -3025,10 +3025,10 @@
       const hsv = RGBToHSV(rgba.r, rgba.g, rgba.b);
       const angleConvert = 2 * Math.PI;
       const radius = this.r * hsv.s;
-      const x2 = this.centerCoordinates.x + radius * Math.sin(angleConvert * hsv.h);
-      const y2 = this.centerCoordinates.y + radius * Math.cos(angleConvert * hsv.h);
-      this.colorPickerSelector.style.left = x2 - 0.5 * this.colorPickerSelector.clientWidth + "px";
-      this.colorPickerSelector.style.top = y2 - 0.5 * this.colorPickerSelector.clientHeight + "px";
+      const x = this.centerCoordinates.x + radius * Math.sin(angleConvert * hsv.h);
+      const y = this.centerCoordinates.y + radius * Math.cos(angleConvert * hsv.h);
+      this.colorPickerSelector.style.left = x - 0.5 * this.colorPickerSelector.clientWidth + "px";
+      this.colorPickerSelector.style.top = y - 0.5 * this.colorPickerSelector.clientHeight + "px";
       this._updatePicker(rgba);
     }
     /**
@@ -3235,7 +3235,7 @@
         const w = this.colorPickerCanvas.clientWidth;
         const h = this.colorPickerCanvas.clientHeight;
         ctx.clearRect(0, 0, w, h);
-        let x2, y2, hue, sat;
+        let x, y, hue, sat;
         this.centerCoordinates = { x: w * 0.5, y: h * 0.5 };
         this.r = 0.49 * w;
         const angleConvert = 2 * Math.PI / 360;
@@ -3244,11 +3244,11 @@
         let rgb;
         for (hue = 0; hue < 360; hue++) {
           for (sat = 0; sat < this.r; sat++) {
-            x2 = this.centerCoordinates.x + sat * Math.sin(angleConvert * hue);
-            y2 = this.centerCoordinates.y + sat * Math.cos(angleConvert * hue);
+            x = this.centerCoordinates.x + sat * Math.sin(angleConvert * hue);
+            y = this.centerCoordinates.y + sat * Math.cos(angleConvert * hue);
             rgb = HSVToRGB(hue * hfac, sat * sfac, 1);
             ctx.fillStyle = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
-            ctx.fillRect(x2 - 0.5, y2 - 0.5, 2, 2);
+            ctx.fillRect(x - 0.5, y - 0.5, 2, 2);
           }
         }
         ctx.strokeStyle = "rgba(0,0,0,1)";
@@ -3269,10 +3269,10 @@
       const top = event.center.y - rect.top;
       const centerY = 0.5 * this.colorPickerDiv.clientHeight;
       const centerX = 0.5 * this.colorPickerDiv.clientWidth;
-      const x2 = left - centerX;
-      const y2 = top - centerY;
-      const angle = Math.atan2(x2, y2);
-      const radius = 0.98 * Math.min(Math.sqrt(x2 * x2 + y2 * y2), centerX);
+      const x = left - centerX;
+      const y = top - centerY;
+      const angle = Math.atan2(x, y);
+      const radius = 0.98 * Math.min(Math.sqrt(x * x + y * y), centerX);
       const newTop = Math.cos(angle) * radius + centerY;
       const newLeft = Math.sin(angle) * radius + centerX;
       this.colorPickerSelector.style.top = newTop - 0.5 * this.colorPickerSelector.clientHeight + "px";
@@ -3434,8 +3434,8 @@
       this.wrapper = document.createElement("div");
       this.wrapper.className = "vis-configuration-wrapper";
       this.container.appendChild(this.wrapper);
-      for (let i2 = 0; i2 < this.domElements.length; i2++) {
-        this.wrapper.appendChild(this.domElements[i2]);
+      for (let i = 0; i < this.domElements.length; i++) {
+        this.wrapper.appendChild(this.domElements[i]);
       }
       this._showPopupIfNeeded();
     }
@@ -3444,8 +3444,8 @@
      * @private
      */
     _clean() {
-      for (let i2 = 0; i2 < this.domElements.length; i2++) {
-        this.wrapper.removeChild(this.domElements[i2]);
+      for (let i = 0; i < this.domElements.length; i++) {
+        this.wrapper.removeChild(this.domElements[i]);
       }
       if (this.wrapper !== void 0) {
         this.container.removeChild(this.wrapper);
@@ -3462,9 +3462,9 @@
      */
     _getValue(path) {
       let base = this.moduleOptions;
-      for (let i2 = 0; i2 < path.length; i2++) {
-        if (base[path[i2]] !== void 0) {
-          base = base[path[i2]];
+      for (let i = 0; i < path.length; i++) {
+        if (base[path[i]] !== void 0) {
+          base = base[path[i]];
         } else {
           base = void 0;
           break;
@@ -3539,13 +3539,13 @@
           selectedValue = arr.indexOf(value);
         }
       }
-      for (let i2 = 0; i2 < arr.length; i2++) {
+      for (let i = 0; i < arr.length; i++) {
         const option = document.createElement("option");
-        option.value = arr[i2];
-        if (i2 === selectedValue) {
+        option.value = arr[i];
+        if (i === selectedValue) {
           option.selected = "selected";
         }
-        option.innerText = arr[i2];
+        option.innerText = arr[i];
         select.appendChild(option);
       }
       const me = this;
@@ -3904,15 +3904,15 @@
       let pointer = optionsObj;
       value = value === "true" ? true : value;
       value = value === "false" ? false : value;
-      for (let i2 = 0; i2 < path.length; i2++) {
-        if (path[i2] !== "global") {
-          if (pointer[path[i2]] === void 0) {
-            pointer[path[i2]] = {};
+      for (let i = 0; i < path.length; i++) {
+        if (path[i] !== "global") {
+          if (pointer[path[i]] === void 0) {
+            pointer[path[i]] = {};
           }
-          if (i2 !== path.length - 1) {
-            pointer = pointer[path[i2]];
+          if (i !== path.length - 1) {
+            pointer = pointer[path[i]];
           } else {
-            pointer[path[i2]] = value;
+            pointer[path[i]] = value;
           }
         }
       }
@@ -3936,10 +3936,10 @@
      */
     getOptions() {
       const options2 = {};
-      for (let i2 = 0; i2 < this.changedOptions.length; i2++) {
+      for (let i = 0; i < this.changedOptions.length; i++) {
         this._constructOptions(
-          this.changedOptions[i2].value,
-          this.changedOptions[i2].path,
+          this.changedOptions[i].value,
+          this.changedOptions[i].path,
           options2
         );
       }
@@ -3966,9 +3966,9 @@
      * @param {number} x   Horizontal position of the popup window
      * @param {number} y   Vertical position of the popup window
      */
-    setPosition(x2, y2) {
-      this.x = parseInt(x2);
-      this.y = parseInt(y2);
+    setPosition(x, y) {
+      this.x = parseInt(x);
+      this.y = parseInt(y);
     }
     /**
      * Set the content for the popup window. This can be HTML code or text.
@@ -4297,18 +4297,18 @@
      */
     static printLocation(path, option, prefix = "Problem value found at: \n") {
       let str = "\n\n" + prefix + "options = {\n";
-      for (let i2 = 0; i2 < path.length; i2++) {
-        for (let j = 0; j < i2 + 1; j++) {
+      for (let i = 0; i < path.length; i++) {
+        for (let j = 0; j < i + 1; j++) {
           str += "  ";
         }
-        str += path[i2] + ": {\n";
+        str += path[i] + ": {\n";
       }
       for (let j = 0; j < path.length + 1; j++) {
         str += "  ";
       }
       str += option + "\n";
-      for (let i2 = 0; i2 < path.length + 1; i2++) {
-        for (let j = 0; j < path.length - i2; j++) {
+      for (let i = 0; i < path.length + 1; i++) {
+        for (let j = 0; j < path.length - i; j++) {
           str += "  ";
         }
         str += "}\n";
@@ -4343,26 +4343,26 @@
       if (a.length === 0) return b.length;
       if (b.length === 0) return a.length;
       const matrix = [];
-      let i2;
-      for (i2 = 0; i2 <= b.length; i2++) {
-        matrix[i2] = [i2];
+      let i;
+      for (i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
       }
       let j;
       for (j = 0; j <= a.length; j++) {
         matrix[0][j] = j;
       }
-      for (i2 = 1; i2 <= b.length; i2++) {
+      for (i = 1; i <= b.length; i++) {
         for (j = 1; j <= a.length; j++) {
-          if (b.charAt(i2 - 1) == a.charAt(j - 1)) {
-            matrix[i2][j] = matrix[i2 - 1][j - 1];
+          if (b.charAt(i - 1) == a.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
           } else {
-            matrix[i2][j] = Math.min(
-              matrix[i2 - 1][j - 1] + 1,
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
               // substitution
               Math.min(
-                matrix[i2][j - 1] + 1,
+                matrix[i][j - 1] + 1,
                 // insertion
-                matrix[i2 - 1][j] + 1
+                matrix[i - 1][j] + 1
               )
             );
           }
@@ -4380,8 +4380,8 @@
 
   // node_modules/uuid/dist/stringify.js
   var byteToHex = [];
-  for (let i2 = 0; i2 < 256; ++i2) {
-    byteToHex.push((i2 + 256).toString(16).slice(1));
+  for (let i = 0; i < 256; ++i) {
+    byteToHex.push((i + 256).toString(16).slice(1));
   }
   function unsafeStringify(arr, offset = 0) {
     return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
@@ -4414,8 +4414,8 @@
       if (offset < 0 || offset + 16 > buf.length) {
         throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
       }
-      for (let i2 = 0; i2 < 16; ++i2) {
-        buf[offset + i2] = rnds[i2];
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = rnds[i];
       }
       return buf;
     }
@@ -4492,24 +4492,24 @@
      * Return an iterable of key, value pairs for every entry in the stream.
      */
     *[Symbol.iterator]() {
-      for (const [id2, item] of this._pairs) {
-        yield [id2, item];
+      for (const [id, item] of this._pairs) {
+        yield [id, item];
       }
     }
     /**
      * Return an iterable of key, value pairs for every entry in the stream.
      */
     *entries() {
-      for (const [id2, item] of this._pairs) {
-        yield [id2, item];
+      for (const [id, item] of this._pairs) {
+        yield [id, item];
       }
     }
     /**
      * Return an iterable of keys in the stream.
      */
     *keys() {
-      for (const [id2] of this._pairs) {
-        yield id2;
+      for (const [id] of this._pairs) {
+        yield id;
       }
     }
     /**
@@ -4555,8 +4555,8 @@
      */
     toObjectMap() {
       const map = /* @__PURE__ */ Object.create(null);
-      for (const [id2, item] of this._pairs) {
-        map[id2] = item;
+      for (const [id, item] of this._pairs) {
+        map[id] = item;
       }
       return map;
     }
@@ -4613,8 +4613,8 @@
      */
     distinct(callback) {
       const set = /* @__PURE__ */ new Set();
-      for (const [id2, item] of this._pairs) {
-        set.add(callback(item, id2));
+      for (const [id, item] of this._pairs) {
+        set.add(callback(item, id));
       }
       return set;
     }
@@ -4627,9 +4627,9 @@
       const pairs = this._pairs;
       return new _DataStream({
         *[Symbol.iterator]() {
-          for (const [id2, item] of pairs) {
-            if (callback(item, id2)) {
-              yield [id2, item];
+          for (const [id, item] of pairs) {
+            if (callback(item, id)) {
+              yield [id, item];
             }
           }
         }
@@ -4640,8 +4640,8 @@
      * @param callback - The function that will be invoked for each item.
      */
     forEach(callback) {
-      for (const [id2, item] of this._pairs) {
-        callback(item, id2);
+      for (const [id, item] of this._pairs) {
+        callback(item, id);
       }
     }
     /**
@@ -4654,8 +4654,8 @@
       const pairs = this._pairs;
       return new _DataStream({
         *[Symbol.iterator]() {
-          for (const [id2, item] of pairs) {
-            yield [id2, callback(item, id2)];
+          for (const [id, item] of pairs) {
+            yield [id, callback(item, id)];
           }
         }
       });
@@ -4674,8 +4674,8 @@
       let maxItem = curr.value[1];
       let maxValue = callback(curr.value[1], curr.value[0]);
       while (!(curr = iter.next()).done) {
-        const [id2, item] = curr.value;
-        const value = callback(item, id2);
+        const [id, item] = curr.value;
+        const value = callback(item, id);
         if (value > maxValue) {
           maxValue = value;
           maxItem = item;
@@ -4697,8 +4697,8 @@
       let minItem = curr.value[1];
       let minValue = callback(curr.value[1], curr.value[0]);
       while (!(curr = iter.next()).done) {
-        const [id2, item] = curr.value;
-        const value = callback(item, id2);
+        const [id, item] = curr.value;
+        const value = callback(item, id);
         if (value < minValue) {
           minValue = value;
           minItem = item;
@@ -4714,8 +4714,8 @@
      * @returns The reduced value.
      */
     reduce(callback, accumulator) {
-      for (const [id2, item] of this._pairs) {
-        accumulator = callback(accumulator, item, id2);
+      for (const [id, item] of this._pairs) {
+        accumulator = callback(accumulator, item, id);
       }
       return accumulator;
     }
@@ -4782,8 +4782,8 @@
         }
       ];
       if (options2 && options2.replace) {
-        for (let i2 = 0; i2 < options2.replace.length; i2++) {
-          const name = options2.replace[i2];
+        for (let i = 0; i < options2.replace.length; i++) {
+          const name = options2.replace[i];
           methods.push({
             name,
             // @TODO: better solution?
@@ -4806,8 +4806,8 @@
       if (this._extended) {
         const object2 = this._extended.object;
         const methods = this._extended.methods;
-        for (let i2 = 0; i2 < methods.length; i2++) {
-          const method = methods[i2];
+        for (let i = 0; i < methods.length; i++) {
+          const method = methods[i];
           if (method.original) {
             object2[method.name] = method.original;
           } else {
@@ -4963,19 +4963,19 @@
      */
     add(data, senderId) {
       const addedIds = [];
-      let id2;
+      let id;
       if (Array.isArray(data)) {
         const idsToAdd = data.map((d) => d[this._idProp]);
-        if (idsToAdd.some((id3) => this._data.has(id3))) {
+        if (idsToAdd.some((id2) => this._data.has(id2))) {
           throw new Error("A duplicate id was found in the parameter array.");
         }
-        for (let i2 = 0, len = data.length; i2 < len; i2++) {
-          id2 = this._addItem(data[i2]);
-          addedIds.push(id2);
+        for (let i = 0, len = data.length; i < len; i++) {
+          id = this._addItem(data[i]);
+          addedIds.push(id);
         }
       } else if (data && typeof data === "object") {
-        id2 = this._addItem(data);
-        addedIds.push(id2);
+        id = this._addItem(data);
+        addedIds.push(id);
       } else {
         throw new Error("Unknown dataType");
       }
@@ -5028,21 +5028,21 @@
         if (origId != null && this._data.has(origId)) {
           const fullItem = item;
           const oldItem = Object.assign({}, this._data.get(origId));
-          const id2 = this._updateItem(fullItem);
-          updatedIds.push(id2);
+          const id = this._updateItem(fullItem);
+          updatedIds.push(id);
           updatedData.push(fullItem);
           oldData.push(oldItem);
         } else {
-          const id2 = this._addItem(item);
-          addedIds.push(id2);
+          const id = this._addItem(item);
+          addedIds.push(id);
         }
       };
       if (Array.isArray(data)) {
-        for (let i2 = 0, len = data.length; i2 < len; i2++) {
-          if (data[i2] && typeof data[i2] === "object") {
-            addOrUpdate(data[i2]);
+        for (let i = 0, len = data.length; i < len; i++) {
+          if (data[i] && typeof data[i] === "object") {
+            addOrUpdate(data[i]);
           } else {
-            console.warn("Ignoring input item, which is not an object at index " + i2);
+            console.warn("Ignoring input item, which is not an object at index " + i);
           }
         }
       } else if (data && typeof data === "object") {
@@ -5103,11 +5103,11 @@
         }
         return { oldData, update };
       }).map(({ oldData, update }) => {
-        const id2 = oldData[this._idProp];
+        const id = oldData[this._idProp];
         const updatedData = pureDeepObjectAssign(oldData, update);
-        this._data.set(id2, updatedData);
+        this._data.set(id, updatedData);
         return {
-          id: id2,
+          id,
           oldData,
           updatedData
         };
@@ -5126,11 +5126,11 @@
     }
     /** @inheritDoc */
     get(first2, second) {
-      let id2 = void 0;
+      let id = void 0;
       let ids = void 0;
       let options2 = void 0;
       if (isId(first2)) {
-        id2 = first2;
+        id = first2;
         options2 = second;
       } else if (Array.isArray(first2)) {
         ids = first2;
@@ -5144,51 +5144,51 @@
       let item = void 0;
       let itemIds = void 0;
       let itemId = void 0;
-      if (id2 != null) {
-        item = this._data.get(id2);
+      if (id != null) {
+        item = this._data.get(id);
         if (item && filter && !filter(item)) {
           item = void 0;
         }
       } else if (ids != null) {
-        for (let i2 = 0, len = ids.length; i2 < len; i2++) {
-          item = this._data.get(ids[i2]);
+        for (let i = 0, len = ids.length; i < len; i++) {
+          item = this._data.get(ids[i]);
           if (item != null && (!filter || filter(item))) {
             items.push(item);
           }
         }
       } else {
         itemIds = [...this._data.keys()];
-        for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-          itemId = itemIds[i2];
+        for (let i = 0, len = itemIds.length; i < len; i++) {
+          itemId = itemIds[i];
           item = this._data.get(itemId);
           if (item != null && (!filter || filter(item))) {
             items.push(item);
           }
         }
       }
-      if (options2 && options2.order && id2 == void 0) {
+      if (options2 && options2.order && id == void 0) {
         this._sort(items, options2.order);
       }
       if (options2 && options2.fields) {
         const fields = options2.fields;
-        if (id2 != void 0 && item != null) {
+        if (id != void 0 && item != null) {
           item = this._filterFields(item, fields);
         } else {
-          for (let i2 = 0, len = items.length; i2 < len; i2++) {
-            items[i2] = this._filterFields(items[i2], fields);
+          for (let i = 0, len = items.length; i < len; i++) {
+            items[i] = this._filterFields(items[i], fields);
           }
         }
       }
       if (returnType == "Object") {
         const result = {};
-        for (let i2 = 0, len = items.length; i2 < len; i2++) {
-          const resultant = items[i2];
-          const id3 = resultant[this._idProp];
-          result[id3] = resultant;
+        for (let i = 0, len = items.length; i < len; i++) {
+          const resultant = items[i];
+          const id2 = resultant[this._idProp];
+          result[id2] = resultant;
         }
         return result;
       } else {
-        if (id2 != null) {
+        if (id != null) {
           return item != null ? item : null;
         } else {
           return items;
@@ -5205,21 +5205,21 @@
       if (filter) {
         if (order) {
           const items = [];
-          for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-            const id2 = itemIds[i2];
-            const item = this._data.get(id2);
+          for (let i = 0, len = itemIds.length; i < len; i++) {
+            const id = itemIds[i];
+            const item = this._data.get(id);
             if (item != null && filter(item)) {
               items.push(item);
             }
           }
           this._sort(items, order);
-          for (let i2 = 0, len = items.length; i2 < len; i2++) {
-            ids.push(items[i2][this._idProp]);
+          for (let i = 0, len = items.length; i < len; i++) {
+            ids.push(items[i][this._idProp]);
           }
         } else {
-          for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-            const id2 = itemIds[i2];
-            const item = this._data.get(id2);
+          for (let i = 0, len = itemIds.length; i < len; i++) {
+            const id = itemIds[i];
+            const item = this._data.get(id);
             if (item != null && filter(item)) {
               ids.push(item[this._idProp]);
             }
@@ -5228,18 +5228,18 @@
       } else {
         if (order) {
           const items = [];
-          for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-            const id2 = itemIds[i2];
-            items.push(data.get(id2));
+          for (let i = 0, len = itemIds.length; i < len; i++) {
+            const id = itemIds[i];
+            items.push(data.get(id));
           }
           this._sort(items, order);
-          for (let i2 = 0, len = items.length; i2 < len; i2++) {
-            ids.push(items[i2][this._idProp]);
+          for (let i = 0, len = items.length; i < len; i++) {
+            ids.push(items[i][this._idProp]);
           }
         } else {
-          for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-            const id2 = itemIds[i2];
-            const item = data.get(id2);
+          for (let i = 0, len = itemIds.length; i < len; i++) {
+            const id = itemIds[i];
+            const item = data.get(id);
             if (item != null) {
               ids.push(item[this._idProp]);
             }
@@ -5259,17 +5259,17 @@
       const itemIds = [...data.keys()];
       if (options2 && options2.order) {
         const items = this.get(options2);
-        for (let i2 = 0, len = items.length; i2 < len; i2++) {
-          const item = items[i2];
-          const id2 = item[this._idProp];
-          callback(item, id2);
+        for (let i = 0, len = items.length; i < len; i++) {
+          const item = items[i];
+          const id = item[this._idProp];
+          callback(item, id);
         }
       } else {
-        for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-          const id2 = itemIds[i2];
-          const item = this._data.get(id2);
+        for (let i = 0, len = itemIds.length; i < len; i++) {
+          const id = itemIds[i];
+          const item = this._data.get(id);
           if (item != null && (!filter || filter(item))) {
-            callback(item, id2);
+            callback(item, id);
           }
         }
       }
@@ -5280,11 +5280,11 @@
       const mappedItems = [];
       const data = this._data;
       const itemIds = [...data.keys()];
-      for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-        const id2 = itemIds[i2];
-        const item = this._data.get(id2);
+      for (let i = 0, len = itemIds.length; i < len; i++) {
+        const id = itemIds[i];
+        const item = this._data.get(id);
         if (item != null && (!filter || filter(item))) {
-          mappedItems.push(callback(item, id2));
+          mappedItems.push(callback(item, id));
         }
       }
       if (options2 && options2.order) {
@@ -5359,12 +5359,12 @@
      * @param senderId - Sender id.
      * @returns The ids of the removed items.
      */
-    remove(id2, senderId) {
+    remove(id, senderId) {
       const removedIds = [];
       const removedItems = [];
-      const ids = Array.isArray(id2) ? id2 : [id2];
-      for (let i2 = 0, len = ids.length; i2 < len; i2++) {
-        const item = this._remove(ids[i2]);
+      const ids = Array.isArray(id) ? id : [id];
+      for (let i = 0, len = ids.length; i < len; i++) {
+        const item = this._remove(ids[i]);
         if (item) {
           const itemId = item[this._idProp];
           if (itemId != null) {
@@ -5383,12 +5383,12 @@
      * @param id - Id of an item or the item itself.
      * @returns The removed item if removed, null otherwise.
      */
-    _remove(id2) {
+    _remove(id) {
       let ident;
-      if (isId(id2)) {
-        ident = id2;
-      } else if (id2 && typeof id2 === "object") {
-        ident = id2[this._idProp];
+      if (isId(id)) {
+        ident = id;
+      } else if (id && typeof id === "object") {
+        ident = id[this._idProp];
       }
       if (ident != null && this._data.has(ident)) {
         const item = this._data.get(ident) || null;
@@ -5408,8 +5408,8 @@
     clear(senderId) {
       const ids = [...this._data.keys()];
       const items = [];
-      for (let i2 = 0, len = ids.length; i2 < len; i2++) {
-        items.push(this._data.get(ids[i2]));
+      for (let i = 0, len = ids.length; i < len; i++) {
+        items.push(this._data.get(ids[i]));
       }
       this._data.clear();
       this.length = 0;
@@ -5460,9 +5460,9 @@
       const itemIds = [...data.keys()];
       const values = [];
       let count = 0;
-      for (let i2 = 0, len = itemIds.length; i2 < len; i2++) {
-        const id2 = itemIds[i2];
-        const item = data.get(id2);
+      for (let i = 0, len = itemIds.length; i < len; i++) {
+        const id = itemIds[i];
+        const item = data.get(id);
         const value = item[prop];
         let exists = false;
         for (let j = 0; j < count; j++) {
@@ -5485,13 +5485,13 @@
      */
     _addItem(item) {
       const fullItem = ensureFullItem(item, this._idProp);
-      const id2 = fullItem[this._idProp];
-      if (this._data.has(id2)) {
-        throw new Error("Cannot add item: item with id " + id2 + " already exists");
+      const id = fullItem[this._idProp];
+      if (this._data.has(id)) {
+        throw new Error("Cannot add item: item with id " + id + " already exists");
       }
-      this._data.set(id2, fullItem);
+      this._data.set(id, fullItem);
       ++this.length;
-      return id2;
+      return id;
     }
     /**
      * Update a single item: merge with existing item.
@@ -5500,16 +5500,16 @@
      * @returns The id of the updated item.
      */
     _updateItem(update) {
-      const id2 = update[this._idProp];
-      if (id2 == null) {
+      const id = update[this._idProp];
+      if (id == null) {
         throw new Error("Cannot update item: item has no id (item: " + JSON.stringify(update) + ")");
       }
-      const item = this._data.get(id2);
+      const item = this._data.get(id);
       if (!item) {
-        throw new Error("Cannot update item: no item with id " + id2 + " found");
+        throw new Error("Cannot update item: no item with id " + id + " found");
       }
-      this._data.set(id2, __spreadValues(__spreadValues({}, item), update));
-      return id2;
+      this._data.set(id, __spreadValues(__spreadValues({}, item), update));
+      return id;
     }
     /** @inheritDoc */
     stream(ids) {
@@ -5517,10 +5517,10 @@
         const data = this._data;
         return new DataStream({
           *[Symbol.iterator]() {
-            for (const id2 of ids) {
-              const item = data.get(id2);
+            for (const id of ids) {
+              const item = data.get(id);
               if (item != null) {
-                yield [id2, item];
+                yield [id, item];
               }
             }
           }
@@ -5549,21 +5549,21 @@
     var _exportFunctions = {};
     var _bound = { keydown: {}, keyup: {} };
     var _keys = {};
-    var i2;
-    for (i2 = 97; i2 <= 122; i2++) {
-      _keys[String.fromCharCode(i2)] = { code: 65 + (i2 - 97), shift: false };
+    var i;
+    for (i = 97; i <= 122; i++) {
+      _keys[String.fromCharCode(i)] = { code: 65 + (i - 97), shift: false };
     }
-    for (i2 = 65; i2 <= 90; i2++) {
-      _keys[String.fromCharCode(i2)] = { code: i2, shift: true };
+    for (i = 65; i <= 90; i++) {
+      _keys[String.fromCharCode(i)] = { code: i, shift: true };
     }
-    for (i2 = 0; i2 <= 9; i2++) {
-      _keys["" + i2] = { code: 48 + i2, shift: false };
+    for (i = 0; i <= 9; i++) {
+      _keys["" + i] = { code: 48 + i, shift: false };
     }
-    for (i2 = 1; i2 <= 12; i2++) {
-      _keys["F" + i2] = { code: 111 + i2, shift: false };
+    for (i = 1; i <= 12; i++) {
+      _keys["F" + i] = { code: 111 + i, shift: false };
     }
-    for (i2 = 0; i2 <= 9; i2++) {
-      _keys["num" + i2] = { code: 96 + i2, shift: false };
+    for (i = 0; i <= 9; i++) {
+      _keys["num" + i] = { code: 96 + i, shift: false };
     }
     _keys["num*"] = { code: 106, shift: false };
     _keys["num+"] = { code: 107, shift: false };
@@ -5598,13 +5598,13 @@
     var handleEvent = function(event, type) {
       if (_bound[type][event.keyCode] !== void 0) {
         var bound = _bound[type][event.keyCode];
-        for (var i3 = 0; i3 < bound.length; i3++) {
-          if (bound[i3].shift === void 0) {
-            bound[i3].fn(event);
-          } else if (bound[i3].shift == true && event.shiftKey == true) {
-            bound[i3].fn(event);
-          } else if (bound[i3].shift == false && event.shiftKey == false) {
-            bound[i3].fn(event);
+        for (var i2 = 0; i2 < bound.length; i2++) {
+          if (bound[i2].shift === void 0) {
+            bound[i2].fn(event);
+          } else if (bound[i2].shift == true && event.shiftKey == true) {
+            bound[i2].fn(event);
+          } else if (bound[i2].shift == false && event.shiftKey == false) {
+            bound[i2].fn(event);
           }
         }
         if (preventDefault == true) {
@@ -5659,9 +5659,9 @@
         var newBindings = [];
         var bound = _bound[type][_keys[key].code];
         if (bound !== void 0) {
-          for (var i3 = 0; i3 < bound.length; i3++) {
-            if (!(bound[i3].fn == callback && bound[i3].shift == _keys[key].shift)) {
-              newBindings.push(_bound[type][_keys[key].code][i3]);
+          for (var i2 = 0; i2 < bound.length; i2++) {
+            if (!(bound[i2].fn == callback && bound[i2].shift == _keys[key].shift)) {
+              newBindings.push(_bound[type][_keys[key].code][i2]);
             }
           }
         }
@@ -5684,63 +5684,63 @@
   }
 
   // node_modules/vis-network/esnext/esm/vis-network.mjs
-  function drawCircle(ctx, x2, y2, r) {
+  function drawCircle(ctx, x, y, r) {
     ctx.beginPath();
-    ctx.arc(x2, y2, r, 0, 2 * Math.PI, false);
+    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.closePath();
   }
-  function drawSquare(ctx, x2, y2, r) {
+  function drawSquare(ctx, x, y, r) {
     ctx.beginPath();
-    ctx.rect(x2 - r, y2 - r, r * 2, r * 2);
+    ctx.rect(x - r, y - r, r * 2, r * 2);
     ctx.closePath();
   }
-  function drawTriangle(ctx, x2, y2, r) {
+  function drawTriangle(ctx, x, y, r) {
     ctx.beginPath();
     r *= 1.15;
-    y2 += 0.275 * r;
+    y += 0.275 * r;
     const s = r * 2;
     const s2 = s / 2;
     const ir = Math.sqrt(3) / 6 * s;
     const h = Math.sqrt(s * s - s2 * s2);
-    ctx.moveTo(x2, y2 - (h - ir));
-    ctx.lineTo(x2 + s2, y2 + ir);
-    ctx.lineTo(x2 - s2, y2 + ir);
-    ctx.lineTo(x2, y2 - (h - ir));
+    ctx.moveTo(x, y - (h - ir));
+    ctx.lineTo(x + s2, y + ir);
+    ctx.lineTo(x - s2, y + ir);
+    ctx.lineTo(x, y - (h - ir));
     ctx.closePath();
   }
-  function drawTriangleDown(ctx, x2, y2, r) {
+  function drawTriangleDown(ctx, x, y, r) {
     ctx.beginPath();
     r *= 1.15;
-    y2 -= 0.275 * r;
+    y -= 0.275 * r;
     const s = r * 2;
     const s2 = s / 2;
     const ir = Math.sqrt(3) / 6 * s;
     const h = Math.sqrt(s * s - s2 * s2);
-    ctx.moveTo(x2, y2 + (h - ir));
-    ctx.lineTo(x2 + s2, y2 - ir);
-    ctx.lineTo(x2 - s2, y2 - ir);
-    ctx.lineTo(x2, y2 + (h - ir));
+    ctx.moveTo(x, y + (h - ir));
+    ctx.lineTo(x + s2, y - ir);
+    ctx.lineTo(x - s2, y - ir);
+    ctx.lineTo(x, y + (h - ir));
     ctx.closePath();
   }
-  function drawStar(ctx, x2, y2, r) {
+  function drawStar(ctx, x, y, r) {
     ctx.beginPath();
     r *= 0.82;
-    y2 += 0.1 * r;
+    y += 0.1 * r;
     for (let n = 0; n < 10; n++) {
       const radius = n % 2 === 0 ? r * 1.3 : r * 0.5;
-      ctx.lineTo(x2 + radius * Math.sin(n * 2 * Math.PI / 10), y2 - radius * Math.cos(n * 2 * Math.PI / 10));
+      ctx.lineTo(x + radius * Math.sin(n * 2 * Math.PI / 10), y - radius * Math.cos(n * 2 * Math.PI / 10));
     }
     ctx.closePath();
   }
-  function drawDiamond(ctx, x2, y2, r) {
+  function drawDiamond(ctx, x, y, r) {
     ctx.beginPath();
-    ctx.lineTo(x2, y2 + r);
-    ctx.lineTo(x2 + r, y2);
-    ctx.lineTo(x2, y2 - r);
-    ctx.lineTo(x2 - r, y2);
+    ctx.lineTo(x, y + r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x, y - r);
+    ctx.lineTo(x - r, y);
     ctx.closePath();
   }
-  function drawRoundRect(ctx, x2, y2, w, h, r) {
+  function drawRoundRect(ctx, x, y, w, h, r) {
     const r2d = Math.PI / 180;
     if (w - 2 * r < 0) {
       r = w / 2;
@@ -5749,49 +5749,49 @@
       r = h / 2;
     }
     ctx.beginPath();
-    ctx.moveTo(x2 + r, y2);
-    ctx.lineTo(x2 + w - r, y2);
-    ctx.arc(x2 + w - r, y2 + r, r, r2d * 270, r2d * 360, false);
-    ctx.lineTo(x2 + w, y2 + h - r);
-    ctx.arc(x2 + w - r, y2 + h - r, r, 0, r2d * 90, false);
-    ctx.lineTo(x2 + r, y2 + h);
-    ctx.arc(x2 + r, y2 + h - r, r, r2d * 90, r2d * 180, false);
-    ctx.lineTo(x2, y2 + r);
-    ctx.arc(x2 + r, y2 + r, r, r2d * 180, r2d * 270, false);
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arc(x + w - r, y + r, r, r2d * 270, r2d * 360, false);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arc(x + w - r, y + h - r, r, 0, r2d * 90, false);
+    ctx.lineTo(x + r, y + h);
+    ctx.arc(x + r, y + h - r, r, r2d * 90, r2d * 180, false);
+    ctx.lineTo(x, y + r);
+    ctx.arc(x + r, y + r, r, r2d * 180, r2d * 270, false);
     ctx.closePath();
   }
-  function drawEllipse(ctx, x2, y2, w, h) {
-    const kappa = 0.5522848, ox = w / 2 * kappa, oy = h / 2 * kappa, xe = x2 + w, ye = y2 + h, xm = x2 + w / 2, ym = y2 + h / 2;
+  function drawEllipse(ctx, x, y, w, h) {
+    const kappa = 0.5522848, ox = w / 2 * kappa, oy = h / 2 * kappa, xe = x + w, ye = y + h, xm = x + w / 2, ym = y + h / 2;
     ctx.beginPath();
-    ctx.moveTo(x2, ym);
-    ctx.bezierCurveTo(x2, ym - oy, xm - ox, y2, xm, y2);
-    ctx.bezierCurveTo(xm + ox, y2, xe, ym - oy, xe, ym);
+    ctx.moveTo(x, ym);
+    ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+    ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
     ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-    ctx.bezierCurveTo(xm - ox, ye, x2, ym + oy, x2, ym);
+    ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
     ctx.closePath();
   }
-  function drawDatabase(ctx, x2, y2, w, h) {
+  function drawDatabase(ctx, x, y, w, h) {
     const f = 1 / 3;
     const wEllipse = w;
     const hEllipse = h * f;
-    const kappa = 0.5522848, ox = wEllipse / 2 * kappa, oy = hEllipse / 2 * kappa, xe = x2 + wEllipse, ye = y2 + hEllipse, xm = x2 + wEllipse / 2, ym = y2 + hEllipse / 2, ymb = y2 + (h - hEllipse / 2), yeb = y2 + h;
+    const kappa = 0.5522848, ox = wEllipse / 2 * kappa, oy = hEllipse / 2 * kappa, xe = x + wEllipse, ye = y + hEllipse, xm = x + wEllipse / 2, ym = y + hEllipse / 2, ymb = y + (h - hEllipse / 2), yeb = y + h;
     ctx.beginPath();
     ctx.moveTo(xe, ym);
     ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-    ctx.bezierCurveTo(xm - ox, ye, x2, ym + oy, x2, ym);
-    ctx.bezierCurveTo(x2, ym - oy, xm - ox, y2, xm, y2);
-    ctx.bezierCurveTo(xm + ox, y2, xe, ym - oy, xe, ym);
+    ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+    ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
     ctx.lineTo(xe, ymb);
     ctx.bezierCurveTo(xe, ymb + oy, xm + ox, yeb, xm, yeb);
-    ctx.bezierCurveTo(xm - ox, yeb, x2, ymb + oy, x2, ymb);
-    ctx.lineTo(x2, ym);
+    ctx.bezierCurveTo(xm - ox, yeb, x, ymb + oy, x, ymb);
+    ctx.lineTo(x, ym);
   }
-  function drawDashedLine(ctx, x2, y2, x22, y22, pattern) {
+  function drawDashedLine(ctx, x, y, x2, y2, pattern) {
     ctx.beginPath();
-    ctx.moveTo(x2, y2);
+    ctx.moveTo(x, y);
     const patternLength = pattern.length;
-    const dx = x22 - x2;
-    const dy = y22 - y2;
+    const dx = x2 - x;
+    const dy = y2 - y;
     const slope = dy / dx;
     let distRemaining = Math.sqrt(dx * dx + dy * dy);
     let patternIndex = 0;
@@ -5805,24 +5805,24 @@
       }
       xStep = Math.sqrt(dashLength * dashLength / (1 + slope * slope));
       xStep = dx < 0 ? -xStep : xStep;
-      x2 += xStep;
-      y2 += slope * xStep;
+      x += xStep;
+      y += slope * xStep;
       if (draw === true) {
-        ctx.lineTo(x2, y2);
+        ctx.lineTo(x, y);
       } else {
-        ctx.moveTo(x2, y2);
+        ctx.moveTo(x, y);
       }
       distRemaining -= dashLength;
       draw = !draw;
     }
   }
-  function drawHexagon(ctx, x2, y2, r) {
+  function drawHexagon(ctx, x, y, r) {
     ctx.beginPath();
     const sides = 6;
     const a = Math.PI * 2 / sides;
-    ctx.moveTo(x2 + r, y2);
-    for (let i2 = 1; i2 < sides; i2++) {
-      ctx.lineTo(x2 + r * Math.cos(a * i2), y2 + r * Math.sin(a * i2));
+    ctx.moveTo(x + r, y);
+    for (let i = 1; i < sides; i++) {
+      ctx.lineTo(x + r * Math.cos(a * i), y + r * Math.sin(a * i));
     }
     ctx.closePath();
   }
@@ -5943,7 +5943,7 @@
     }
   }
   function addNode(graph2, node) {
-    let i2, len;
+    let i, len;
     let current = null;
     const graphs = [graph2];
     let root = graph2;
@@ -5952,9 +5952,9 @@
       root = root.parent;
     }
     if (root.nodes) {
-      for (i2 = 0, len = root.nodes.length; i2 < len; i2++) {
-        if (node.id === root.nodes[i2].id) {
-          current = root.nodes[i2];
+      for (i = 0, len = root.nodes.length; i < len; i++) {
+        if (node.id === root.nodes[i].id) {
+          current = root.nodes[i];
           break;
         }
       }
@@ -5967,8 +5967,8 @@
         current.attr = merge2(current.attr, graph2.node);
       }
     }
-    for (i2 = graphs.length - 1; i2 >= 0; i2--) {
-      const g = graphs[i2];
+    for (i = graphs.length - 1; i >= 0; i--) {
+      const g = graphs[i];
       if (!g.nodes) {
         g.nodes = [];
       }
@@ -6018,11 +6018,11 @@
     do {
       isComment = false;
       if (c === "#") {
-        let i2 = index - 1;
-        while (dot.charAt(i2) === " " || dot.charAt(i2) === "	") {
-          i2--;
+        let i = index - 1;
+        while (dot.charAt(i) === " " || dot.charAt(i) === "	") {
+          i--;
         }
-        if (dot.charAt(i2) === "\n" || dot.charAt(i2) === "") {
+        if (dot.charAt(i) === "\n" || dot.charAt(i) === "") {
           while (c != "" && c != "\n") {
             next();
           }
@@ -6169,17 +6169,17 @@
     if (tokenType != TOKENTYPE.IDENTIFIER) {
       throw newSyntaxError("Identifier expected");
     }
-    const id2 = token;
+    const id = token;
     getToken();
     if (token === "=") {
       getToken();
       if (tokenType != TOKENTYPE.IDENTIFIER) {
         throw newSyntaxError("Identifier expected");
       }
-      graph2[id2] = token;
+      graph2[id] = token;
       getToken();
     } else {
-      parseNodeStatement(graph2, id2);
+      parseNodeStatement(graph2, id);
     }
   }
   function parseSubgraph(graph2) {
@@ -6234,16 +6234,16 @@
     }
     return null;
   }
-  function parseNodeStatement(graph2, id2) {
+  function parseNodeStatement(graph2, id) {
     const node = {
-      id: id2
+      id
     };
     const attr = parseAttributeList();
     if (attr) {
       node.attr = attr;
     }
     addNode(graph2, node);
-    parseEdge(graph2, id2);
+    parseEdge(graph2, id);
   }
   function parseEdge(graph2, from) {
     while (token === "->" || token === "--") {
@@ -6270,7 +6270,7 @@
     }
   }
   function parseAttributeList() {
-    let i2;
+    let i;
     let attr = null;
     const edgeStyles = {
       dashed: true,
@@ -6337,17 +6337,17 @@
     if (attr_names.includes("dir")) {
       const idx = {};
       idx.arrows = {};
-      for (let i3 = 0; i3 < attr_list.length; i3++) {
-        if (attr_list[i3].name === "arrows") {
-          if (attr_list[i3].value.to != null) {
-            idx.arrows.to = i3;
-          } else if (attr_list[i3].value.from != null) {
-            idx.arrows.from = i3;
+      for (let i2 = 0; i2 < attr_list.length; i2++) {
+        if (attr_list[i2].name === "arrows") {
+          if (attr_list[i2].value.to != null) {
+            idx.arrows.to = i2;
+          } else if (attr_list[i2].value.from != null) {
+            idx.arrows.from = i2;
           } else {
             throw newSyntaxError("Invalid value of arrows");
           }
-        } else if (attr_list[i3].name === "dir") {
-          idx.dir = i3;
+        } else if (attr_list[i2].name === "dir") {
+          idx.dir = i2;
         }
       }
       const dir_type = attr_list[idx.dir].value;
@@ -6538,19 +6538,19 @@
     if (attr_names.includes("penwidth")) {
       const tmp_attr_list = [];
       nof_attr_list = attr_list.length;
-      for (i2 = 0; i2 < nof_attr_list; i2++) {
-        if (attr_list[i2].name !== "width") {
-          if (attr_list[i2].name === "penwidth") {
-            attr_list[i2].name = "width";
+      for (i = 0; i < nof_attr_list; i++) {
+        if (attr_list[i].name !== "width") {
+          if (attr_list[i].name === "penwidth") {
+            attr_list[i].name = "width";
           }
-          tmp_attr_list.push(attr_list[i2]);
+          tmp_attr_list.push(attr_list[i]);
         }
       }
       attr_list = tmp_attr_list;
     }
     nof_attr_list = attr_list.length;
-    for (i2 = 0; i2 < nof_attr_list; i2++) {
-      setValue(attr_list[i2].attr, attr_list[i2].name, attr_list[i2].value);
+    for (i = 0; i < nof_attr_list; i++) {
+      setValue(attr_list[i].attr, attr_list[i].name, attr_list[i].value);
     }
     return attr;
   }
@@ -6587,8 +6587,8 @@
     const names = path.split(".");
     const prop = names.pop();
     let obj = object2;
-    for (let i2 = 0; i2 < names.length; i2++) {
-      const name = names[i2];
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i];
       if (!(name in obj)) {
         obj[name] = {};
       }
@@ -7563,8 +7563,8 @@
      * @returns {number}
      * @private
      */
-    _XconvertDOMtoCanvas(x2) {
-      return (x2 - this.body.view.translation.x) / this.body.view.scale;
+    _XconvertDOMtoCanvas(x) {
+      return (x - this.body.view.translation.x) / this.body.view.scale;
     }
     /**
      * Convert the X coordinate in canvas-space (the simulation sandbox, which the camera looks upon) to
@@ -7573,8 +7573,8 @@
      * @returns {number}
      * @private
      */
-    _XconvertCanvasToDOM(x2) {
-      return x2 * this.body.view.scale + this.body.view.translation.x;
+    _XconvertCanvasToDOM(x) {
+      return x * this.body.view.scale + this.body.view.translation.x;
     }
     /**
      * Convert the Y coordinate in DOM-space (coordinate point in browser relative to the container div) to
@@ -7583,8 +7583,8 @@
      * @returns {number}
      * @private
      */
-    _YconvertDOMtoCanvas(y2) {
-      return (y2 - this.body.view.translation.y) / this.body.view.scale;
+    _YconvertDOMtoCanvas(y) {
+      return (y - this.body.view.translation.y) / this.body.view.scale;
     }
     /**
      * Convert the Y coordinate in canvas-space (the simulation sandbox, which the camera looks upon) to
@@ -7593,17 +7593,17 @@
      * @returns {number}
      * @private
      */
-    _YconvertCanvasToDOM(y2) {
-      return y2 * this.body.view.scale + this.body.view.translation.y;
+    _YconvertCanvasToDOM(y) {
+      return y * this.body.view.scale + this.body.view.translation.y;
     }
     /**
      * @param {point} pos
      * @returns {point}
      */
-    canvasToDOM(pos2) {
+    canvasToDOM(pos) {
       return {
-        x: this._XconvertCanvasToDOM(pos2.x),
-        y: this._YconvertCanvasToDOM(pos2.y)
+        x: this._XconvertCanvasToDOM(pos.x),
+        y: this._YconvertCanvasToDOM(pos.y)
       };
     }
     /**
@@ -7611,10 +7611,10 @@
      * @param {point} pos
      * @returns {point}
      */
-    DOMtoCanvas(pos2) {
+    DOMtoCanvas(pos) {
       return {
-        x: this._XconvertDOMtoCanvas(pos2.x),
-        y: this._YconvertDOMtoCanvas(pos2.y)
+        x: this._XconvertDOMtoCanvas(pos.x),
+        y: this._YconvertDOMtoCanvas(pos.y)
       };
     }
   };
@@ -7857,12 +7857,12 @@
         right: bottomRight.x
       };
       const drawExternalLabels = [];
-      for (let i3 = 0; i3 < nodeIndices.length; i3++) {
-        node = nodes[nodeIndices[i3]];
+      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
+        node = nodes[nodeIndices[i2]];
         if (node.hover) {
-          hovered.push(nodeIndices[i3]);
+          hovered.push(nodeIndices[i2]);
         } else if (node.isSelected()) {
-          selected.push(nodeIndices[i3]);
+          selected.push(nodeIndices[i2]);
         } else {
           if (alwaysShow === true) {
             const drawLater = node.draw(ctx);
@@ -7879,18 +7879,18 @@
           }
         }
       }
-      let i2;
+      let i;
       const selectedLength = selected.length;
       const hoveredLength = hovered.length;
-      for (i2 = 0; i2 < selectedLength; i2++) {
-        node = nodes[selected[i2]];
+      for (i = 0; i < selectedLength; i++) {
+        node = nodes[selected[i]];
         const drawLater = node.draw(ctx);
         if (drawLater.drawExternalLabel != null) {
           drawExternalLabels.push(drawLater.drawExternalLabel);
         }
       }
-      for (i2 = 0; i2 < hoveredLength; i2++) {
-        node = nodes[hovered[i2]];
+      for (i = 0; i < hoveredLength; i++) {
+        node = nodes[hovered[i]];
         const drawLater = node.draw(ctx);
         if (drawLater.drawExternalLabel != null) {
           drawExternalLabels.push(drawLater.drawExternalLabel);
@@ -7912,8 +7912,8 @@
     _drawEdges(ctx) {
       const edges = this.body.edges;
       const edgeIndices = this.body.edgeIndices;
-      for (let i2 = 0; i2 < edgeIndices.length; i2++) {
-        const edge = edges[edgeIndices[i2]];
+      for (let i = 0; i < edgeIndices.length; i++) {
+        const edge = edges[edgeIndices[i]];
         if (edge.connected === true) {
           edge.draw(ctx);
         }
@@ -7927,8 +7927,8 @@
     _drawArrows(ctx) {
       const edges = this.body.edges;
       const edgeIndices = this.body.edgeIndices;
-      for (let i2 = 0; i2 < edgeIndices.length; i2++) {
-        const edge = edges[edgeIndices[i2]];
+      for (let i = 0; i < edgeIndices.length; i++) {
+        const edge = edges[edgeIndices[i]];
         if (edge.connected === true) {
           edge.drawArrows(ctx);
         }
@@ -7975,8 +7975,8 @@
     static getRange(allNodes, specificNodes = []) {
       let minY = 1e9, maxY = -1e9, minX = 1e9, maxX = -1e9, node;
       if (specificNodes.length > 0) {
-        for (let i2 = 0; i2 < specificNodes.length; i2++) {
-          node = allNodes[specificNodes[i2]];
+        for (let i = 0; i < specificNodes.length; i++) {
+          node = allNodes[specificNodes[i]];
           if (minX > node.shape.boundingBox.left) {
             minX = node.shape.boundingBox.left;
           }
@@ -8009,8 +8009,8 @@
     static getRangeCore(allNodes, specificNodes = []) {
       let minY = 1e9, maxY = -1e9, minX = 1e9, maxX = -1e9, node;
       if (specificNodes.length > 0) {
-        for (let i2 = 0; i2 < specificNodes.length; i2++) {
-          node = allNodes[specificNodes[i2]];
+        for (let i = 0; i < specificNodes.length; i++) {
+          node = allNodes[specificNodes[i]];
           if (minX > node.x) {
             minX = node.x;
           }
@@ -8111,30 +8111,30 @@
     return typeof text === "string" && text !== "";
   }
   function getSelfRefCoordinates(ctx, angle, radius, node) {
-    let x2 = node.x;
-    let y2 = node.y;
+    let x = node.x;
+    let y = node.y;
     if (typeof node.distanceToBorder === "function") {
       const toBorderDist = node.distanceToBorder(ctx, angle);
       const yFromNodeCenter = Math.sin(angle) * toBorderDist;
       const xFromNodeCenter = Math.cos(angle) * toBorderDist;
       if (xFromNodeCenter === toBorderDist) {
-        x2 += toBorderDist;
-        y2 = node.y;
+        x += toBorderDist;
+        y = node.y;
       } else if (yFromNodeCenter === toBorderDist) {
-        x2 = node.x;
-        y2 -= toBorderDist;
+        x = node.x;
+        y -= toBorderDist;
       } else {
-        x2 += xFromNodeCenter;
-        y2 -= yFromNodeCenter;
+        x += xFromNodeCenter;
+        y -= yFromNodeCenter;
       }
     } else if (node.shape.width > node.shape.height) {
-      x2 = node.x + node.shape.width * 0.5;
-      y2 = node.y - radius;
+      x = node.x + node.shape.width * 0.5;
+      y = node.y - radius;
     } else {
-      x2 = node.x + radius;
-      y2 = node.y - node.shape.height * 0.5;
+      x = node.x + radius;
+      y = node.y - node.shape.height * 0.5;
     }
-    return { x: x2, y: y2 };
+    return { x, y };
   }
   var EndPoint = class {
     /**
@@ -8151,16 +8151,16 @@
       if (!Array.isArray(points)) {
         points = [points];
       }
-      const x2 = arrowData.point.x;
-      const y2 = arrowData.point.y;
+      const x = arrowData.point.x;
+      const y = arrowData.point.y;
       const angle = arrowData.angle;
       const length2 = arrowData.length;
-      for (let i2 = 0; i2 < points.length; ++i2) {
-        const p = points[i2];
+      for (let i = 0; i < points.length; ++i) {
+        const p = points[i];
         const xt = p.x * Math.cos(angle) - p.y * Math.sin(angle);
         const yt = p.x * Math.sin(angle) + p.y * Math.cos(angle);
-        p.x = x2 + length2 * xt;
-        p.y = y2 + length2 * yt;
+        p.x = x + length2 * xt;
+        p.y = y + length2 * yt;
       }
     }
     /**
@@ -8171,8 +8171,8 @@
     static drawPath(ctx, points) {
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
-      for (let i2 = 1; i2 < points.length; ++i2) {
-        ctx.lineTo(points[i2].x, points[i2].y);
+      for (let i = 1; i < points.length; ++i) {
+        ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.closePath();
     }
@@ -8527,8 +8527,8 @@
       if (this.from != this.to) {
         this._line(ctx, values, viaNode, fromPoint, toPoint);
       } else {
-        const [x2, y2, radius] = this._getCircleData(ctx);
-        this._circle(ctx, values, x2, y2, radius);
+        const [x, y, radius] = this._getCircleData(ctx);
+        this._circle(ctx, values, x, y, radius);
       }
     }
     /**
@@ -8549,8 +8549,8 @@
         if (this.from != this.to) {
           this._line(ctx, values, viaNode);
         } else {
-          const [x2, y2, radius] = this._getCircleData(ctx);
-          this._circle(ctx, values, x2, y2, radius);
+          const [x, y, radius] = this._getCircleData(ctx);
+          this._circle(ctx, values, x, y, radius);
         }
         ctx.setLineDash([0]);
         ctx.lineDashOffset = 0;
@@ -8559,8 +8559,8 @@
         if (this.from != this.to) {
           drawDashedLine(ctx, this.from.x, this.from.y, this.to.x, this.to.y, pattern);
         } else {
-          const [x2, y2, radius] = this._getCircleData(ctx);
-          this._circle(ctx, values, x2, y2, radius);
+          const [x, y, radius] = this._getCircleData(ctx);
+          this._circle(ctx, values, x, y, radius);
         }
         this.enableShadow(ctx, values);
         ctx.stroke();
@@ -8589,18 +8589,18 @@
           to: this._findBorderPosition(this.to, ctx)
         };
       } else {
-        const [x2, y2] = this._getCircleData(ctx).slice(0, 2);
+        const [x, y] = this._getCircleData(ctx).slice(0, 2);
         return {
           from: this._findBorderPositionCircle(this.from, ctx, {
-            x: x2,
-            y: y2,
+            x,
+            y,
             low: 0.25,
             high: 0.6,
             direction: -1
           }),
           to: this._findBorderPositionCircle(this.from, ctx, {
-            x: x2,
-            y: y2,
+            x,
+            y,
             low: 0.6,
             high: 0.8,
             direction: 1
@@ -8631,11 +8631,11 @@
      * @param position - Value between 0 (line start) and 1 (line end).
      * @returns Cartesian coordinates of requested point on the circle.
      */
-    _pointOnCircle(x2, y2, radius, position) {
+    _pointOnCircle(x, y, radius, position) {
       const angle = position * 2 * Math.PI;
       return {
-        x: x2 + radius * Math.cos(angle),
-        y: y2 - radius * Math.sin(angle)
+        x: x + radius * Math.cos(angle),
+        y: y - radius * Math.sin(angle)
       };
     }
     /**
@@ -8648,15 +8648,15 @@
      * @returns Cartesian coordinates of the intersection between the border of the node and the edge.
      */
     _findBorderPositionCircle(nearNode, ctx, options2) {
-      const x2 = options2.x;
-      const y2 = options2.y;
+      const x = options2.x;
+      const y = options2.y;
       let low = options2.low;
       let high = options2.high;
       const direction = options2.direction;
       const maxIterations = 10;
       const radius = this.options.selfReference.size;
       const threshold = 0.05;
-      let pos2;
+      let pos;
       let middle = (low + high) * 0.5;
       let endPointOffset = 0;
       if (this.options.arrowStrikethrough === true) {
@@ -8669,10 +8669,10 @@
       let iteration = 0;
       do {
         middle = (low + high) * 0.5;
-        pos2 = this._pointOnCircle(x2, y2, radius, middle);
-        const angle = Math.atan2(nearNode.y - pos2.y, nearNode.x - pos2.x);
+        pos = this._pointOnCircle(x, y, radius, middle);
+        const angle = Math.atan2(nearNode.y - pos.y, nearNode.x - pos.x);
         const distanceToBorder = nearNode.distanceToBorder(ctx, angle) + endPointOffset;
-        const distanceToPoint = Math.sqrt(Math.pow(pos2.x - nearNode.x, 2) + Math.pow(pos2.y - nearNode.y, 2));
+        const distanceToPoint = Math.sqrt(Math.pow(pos.x - nearNode.x, 2) + Math.pow(pos.y - nearNode.y, 2));
         const difference = distanceToBorder - distanceToPoint;
         if (Math.abs(difference) < threshold) {
           break;
@@ -8691,7 +8691,7 @@
         }
         ++iteration;
       } while (low <= high && iteration < maxIterations);
-      return __spreadProps(__spreadValues({}, pos2), {
+      return __spreadProps(__spreadValues({}, pos), {
         t: middle
       });
     }
@@ -8753,7 +8753,7 @@
      * @param y - Center of the circle on the y axis.
      * @param radius - Radius of the circle.
      */
-    _circle(ctx, values, x2, y2, radius) {
+    _circle(ctx, values, x, y, radius) {
       this.enableShadow(ctx, values);
       let angleFrom = 0;
       let angleTo = Math.PI * 2;
@@ -8761,24 +8761,24 @@
         const low = this.options.selfReference.angle;
         const high = this.options.selfReference.angle + Math.PI;
         const pointTFrom = this._findBorderPositionCircle(this.from, ctx, {
-          x: x2,
-          y: y2,
+          x,
+          y,
           low,
           high,
           direction: -1
         });
         const pointTTo = this._findBorderPositionCircle(this.from, ctx, {
-          x: x2,
-          y: y2,
+          x,
+          y,
           low,
           high,
           direction: 1
         });
-        angleFrom = Math.atan2(pointTFrom.y - y2, pointTFrom.x - x2);
-        angleTo = Math.atan2(pointTTo.y - y2, pointTTo.x - x2);
+        angleFrom = Math.atan2(pointTFrom.y - y, pointTFrom.x - x);
+        angleTo = Math.atan2(pointTTo.y - y, pointTTo.x - x);
       }
       ctx.beginPath();
-      ctx.arc(x2, y2, radius, angleFrom, angleTo, false);
+      ctx.arc(x, y, radius, angleFrom, angleTo, false);
       ctx.stroke();
       this.disableShadow(ctx, values);
     }
@@ -8791,9 +8791,9 @@
       if (this.from != this.to) {
         return this._getDistanceToEdge(x1, y1, x2, y2, x3, y3);
       } else {
-        const [x4, y4, radius] = this._getCircleData(void 0);
-        const dx = x4 - x3;
-        const dy = y4 - y3;
+        const [x, y, radius] = this._getCircleData(void 0);
+        const dx = x - x3;
+        const dy = y - y3;
         return Math.abs(Math.sqrt(dx * dx + dy * dy) - radius);
       }
     }
@@ -8817,10 +8817,10 @@
       } else if (u < 0) {
         u = 0;
       }
-      const x4 = x1 + u * px;
-      const y4 = y1 + u * py;
-      const dx = x4 - x3;
-      const dy = y4 - y3;
+      const x = x1 + u * px;
+      const y = y1 + u * py;
+      const dx = x - x3;
+      const dy = y - y3;
       return Math.sqrt(dx * dx + dy * dy);
     }
     /** @inheritDoc */
@@ -8874,13 +8874,13 @@
           arrowPoint = this.getPoint(0.5, viaNode);
         }
       } else {
-        const [x2, y2, radius] = this._getCircleData(ctx);
+        const [x, y, radius] = this._getCircleData(ctx);
         if (position === "from") {
           const low = this.options.selfReference.angle;
           const high = this.options.selfReference.angle + Math.PI;
           const pointT = this._findBorderPositionCircle(this.from, ctx, {
-            x: x2,
-            y: y2,
+            x,
+            y,
             low,
             high,
             direction: -1
@@ -8891,8 +8891,8 @@
           const low = this.options.selfReference.angle;
           const high = this.options.selfReference.angle + Math.PI;
           const pointT = this._findBorderPositionCircle(this.from, ctx, {
-            x: x2,
-            y: y2,
+            x,
+            y,
             low,
             high,
             direction: 1
@@ -8900,9 +8900,9 @@
           angle = pointT.t * -2 * Math.PI + 1.5 * Math.PI - 1.1 * Math.PI;
           arrowPoint = pointT;
         } else {
-          const pos2 = this.options.selfReference.angle / (2 * Math.PI);
-          arrowPoint = this._pointOnCircle(x2, y2, radius, pos2);
-          angle = pos2 * -2 * Math.PI + 1.5 * Math.PI + 0.1 * Math.PI;
+          const pos = this.options.selfReference.angle / (2 * Math.PI);
+          arrowPoint = this._pointOnCircle(x, y, radius, pos);
+          angle = pos * -2 * Math.PI + 1.5 * Math.PI + 0.1 * Math.PI;
         }
       }
       const xi = arrowPoint.x - length2 * 0.9 * Math.cos(angle);
@@ -9015,7 +9015,7 @@
       let high = 1;
       let low = 0;
       let node = this.to;
-      let pos2;
+      let pos;
       let middle;
       let endPointOffset = this.options.endPointOffset ? this.options.endPointOffset.to : 0;
       if (nearNode.id === this.from.id) {
@@ -9029,10 +9029,10 @@
       let iteration = 0;
       do {
         middle = (low + high) * 0.5;
-        pos2 = this.getPoint(middle, viaNode);
-        const angle = Math.atan2(node.y - pos2.y, node.x - pos2.x);
+        pos = this.getPoint(middle, viaNode);
+        const angle = Math.atan2(node.y - pos.y, node.x - pos.x);
         const distanceToBorder = node.distanceToBorder(ctx, angle) + endPointOffset;
-        const distanceToPoint = Math.sqrt(Math.pow(pos2.x - node.x, 2) + Math.pow(pos2.y - node.y, 2));
+        const distanceToPoint = Math.sqrt(Math.pow(pos.x - node.x, 2) + Math.pow(pos.y - node.y, 2));
         const difference = distanceToBorder - distanceToPoint;
         if (Math.abs(difference) < threshold) {
           break;
@@ -9051,7 +9051,7 @@
         }
         ++iteration;
       } while (low <= high && iteration < maxIterations);
-      return __spreadProps(__spreadValues({}, pos2), {
+      return __spreadProps(__spreadValues({}, pos), {
         t: middle
       });
     }
@@ -9071,19 +9071,19 @@
     _getDistanceToBezierEdge(x1, y1, x2, y2, x3, y3, via) {
       let minDistance = 1e9;
       let distance;
-      let i2, t, x4, y4;
+      let i, t, x, y;
       let lastX = x1;
       let lastY = y1;
-      for (i2 = 1; i2 < 10; i2++) {
-        t = 0.1 * i2;
-        x4 = Math.pow(1 - t, 2) * x1 + 2 * t * (1 - t) * via.x + Math.pow(t, 2) * x2;
-        y4 = Math.pow(1 - t, 2) * y1 + 2 * t * (1 - t) * via.y + Math.pow(t, 2) * y2;
-        if (i2 > 0) {
-          distance = this._getDistanceToLine(lastX, lastY, x4, y4, x3, y3);
+      for (i = 1; i < 10; i++) {
+        t = 0.1 * i;
+        x = Math.pow(1 - t, 2) * x1 + 2 * t * (1 - t) * via.x + Math.pow(t, 2) * x2;
+        y = Math.pow(1 - t, 2) * y1 + 2 * t * (1 - t) * via.y + Math.pow(t, 2) * y2;
+        if (i > 0) {
+          distance = this._getDistanceToLine(lastX, lastY, x, y, x3, y3);
           minDistance = distance < minDistance ? distance : minDistance;
         }
-        lastX = x4;
-        lastY = y4;
+        lastX = x;
+        lastY = y;
       }
       return minDistance;
     }
@@ -9396,9 +9396,9 @@
     /** @inheritDoc */
     getPoint(position, viaNode = this._getViaCoordinates()) {
       const t = position;
-      const x2 = Math.pow(1 - t, 2) * this.fromPoint.x + 2 * t * (1 - t) * viaNode.x + Math.pow(t, 2) * this.toPoint.x;
-      const y2 = Math.pow(1 - t, 2) * this.fromPoint.y + 2 * t * (1 - t) * viaNode.y + Math.pow(t, 2) * this.toPoint.y;
-      return { x: x2, y: y2 };
+      const x = Math.pow(1 - t, 2) * this.fromPoint.x + 2 * t * (1 - t) * viaNode.x + Math.pow(t, 2) * this.toPoint.x;
+      const y = Math.pow(1 - t, 2) * this.fromPoint.y + 2 * t * (1 - t) * viaNode.y + Math.pow(t, 2) * this.toPoint.y;
+      return { x, y };
     }
   };
   var CubicBezierEdgeBase = class extends BezierEdgeBase {
@@ -9422,20 +9422,20 @@
       let lastX = x1;
       let lastY = y1;
       const vec = [0, 0, 0, 0];
-      for (let i2 = 1; i2 < 10; i2++) {
-        const t = 0.1 * i2;
+      for (let i = 1; i < 10; i++) {
+        const t = 0.1 * i;
         vec[0] = Math.pow(1 - t, 3);
         vec[1] = 3 * t * Math.pow(1 - t, 2);
         vec[2] = 3 * Math.pow(t, 2) * (1 - t);
         vec[3] = Math.pow(t, 3);
-        const x4 = vec[0] * x1 + vec[1] * via1.x + vec[2] * via2.x + vec[3] * x2;
-        const y4 = vec[0] * y1 + vec[1] * via1.y + vec[2] * via2.y + vec[3] * y2;
-        if (i2 > 0) {
-          const distance = this._getDistanceToLine(lastX, lastY, x4, y4, x3, y3);
+        const x = vec[0] * x1 + vec[1] * via1.x + vec[2] * via2.x + vec[3] * x2;
+        const y = vec[0] * y1 + vec[1] * via1.y + vec[2] * via2.y + vec[3] * y2;
+        if (i > 0) {
+          const distance = this._getDistanceToLine(lastX, lastY, x, y, x3, y3);
           minDistance = distance < minDistance ? distance : minDistance;
         }
-        lastX = x4;
-        lastY = y4;
+        lastX = x;
+        lastY = y;
       }
       return minDistance;
     }
@@ -9496,9 +9496,9 @@
         3 * Math.pow(t, 2) * (1 - t),
         Math.pow(t, 3)
       ];
-      const x2 = vec[0] * this.fromPoint.x + vec[1] * via1.x + vec[2] * via2.x + vec[3] * this.toPoint.x;
-      const y2 = vec[0] * this.fromPoint.y + vec[1] * via1.y + vec[2] * via2.y + vec[3] * this.toPoint.y;
-      return { x: x2, y: y2 };
+      const x = vec[0] * this.fromPoint.x + vec[1] * via1.x + vec[2] * via2.x + vec[3] * this.toPoint.x;
+      const y = vec[0] * this.fromPoint.y + vec[1] * via1.y + vec[2] * via2.y + vec[3] * this.toPoint.y;
+      return { x, y };
     }
   };
   var StraightEdge = class extends EdgeBase {
@@ -9971,8 +9971,8 @@
       const nlLines = String(text).split("\n");
       const lineCount = nlLines.length;
       if (font.multi) {
-        for (let i2 = 0; i2 < lineCount; i2++) {
-          const blocks = this.splitBlocks(nlLines[i2], font.multi);
+        for (let i = 0; i < lineCount; i++) {
+          const blocks = this.splitBlocks(nlLines[i], font.multi);
           if (blocks === void 0) continue;
           if (blocks.length === 0) {
             this.lines.newLine("");
@@ -9995,12 +9995,12 @@
         }
       } else {
         if (font.maxWdt > 0) {
-          for (let i2 = 0; i2 < lineCount; i2++) {
-            this.splitStringIntoLines(nlLines[i2]);
+          for (let i = 0; i < lineCount; i++) {
+            this.splitStringIntoLines(nlLines[i]);
           }
         } else {
-          for (let i2 = 0; i2 < lineCount; i2++) {
-            this.lines.newLine(nlLines[i2]);
+          for (let i = 0; i < lineCount; i++) {
+            this.lines.newLine(nlLines[i]);
           }
         }
       }
@@ -10170,9 +10170,9 @@
         let w = this.getLongestFit(words);
         if (w === 0) {
           const word = words[0];
-          const x2 = this.getLongestFitWord(word);
-          this.lines.newLine(word.slice(0, x2), mod);
-          words[0] = word.slice(x2);
+          const x = this.getLongestFitWord(word);
+          this.lines.newLine(word.slice(0, x), mod);
+          words[0] = word.slice(x);
         } else {
           let newW = w;
           if (words[w - 1] === " ") {
@@ -10365,8 +10365,8 @@
      * @private
      */
     addFontOptionsToPile(dstPile, srcPile) {
-      for (let i2 = 0; i2 < srcPile.length; ++i2) {
-        this.addFontToPile(dstPile, srcPile[i2]);
+      for (let i = 0; i < srcPile.length; ++i) {
+        this.addFontToPile(dstPile, srcPile[i]);
       }
     }
     /**
@@ -10469,8 +10469,8 @@
     getFontOptions(pile, multiName) {
       const result = {};
       const optionNames = ["color", "size", "face", "mod", "vadjust"];
-      for (let i2 = 0; i2 < optionNames.length; ++i2) {
-        const mod = optionNames[i2];
+      for (let i = 0; i < optionNames.length; ++i) {
+        const mod = optionNames[i];
         result[mod] = this.getFontOption(pile, multiName, mod);
       }
       return result;
@@ -10488,8 +10488,8 @@
       const fontPile = [];
       this.addFontOptionsToPile(fontPile, pile);
       this.fontOptions = this.getBasicOptions(fontPile);
-      for (let i2 = 0; i2 < multiFontStyle.length; ++i2) {
-        const mod = multiFontStyle[i2];
+      for (let i = 0; i < multiFontStyle.length; ++i) {
+        const mod = multiFontStyle[i];
         const modOptions = this.fontOptions[mod];
         const tmpMultiFontOptions = this.getFontOptions(fontPile, mod);
         forEach(tmpMultiFontOptions, (option, n) => {
@@ -10508,7 +10508,7 @@
      * @param {boolean} hover
      * @param {string} [baseline]
      */
-    draw(ctx, x2, y2, selected, hover, baseline = "middle") {
+    draw(ctx, x, y, selected, hover, baseline = "middle") {
       if (this.elementOptions.label === void 0) return;
       let viewFontSize = this.fontOptions.size * this.body.view.scale;
       if (this.elementOptions.label && viewFontSize < this.elementOptions.scaling.label.drawThreshold - 1)
@@ -10516,9 +10516,9 @@
       if (viewFontSize >= this.elementOptions.scaling.label.maxVisible) {
         viewFontSize = Number(this.elementOptions.scaling.label.maxVisible) / this.body.view.scale;
       }
-      this.calculateLabelSize(ctx, selected, hover, x2, y2, baseline);
+      this.calculateLabelSize(ctx, selected, hover, x, y, baseline);
       this._drawBackground(ctx);
-      this._drawText(ctx, x2, this.size.yLine, baseline, viewFontSize);
+      this._drawText(ctx, x, this.size.yLine, baseline, viewFontSize);
     }
     /**
      * Draws the label background
@@ -10541,20 +10541,20 @@
      * @param {number} viewFontSize
      * @private
      */
-    _drawText(ctx, x2, y2, baseline = "middle", viewFontSize) {
-      [x2, y2] = this._setAlignment(ctx, x2, y2, baseline);
+    _drawText(ctx, x, y, baseline = "middle", viewFontSize) {
+      [x, y] = this._setAlignment(ctx, x, y, baseline);
       ctx.textAlign = "left";
-      x2 = x2 - this.size.width / 2;
+      x = x - this.size.width / 2;
       if (this.fontOptions.valign && this.size.height > this.size.labelHeight) {
         if (this.fontOptions.valign === "top") {
-          y2 -= (this.size.height - this.size.labelHeight) / 2;
+          y -= (this.size.height - this.size.labelHeight) / 2;
         }
         if (this.fontOptions.valign === "bottom") {
-          y2 += (this.size.height - this.size.labelHeight) / 2;
+          y += (this.size.height - this.size.labelHeight) / 2;
         }
       }
-      for (let i2 = 0; i2 < this.lineCount; i2++) {
-        const line = this.lines[i2];
+      for (let i = 0; i < this.lineCount; i++) {
+        const line = this.lines[i];
         if (line && line.blocks) {
           let width = 0;
           if (this.isEdgeLabel || this.fontOptions.align === "center") {
@@ -10577,12 +10577,12 @@
             }
             ctx.fillStyle = fontColor;
             if (block.strokeWidth > 0) {
-              ctx.strokeText(block.text, x2 + width, y2 + block.vadjust);
+              ctx.strokeText(block.text, x + width, y + block.vadjust);
             }
-            ctx.fillText(block.text, x2 + width, y2 + block.vadjust);
+            ctx.fillText(block.text, x + width, y + block.vadjust);
             width += block.width;
           }
-          y2 += line.height;
+          y += line.height;
         }
       }
     }
@@ -10595,24 +10595,24 @@
      * @returns {Array.<number>}
      * @private
      */
-    _setAlignment(ctx, x2, y2, baseline) {
+    _setAlignment(ctx, x, y, baseline) {
       if (this.isEdgeLabel && this.fontOptions.align !== "horizontal" && this.pointToSelf === false) {
-        x2 = 0;
-        y2 = 0;
+        x = 0;
+        y = 0;
         const lineMargin = 2;
         if (this.fontOptions.align === "top") {
           ctx.textBaseline = "alphabetic";
-          y2 -= 2 * lineMargin;
+          y -= 2 * lineMargin;
         } else if (this.fontOptions.align === "bottom") {
           ctx.textBaseline = "hanging";
-          y2 += 2 * lineMargin;
+          y += 2 * lineMargin;
         } else {
           ctx.textBaseline = "middle";
         }
       } else {
         ctx.textBaseline = baseline;
       }
-      return [x2, y2];
+      return [x, y];
     }
     /**
      * fade in when relative scale is between threshold and threshold - 1.
@@ -10660,28 +10660,28 @@
      */
     getSize() {
       const lineMargin = 2;
-      let x2 = this.size.left;
-      let y2 = this.size.top - 0.5 * lineMargin;
+      let x = this.size.left;
+      let y = this.size.top - 0.5 * lineMargin;
       if (this.isEdgeLabel) {
-        const x22 = -this.size.width * 0.5;
+        const x2 = -this.size.width * 0.5;
         switch (this.fontOptions.align) {
           case "middle":
-            x2 = x22;
-            y2 = -this.size.height * 0.5;
+            x = x2;
+            y = -this.size.height * 0.5;
             break;
           case "top":
-            x2 = x22;
-            y2 = -(this.size.height + lineMargin);
+            x = x2;
+            y = -(this.size.height + lineMargin);
             break;
           case "bottom":
-            x2 = x22;
-            y2 = lineMargin;
+            x = x2;
+            y = lineMargin;
             break;
         }
       }
       const ret = {
-        left: x2,
-        top: y2,
+        left: x,
+        top: y,
         width: this.size.width,
         height: this.size.height
       };
@@ -10696,11 +10696,11 @@
      * @param {number} [y]
      * @param {'middle'|'hanging'} [baseline]
      */
-    calculateLabelSize(ctx, selected, hover, x2 = 0, y2 = 0, baseline = "middle") {
+    calculateLabelSize(ctx, selected, hover, x = 0, y = 0, baseline = "middle") {
       this._processLabel(ctx, selected, hover);
-      this.size.left = x2 - this.size.width * 0.5;
-      this.size.top = y2 - this.size.height * 0.5;
-      this.size.yLine = y2 + (1 - this.lineCount) * 0.5 * this.fontOptions.size;
+      this.size.left = x - this.size.width * 0.5;
+      this.size.top = y - this.size.height * 0.5;
+      this.size.yLine = y + (1 - this.lineCount) * 0.5 * this.fontOptions.size;
       if (baseline === "hanging") {
         this.size.top += 0.5 * this.fontOptions.size;
         this.size.top += 4;
@@ -11022,9 +11022,9 @@
         if (copyFromGlobals) {
           deepExtend(toColor, globalOptions.color, false, allowDeletion);
         } else {
-          for (const i2 in toColor) {
-            if (Object.prototype.hasOwnProperty.call(toColor, i2)) {
-              delete toColor[i2];
+          for (const i in toColor) {
+            if (Object.prototype.hasOwnProperty.call(toColor, i)) {
+              delete toColor[i];
             }
           }
         }
@@ -11591,10 +11591,10 @@
      * @returns {object} point
      * @private
      */
-    _pointOnCircle(x2, y2, radius, angle) {
+    _pointOnCircle(x, y, radius, angle) {
       return {
-        x: x2 + radius * Math.cos(angle),
-        y: y2 - radius * Math.sin(angle)
+        x: x + radius * Math.cos(angle),
+        y: y - radius * Math.sin(angle)
       };
     }
     /**
@@ -11840,12 +11840,12 @@
      * @param {boolean} hover
      * @private
      */
-    _updateBoundingBox(x2, y2, ctx, selected, hover) {
+    _updateBoundingBox(x, y, ctx, selected, hover) {
       if (ctx !== void 0) {
         this.resize(ctx, selected, hover);
       }
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       this.boundingBox.left = this.left;
       this.boundingBox.top = this.top;
       this.boundingBox.bottom = this.top + this.height;
@@ -11860,8 +11860,8 @@
      * @param {boolean} selected
      * @param {boolean} hover
      */
-    updateBoundingBox(x2, y2, ctx, selected, hover) {
-      this._updateBoundingBox(x2, y2, ctx, selected, hover);
+    updateBoundingBox(x, y, ctx, selected, hover) {
+      this._updateBoundingBox(x, y, ctx, selected, hover);
     }
     /**
      * Determine the dimensions to use for nodes with an internal label
@@ -11920,10 +11920,10 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       this.initContextForDraw(ctx, values);
       drawRoundRect(
         ctx,
@@ -11934,7 +11934,7 @@
         values.borderRadius
       );
       this.performFill(ctx, values);
-      this.updateBoundingBox(x2, y2, ctx, selected, hover);
+      this.updateBoundingBox(x, y, ctx, selected, hover);
       this.labelModule.draw(
         ctx,
         this.left + this.textSize.width / 2 + this.margin.left,
@@ -11951,8 +11951,8 @@
      * @param {boolean} selected
      * @param {boolean} hover
      */
-    updateBoundingBox(x2, y2, ctx, selected, hover) {
-      this._updateBoundingBox(x2, y2, ctx, selected, hover);
+    updateBoundingBox(x, y, ctx, selected, hover) {
+      this._updateBoundingBox(x, y, ctx, selected, hover);
       const borderRadius = this.options.shapeProperties.borderRadius;
       this._addBoundingBoxMargin(borderRadius);
     }
@@ -12090,9 +12090,9 @@
      * @param {ArrowOptions} values
      * @private
      */
-    _drawRawCircle(ctx, x2, y2, values) {
+    _drawRawCircle(ctx, x, y, values) {
       this.initContextForDraw(ctx, values);
-      drawCircle(ctx, x2, y2, values.size);
+      drawCircle(ctx, x, y, values.size);
       this.performFill(ctx, values);
     }
     /**
@@ -12134,7 +12134,7 @@
      * @param {boolean} hover
      * @private
      */
-    _drawImageLabel(ctx, x2, y2, selected, hover) {
+    _drawImageLabel(ctx, x, y, selected, hover) {
       let offset = 0;
       if (this.height !== void 0) {
         offset = this.height * 0.5;
@@ -12147,11 +12147,11 @@
           offset += labelDimensions.height / 2;
         }
       }
-      const yLabel = y2 + offset;
+      const yLabel = y + offset;
       if (this.options.label) {
         this.labelOffset = offset;
       }
-      this.labelModule.draw(ctx, x2, yLabel, selected, hover, "hanging");
+      this.labelModule.draw(ctx, x, yLabel, selected, hover, "hanging");
     }
   };
   var Circle2 = class extends CircleImageBase {
@@ -12192,16 +12192,16 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
-      this._drawRawCircle(ctx, x2, y2, values);
-      this.updateBoundingBox(x2, y2);
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
+      this._drawRawCircle(ctx, x, y, values);
+      this.updateBoundingBox(x, y);
       this.labelModule.draw(
         ctx,
         this.left + this.textSize.width / 2 + this.margin.left,
-        y2,
+        y,
         selected,
         hover
       );
@@ -12211,11 +12211,11 @@
      * @param {number} x width
      * @param {number} y height
      */
-    updateBoundingBox(x2, y2) {
-      this.boundingBox.top = y2 - this.options.size;
-      this.boundingBox.left = x2 - this.options.size;
-      this.boundingBox.right = x2 + this.options.size;
-      this.boundingBox.bottom = y2 + this.options.size;
+    updateBoundingBox(x, y) {
+      this.boundingBox.top = y - this.options.size;
+      this.boundingBox.left = x - this.options.size;
+      this.boundingBox.right = x + this.options.size;
+      this.boundingBox.bottom = y + this.options.size;
     }
     /**
      *
@@ -12269,18 +12269,18 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.switchImages(selected);
       this.resize();
-      let labelX = x2, labelY = y2;
+      let labelX = x, labelY = y;
       if (this.options.shapeProperties.coordinateOrigin === "top-left") {
-        this.left = x2;
-        this.top = y2;
+        this.left = x;
+        this.top = y;
         labelX += this.width / 2;
         labelY += this.height / 2;
       } else {
-        this.left = x2 - this.width / 2;
-        this.top = y2 - this.height / 2;
+        this.left = x - this.width / 2;
+        this.top = y - this.height / 2;
       }
       this._drawRawCircle(ctx, labelX, labelY, values);
       ctx.save();
@@ -12288,7 +12288,7 @@
       this._drawImageAtPosition(ctx, values);
       ctx.restore();
       this._drawImageLabel(ctx, labelX, labelY, selected, hover);
-      this.updateBoundingBox(x2, y2);
+      this.updateBoundingBox(x, y);
     }
     // TODO: compare with Circle.updateBoundingBox(), consolidate? More stuff is happening here
     /**
@@ -12296,17 +12296,17 @@
      * @param {number} x width
      * @param {number} y height
      */
-    updateBoundingBox(x2, y2) {
+    updateBoundingBox(x, y) {
       if (this.options.shapeProperties.coordinateOrigin === "top-left") {
-        this.boundingBox.top = y2;
-        this.boundingBox.left = x2;
-        this.boundingBox.right = x2 + this.options.size * 2;
-        this.boundingBox.bottom = y2 + this.options.size * 2;
+        this.boundingBox.top = y;
+        this.boundingBox.left = x;
+        this.boundingBox.right = x + this.options.size * 2;
+        this.boundingBox.bottom = y + this.options.size * 2;
       } else {
-        this.boundingBox.top = y2 - this.options.size;
-        this.boundingBox.left = x2 - this.options.size;
-        this.boundingBox.right = x2 + this.options.size;
-        this.boundingBox.bottom = y2 + this.options.size;
+        this.boundingBox.top = y - this.options.size;
+        this.boundingBox.left = x - this.options.size;
+        this.boundingBox.right = x + this.options.size;
+        this.boundingBox.bottom = y + this.options.size;
       }
       this.boundingBox.left = Math.min(
         this.boundingBox.left,
@@ -12364,12 +12364,12 @@
      * @private
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    _drawShape(ctx, shape, sizeMultiplier, x2, y2, selected, hover, values) {
+    _drawShape(ctx, shape, sizeMultiplier, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover, values);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       this.initContextForDraw(ctx, values);
-      getShape(shape)(ctx, x2, y2, values.size);
+      getShape(shape)(ctx, x, y, values.size);
       this.performFill(ctx, values);
       if (this.options.icon !== void 0) {
         if (this.options.icon.code !== void 0) {
@@ -12377,7 +12377,7 @@
           ctx.fillStyle = this.options.icon.color || "black";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(this.options.icon.code, x2, y2);
+          ctx.fillText(this.options.icon.code, x, y);
         }
       }
       return {
@@ -12387,14 +12387,14 @@
               ctx,
               selected,
               hover,
-              x2,
-              y2,
+              x,
+              y,
               "hanging"
             );
-            const yLabel = y2 + 0.5 * this.height + 0.5 * this.labelModule.size.height;
-            this.labelModule.draw(ctx, x2, yLabel, selected, hover, "hanging");
+            const yLabel = y + 0.5 * this.height + 0.5 * this.labelModule.size.height;
+            this.labelModule.draw(ctx, x, yLabel, selected, hover, "hanging");
           }
-          this.updateBoundingBox(x2, y2);
+          this.updateBoundingBox(x, y);
         }
       };
     }
@@ -12403,11 +12403,11 @@
      * @param {number} x
      * @param {number} y
      */
-    updateBoundingBox(x2, y2) {
-      this.boundingBox.top = y2 - this.options.size;
-      this.boundingBox.left = x2 - this.options.size;
-      this.boundingBox.right = x2 + this.options.size;
-      this.boundingBox.bottom = y2 + this.options.size;
+    updateBoundingBox(x, y) {
+      this.boundingBox.top = y - this.options.size;
+      this.boundingBox.left = x - this.options.size;
+      this.boundingBox.right = x + this.options.size;
+      this.boundingBox.bottom = y + this.options.size;
       if (this.options.label !== void 0 && this.labelModule.size.width > 0) {
         this.boundingBox.left = Math.min(
           this.boundingBox.left,
@@ -12445,16 +12445,16 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on different layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover, values);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       ctx.save();
       const drawLater = this.ctxRenderer({
         ctx,
         id: this.options.id,
-        x: x2,
-        y: y2,
+        x,
+        y,
         state: { selected, hover },
         style: __spreadValues({}, values),
         label: this.options.label
@@ -12521,20 +12521,20 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       this.initContextForDraw(ctx, values);
       drawDatabase(
         ctx,
-        x2 - this.width / 2,
-        y2 - this.height / 2,
+        x - this.width / 2,
+        y - this.height / 2,
         this.width,
         this.height
       );
       this.performFill(ctx, values);
-      this.updateBoundingBox(x2, y2, ctx, selected, hover);
+      this.updateBoundingBox(x, y, ctx, selected, hover);
       this.labelModule.draw(
         ctx,
         this.left + this.textSize.width / 2 + this.margin.left,
@@ -12564,8 +12564,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "diamond", 4, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "diamond", 4, x, y, selected, hover, values);
     }
     /**
      *
@@ -12588,8 +12588,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "circle", 2, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "circle", 2, x, y, selected, hover, values);
     }
     /**
      *
@@ -12627,15 +12627,15 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
-      this.left = x2 - this.width * 0.5;
-      this.top = y2 - this.height * 0.5;
+      this.left = x - this.width * 0.5;
+      this.top = y - this.height * 0.5;
       this.initContextForDraw(ctx, values);
       drawEllipse(ctx, this.left, this.top, this.width, this.height);
       this.performFill(ctx, values);
-      this.updateBoundingBox(x2, y2, ctx, selected, hover);
-      this.labelModule.draw(ctx, x2, y2, selected, hover);
+      this.updateBoundingBox(x, y, ctx, selected, hover);
+      this.labelModule.draw(ctx, x, y, selected, hover);
     }
     /**
      *
@@ -12665,8 +12665,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "hexagon", 4, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "hexagon", 4, x, y, selected, hover, values);
     }
     /**
      *
@@ -12715,12 +12715,12 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
       this.options.icon.size = this.options.icon.size || 50;
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
-      this._icon(ctx, x2, y2, selected, hover, values);
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
+      this._icon(ctx, x, y, selected, hover, values);
       return {
         drawExternalLabel: () => {
           if (this.options.label !== void 0) {
@@ -12728,11 +12728,11 @@
             this.labelModule.draw(
               ctx,
               this.left + this.iconSize.width / 2 + this.margin.left,
-              y2 + this.height / 2 + iconTextSpacing,
+              y + this.height / 2 + iconTextSpacing,
               selected
             );
           }
-          this.updateBoundingBox(x2, y2);
+          this.updateBoundingBox(x, y);
         }
       };
     }
@@ -12741,11 +12741,11 @@
      * @param {number} x
      * @param {number} y
      */
-    updateBoundingBox(x2, y2) {
-      this.boundingBox.top = y2 - this.options.icon.size * 0.5;
-      this.boundingBox.left = x2 - this.options.icon.size * 0.5;
-      this.boundingBox.right = x2 + this.options.icon.size * 0.5;
-      this.boundingBox.bottom = y2 + this.options.icon.size * 0.5;
+    updateBoundingBox(x, y) {
+      this.boundingBox.top = y - this.options.icon.size * 0.5;
+      this.boundingBox.left = x - this.options.icon.size * 0.5;
+      this.boundingBox.right = x + this.options.icon.size * 0.5;
+      this.boundingBox.bottom = y + this.options.icon.size * 0.5;
       if (this.options.label !== void 0 && this.labelModule.size.width > 0) {
         const iconTextSpacing = 5;
         this.boundingBox.left = Math.min(
@@ -12771,7 +12771,7 @@
      * @param {boolean} hover - Unused
      * @param {ArrowOptions} values
      */
-    _icon(ctx, x2, y2, selected, hover, values) {
+    _icon(ctx, x, y, selected, hover, values) {
       const iconSize = Number(this.options.icon.size);
       if (this.options.icon.code !== void 0) {
         ctx.font = [
@@ -12785,7 +12785,7 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         this.enableShadow(ctx, values);
-        ctx.fillText(this.options.icon.code, x2, y2);
+        ctx.fillText(this.options.icon.code, x, y);
         this.disableShadow(ctx, values);
       } else {
         console.error(
@@ -12842,19 +12842,19 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       ctx.save();
       this.switchImages(selected);
       this.resize();
-      let labelX = x2, labelY = y2;
+      let labelX = x, labelY = y;
       if (this.options.shapeProperties.coordinateOrigin === "top-left") {
-        this.left = x2;
-        this.top = y2;
+        this.left = x;
+        this.top = y;
         labelX += this.width / 2;
         labelY += this.height / 2;
       } else {
-        this.left = x2 - this.width / 2;
-        this.top = y2 - this.height / 2;
+        this.left = x - this.width / 2;
+        this.top = y - this.height / 2;
       }
       if (this.options.shapeProperties.useBorderWithImage === true) {
         const neutralborderWidth = this.options.borderWidth;
@@ -12882,7 +12882,7 @@
       }
       this._drawImageAtPosition(ctx, values);
       this._drawImageLabel(ctx, labelX, labelY, selected, hover);
-      this.updateBoundingBox(x2, y2);
+      this.updateBoundingBox(x, y);
       ctx.restore();
     }
     /**
@@ -12890,14 +12890,14 @@
      * @param {number} x
      * @param {number} y
      */
-    updateBoundingBox(x2, y2) {
+    updateBoundingBox(x, y) {
       this.resize();
       if (this.options.shapeProperties.coordinateOrigin === "top-left") {
-        this.left = x2;
-        this.top = y2;
+        this.left = x;
+        this.top = y;
       } else {
-        this.left = x2 - this.width / 2;
-        this.top = y2 - this.height / 2;
+        this.left = x - this.width / 2;
+        this.top = y - this.height / 2;
       }
       this.boundingBox.left = this.left;
       this.boundingBox.top = this.top;
@@ -12939,8 +12939,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "square", 2, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "square", 2, x, y, selected, hover, values);
     }
     /**
      *
@@ -12963,8 +12963,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "star", 4, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "star", 4, x, y, selected, hover, values);
     }
     /**
      *
@@ -13009,10 +13009,10 @@
      * @param {boolean} hover
      * @param {ArrowOptions} values
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       this.resize(ctx, selected, hover);
-      this.left = x2 - this.width / 2;
-      this.top = y2 - this.height / 2;
+      this.left = x - this.width / 2;
+      this.top = y - this.height / 2;
       this.enableShadow(ctx, values);
       this.labelModule.draw(
         ctx,
@@ -13022,7 +13022,7 @@
         hover
       );
       this.disableShadow(ctx, values);
-      this.updateBoundingBox(x2, y2, ctx, selected, hover);
+      this.updateBoundingBox(x, y, ctx, selected, hover);
     }
     /**
      *
@@ -13045,8 +13045,8 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
-      return this._drawShape(ctx, "triangle", 3, x2, y2, selected, hover, values);
+    draw(ctx, x, y, selected, hover, values) {
+      return this._drawShape(ctx, "triangle", 3, x, y, selected, hover, values);
     }
     /**
      *
@@ -13069,13 +13069,13 @@
      * @param {ArrowOptions} values
      * @returns {object} Callbacks to draw later on higher layers.
      */
-    draw(ctx, x2, y2, selected, hover, values) {
+    draw(ctx, x, y, selected, hover, values) {
       return this._drawShape(
         ctx,
         "triangleDown",
         3,
-        x2,
-        y2,
+        x,
+        y,
         selected,
         hover,
         values
@@ -13714,11 +13714,11 @@
      * @param {Node.id} id
      * @static
      */
-    static checkMass(options2, id2) {
+    static checkMass(options2, id) {
       if (options2.mass !== void 0 && options2.mass <= 0) {
         let strId = "";
-        if (id2 !== void 0) {
-          strId = " in node id: " + id2;
+        if (id !== void 0) {
+          strId = " in node id: " + id;
         }
         console.error(
           "%cNegative or zero mass disallowed" + strId + ", setting mass to 1.",
@@ -13816,14 +13816,14 @@
         hubsize = this._getHubSize();
       }
       const nodesToCluster = [];
-      for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-        const node = this.body.nodes[this.body.nodeIndices[i2]];
+      for (let i = 0; i < this.body.nodeIndices.length; i++) {
+        const node = this.body.nodes[this.body.nodeIndices[i]];
         if (node.edges.length >= hubsize) {
           nodesToCluster.push(node.id);
         }
       }
-      for (let i2 = 0; i2 < nodesToCluster.length; i2++) {
-        this.clusterByConnection(nodesToCluster[i2], options2, true);
+      for (let i = 0; i < nodesToCluster.length; i++) {
+        this.clusterByConnection(nodesToCluster[i], options2, true);
       }
       this.body.emitter.emit("_dataChanged");
     }
@@ -13864,10 +13864,10 @@
       const clusters = [];
       const usedNodes = {};
       let edge, edges, relevantEdgeCount;
-      for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
+      for (let i = 0; i < this.body.nodeIndices.length; i++) {
         const childNodesObj = {};
         const childEdgesObj = {};
-        const nodeId = this.body.nodeIndices[i2];
+        const nodeId = this.body.nodeIndices[i];
         const node = this.body.nodes[nodeId];
         if (usedNodes[nodeId] === void 0) {
           relevantEdgeCount = 0;
@@ -13933,8 +13933,8 @@
           }
         }
       }
-      for (let i2 = 0; i2 < clusters.length; i2++) {
-        this._cluster(clusters[i2].nodes, clusters[i2].edges, options2, false);
+      for (let i = 0; i < clusters.length; i++) {
+        this._cluster(clusters[i].nodes, clusters[i].edges, options2, false);
       }
       if (refreshData === true) {
         this.body.emitter.emit("_dataChanged");
@@ -13989,8 +13989,8 @@
       const parentNodeId = node.id;
       const parentClonedOptions = NetworkUtil.cloneOptions(node);
       childNodesObj[parentNodeId] = node;
-      for (let i2 = 0; i2 < node.edges.length; i2++) {
-        const edge = node.edges[i2];
+      for (let i = 0; i < node.edges.length; i++) {
+        const edge = node.edges[i];
         if (this.clusteredEdges[edge.id] === void 0) {
           const childNodeId = this._getConnectedId(edge, parentNodeId);
           if (this.clusteredNodes[childNodeId] === void 0) {
@@ -14023,8 +14023,8 @@
         if (!Object.prototype.hasOwnProperty.call(childNodesObj, childNodeKey))
           continue;
         const childNode = childNodesObj[childNodeKey];
-        for (let y2 = 0; y2 < childNode.edges.length; y2++) {
-          const childEdge = childNode.edges[y2];
+        for (let y = 0; y < childNode.edges.length; y++) {
+          const childEdge = childNode.edges[y];
           if (childNodeIDs.indexOf(this._getConnectedId(childEdge, childNode.id)) > -1) {
             childEdgesObj[childEdge.id] = childEdge;
           }
@@ -14045,8 +14045,8 @@
       let edge, childNodeId, childNode, toId, fromId, otherNodeId;
       const childKeys = Object.keys(childNodesObj);
       const createEdges = [];
-      for (let i2 = 0; i2 < childKeys.length; i2++) {
-        childNodeId = childKeys[i2];
+      for (let i = 0; i < childKeys.length; i++) {
+        childNodeId = childKeys[i];
         childNode = childNodesObj[childNodeId];
         for (let j = 0; j < childNode.edges.length; j++) {
           edge = childNode.edges[j];
@@ -14183,16 +14183,16 @@
       if (clusterNodeProperties.label === void 0) {
         clusterNodeProperties.label = "cluster";
       }
-      let pos2 = void 0;
+      let pos = void 0;
       if (clusterNodeProperties.x === void 0) {
-        pos2 = this._getClusterPosition(childNodesObj);
-        clusterNodeProperties.x = pos2.x;
+        pos = this._getClusterPosition(childNodesObj);
+        clusterNodeProperties.x = pos.x;
       }
       if (clusterNodeProperties.y === void 0) {
-        if (pos2 === void 0) {
-          pos2 = this._getClusterPosition(childNodesObj);
+        if (pos === void 0) {
+          pos = this._getClusterPosition(childNodesObj);
         }
-        clusterNodeProperties.y = pos2.y;
+        clusterNodeProperties.y = pos.y;
       }
       clusterNodeProperties.id = clusterId;
       const clusterNode = this.body.functions.createNode(
@@ -14262,8 +14262,8 @@
       let minY = childNodesObj[childKeys[0]].y;
       let maxY = childNodesObj[childKeys[0]].y;
       let node;
-      for (let i2 = 1; i2 < childKeys.length; i2++) {
-        node = childNodesObj[childKeys[i2]];
+      for (let i = 1; i < childKeys.length; i++) {
+        node = childNodesObj[childKeys[i]];
         minX = node.x < minX ? node.x : minX;
         maxX = node.x > maxX ? node.x : maxX;
         minY = node.y < minY ? node.y : minY;
@@ -14343,11 +14343,11 @@
         }
       }
       const edgesToBeDeleted = [];
-      for (let i2 = 0; i2 < clusterNode.edges.length; i2++) {
-        edgesToBeDeleted.push(clusterNode.edges[i2]);
+      for (let i = 0; i < clusterNode.edges.length; i++) {
+        edgesToBeDeleted.push(clusterNode.edges[i]);
       }
-      for (let i2 = 0; i2 < edgesToBeDeleted.length; i2++) {
-        const edge = edgesToBeDeleted[i2];
+      for (let i = 0; i < edgesToBeDeleted.length; i++) {
+        const edge = edgesToBeDeleted[i];
         const otherNodeId = this._getConnectedId(edge, clusterNodeId);
         const otherNode = this.clusteredNodes[otherNodeId];
         for (let j = 0; j < edge.clusteringEdgeReplacingIds.length; j++) {
@@ -14466,8 +14466,8 @@
         throw new Error("The startEdgeId supplied to updateEdge does not exist.");
       }
       const allEdgeIds = this.getClusteredEdges(startEdgeId);
-      for (let i2 = 0; i2 < allEdgeIds.length; i2++) {
-        const edge = this.body.edges[allEdgeIds[i2]];
+      for (let i = 0; i < allEdgeIds.length; i++) {
+        const edge = this.body.edges[allEdgeIds[i]];
         edge.setOptions(newOptions);
       }
       this.body.emitter.emit("_dataChanged");
@@ -14520,8 +14520,8 @@
         if (replacingIds === void 0) {
           foundIds.push(nextId);
         } else {
-          for (let i2 = 0; i2 < replacingIds.length; ++i2) {
-            const replacingId = replacingIds[i2];
+          for (let i = 0; i < replacingIds.length; ++i) {
+            const replacingId = replacingIds[i];
             if (IdsToHandle.indexOf(replacingIds) !== -1 || doneIds.indexOf(replacingIds) !== -1) {
               continue;
             }
@@ -14559,8 +14559,8 @@
       let averageSquared = 0;
       let hubCounter = 0;
       let largestHub = 0;
-      for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-        const node = this.body.nodes[this.body.nodeIndices[i2]];
+      for (let i = 0; i < this.body.nodeIndices.length; i++) {
+        const node = this.body.nodes[this.body.nodeIndices[i]];
         if (node.edges.length > largestHub) {
           largestHub = node.edges.length;
         }
@@ -14767,8 +14767,8 @@
             }
             edge.clusteringEdgeReplacingIds = this._filter(
               edge.clusteringEdgeReplacingIds,
-              function(id2) {
-                return !deletedEdgeIds[id2];
+              function(id) {
+                return !deletedEdgeIds[id];
               }
             );
           });
@@ -15099,14 +15099,14 @@
     add(ids, doNotEmit = false) {
       const edges = this.body.edges;
       const edgesData = this.body.data.edges;
-      for (let i2 = 0; i2 < ids.length; i2++) {
-        const id2 = ids[i2];
-        const oldEdge = edges[id2];
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const oldEdge = edges[id];
         if (oldEdge) {
           oldEdge.disconnect();
         }
-        const data = edgesData.get(id2, { showInternalIds: true });
-        edges[id2] = this.create(data);
+        const data = edgesData.get(id, { showInternalIds: true });
+        edges[id] = this.create(data);
       }
       this.body.emitter.emit("_adjustEdgesForHierarchicalLayout");
       if (doNotEmit === false) {
@@ -15122,16 +15122,16 @@
       const edges = this.body.edges;
       const edgesData = this.body.data.edges;
       let dataChanged = false;
-      for (let i2 = 0; i2 < ids.length; i2++) {
-        const id2 = ids[i2];
-        const data = edgesData.get(id2);
-        const edge = edges[id2];
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const data = edgesData.get(id);
+        const edge = edges[id];
         if (edge !== void 0) {
           edge.disconnect();
           dataChanged = edge.setOptions(data) || dataChanged;
           edge.connect();
         } else {
-          this.body.edges[id2] = this.create(data);
+          this.body.edges[id] = this.create(data);
           dataChanged = true;
         }
       }
@@ -15151,8 +15151,8 @@
     remove(ids, emit = true) {
       if (ids.length === 0) return;
       const edges = this.body.edges;
-      forEach(ids, (id2) => {
-        const edge = edges[id2];
+      forEach(ids, (id) => {
+        const edge = edges[id];
         if (edge !== void 0) {
           edge.remove();
         }
@@ -15191,17 +15191,17 @@
      * @private
      */
     reconnectEdges() {
-      let id2;
+      let id;
       const nodes = this.body.nodes;
       const edges = this.body.edges;
-      for (id2 in nodes) {
-        if (Object.prototype.hasOwnProperty.call(nodes, id2)) {
-          nodes[id2].edges = [];
+      for (id in nodes) {
+        if (Object.prototype.hasOwnProperty.call(nodes, id)) {
+          nodes[id].edges = [];
         }
       }
-      for (id2 in edges) {
-        if (Object.prototype.hasOwnProperty.call(edges, id2)) {
-          const edge = edges[id2];
+      for (id in edges) {
+        if (Object.prototype.hasOwnProperty.call(edges, id)) {
+          const edge = edges[id];
           edge.from = null;
           edge.to = null;
           edge.connect();
@@ -15240,14 +15240,14 @@
      */
     _removeInvalidEdges() {
       const edgesToDelete = [];
-      forEach(this.body.edges, (edge, id2) => {
+      forEach(this.body.edges, (edge, id) => {
         const toNode = this.body.nodes[edge.toId];
         const fromNode = this.body.nodes[edge.fromId];
         if (toNode !== void 0 && toNode.isCluster === true || fromNode !== void 0 && fromNode.isCluster === true) {
           return;
         }
         if (toNode === void 0 || fromNode === void 0) {
-          edgesToDelete.push(id2);
+          edgesToDelete.push(id);
         }
       });
       this.remove(edgesToDelete, false);
@@ -15551,8 +15551,8 @@
      */
     cleanNavigation() {
       if (this.navigationHammers.length != 0) {
-        for (let i2 = 0; i2 < this.navigationHammers.length; i2++) {
-          this.navigationHammers[i2].destroy();
+        for (let i = 0; i < this.navigationHammers.length; i++) {
+          this.navigationHammers[i].destroy();
         }
         this.navigationHammers = [];
       }
@@ -15594,17 +15594,17 @@
       this.navigationDOM["wrapper"] = document.createElement("div");
       this.navigationDOM["wrapper"].className = "vis-navigation";
       this.canvas.frame.appendChild(this.navigationDOM["wrapper"]);
-      for (let i2 = 0; i2 < navigationDivs.length; i2++) {
-        this.navigationDOM[navigationDivs[i2]] = document.createElement("div");
-        this.navigationDOM[navigationDivs[i2]].className = "vis-button vis-" + navigationDivs[i2];
+      for (let i = 0; i < navigationDivs.length; i++) {
+        this.navigationDOM[navigationDivs[i]] = document.createElement("div");
+        this.navigationDOM[navigationDivs[i]].className = "vis-button vis-" + navigationDivs[i];
         this.navigationDOM["wrapper"].appendChild(
-          this.navigationDOM[navigationDivs[i2]]
+          this.navigationDOM[navigationDivs[i]]
         );
-        const hammer = new Hammer2(this.navigationDOM[navigationDivs[i2]]);
-        if (navigationDivActions[i2] === "_fit") {
+        const hammer = new Hammer2(this.navigationDOM[navigationDivs[i]]);
+        if (navigationDivActions[i] === "_fit") {
           onTouch(hammer, this._fit.bind(this));
         } else {
-          onTouch(hammer, this.bindToRedraw.bind(this, navigationDivActions[i2]));
+          onTouch(hammer, this.bindToRedraw.bind(this, navigationDivActions[i]));
         }
         this.navigationHammers.push(hammer);
       }
@@ -16101,8 +16101,8 @@
     _determineDifference(firstSet, secondSet) {
       const arrayDiff = function(firstArr, secondArr) {
         const result = [];
-        for (let i2 = 0; i2 < firstArr.length; i2++) {
-          const value = firstArr[i2];
+        for (let i = 0; i < firstArr.length; i++) {
+          const value = firstArr[i];
           if (secondArr.indexOf(value) === -1) {
             result.push(value);
           }
@@ -16443,13 +16443,13 @@
      * @private
      */
     _checkShowPopup(pointer) {
-      const x2 = this.canvas._XconvertDOMtoCanvas(pointer.x);
-      const y2 = this.canvas._YconvertDOMtoCanvas(pointer.y);
+      const x = this.canvas._XconvertDOMtoCanvas(pointer.x);
+      const y = this.canvas._YconvertDOMtoCanvas(pointer.y);
       const pointerObj = {
-        left: x2,
-        top: y2,
-        right: x2,
-        bottom: y2
+        left: x,
+        top: y,
+        right: x,
+        bottom: y
       };
       const previousPopupObjId = this.popupObj === void 0 ? void 0 : this.popupObj.id;
       let nodeUnderCursor = false;
@@ -16459,12 +16459,12 @@
         const nodes = this.body.nodes;
         let node;
         const overlappingNodes = [];
-        for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-          node = nodes[nodeIndices[i2]];
+        for (let i = 0; i < nodeIndices.length; i++) {
+          node = nodes[nodeIndices[i]];
           if (node.isOverlappingWith(pointerObj) === true) {
             nodeUnderCursor = true;
             if (node.getTitle() !== void 0) {
-              overlappingNodes.push(nodeIndices[i2]);
+              overlappingNodes.push(nodeIndices[i]);
             }
           }
         }
@@ -16478,11 +16478,11 @@
         const edges = this.body.edges;
         let edge;
         const overlappingEdges = [];
-        for (let i2 = 0; i2 < edgeIndices.length; i2++) {
-          edge = edges[edgeIndices[i2]];
+        for (let i = 0; i < edgeIndices.length; i++) {
+          edge = edges[edgeIndices[i]];
           if (edge.isOverlappingWith(pointerObj) === true) {
             if (edge.connected === true && edge.getTitle() !== void 0) {
-              overlappingEdges.push(edgeIndices[i2]);
+              overlappingEdges.push(edgeIndices[i]);
             }
           }
         }
@@ -16556,16 +16556,16 @@
     getDistances(body, nodesArray, edgesArray) {
       const D_matrix = {};
       const edges = body.edges;
-      for (let i2 = 0; i2 < nodesArray.length; i2++) {
-        const node = nodesArray[i2];
+      for (let i = 0; i < nodesArray.length; i++) {
+        const node = nodesArray[i];
         const cell = {};
         D_matrix[node] = cell;
         for (let j = 0; j < nodesArray.length; j++) {
-          cell[nodesArray[j]] = i2 == j ? 0 : 1e9;
+          cell[nodesArray[j]] = i == j ? 0 : 1e9;
         }
       }
-      for (let i2 = 0; i2 < edgesArray.length; i2++) {
-        const edge = edges[edgesArray[i2]];
+      for (let i = 0; i < edgesArray.length; i++) {
+        const edge = edges[edgesArray[i]];
         if (edge.connected === true && D_matrix[edge.fromId] !== void 0 && D_matrix[edge.toId] !== void 0) {
           D_matrix[edge.fromId][edge.toId] = 1;
           D_matrix[edge.toId][edge.fromId] = 1;
@@ -16575,10 +16575,10 @@
       for (let k = 0; k < nodeCount; k++) {
         const knode = nodesArray[k];
         const kcolm = D_matrix[knode];
-        for (let i2 = 0; i2 < nodeCount - 1; i2++) {
-          const inode = nodesArray[i2];
+        for (let i = 0; i < nodeCount - 1; i++) {
+          const inode = nodesArray[i];
           const icolm = D_matrix[inode];
-          for (let j = i2 + 1; j < nodeCount; j++) {
+          for (let j = i + 1; j < nodeCount; j++) {
             const jnode = nodesArray[j];
             const jcolm = D_matrix[jnode];
             const val = Math.min(icolm[jnode], icolm[knode] + kcolm[jnode]);
@@ -16709,12 +16709,12 @@
       const km = this.K_matrix[m];
       const lm = this.L_matrix[m];
       for (let iIdx = 0; iIdx < nodesArray.length; iIdx++) {
-        const i2 = nodesArray[iIdx];
-        if (i2 !== m) {
-          const x_i = nodes[i2].x;
-          const y_i = nodes[i2].y;
-          const kmat = km[i2];
-          const lmat = lm[i2];
+        const i = nodesArray[iIdx];
+        if (i !== m) {
+          const x_i = nodes[i].x;
+          const y_i = nodes[i].y;
+          const kmat = km[i];
+          const lmat = lm[i];
           const denominator = 1 / ((x_m - x_i) ** 2 + (y_m - y_i) ** 2) ** 1.5;
           d2E_dx2 += kmat * (1 - lmat * (y_m - y_i) ** 2 * denominator);
           d2E_dxdy += kmat * (lmat * (x_m - x_i) * (y_m - y_i) * denominator);
@@ -16737,10 +16737,10 @@
       const nodesArray = this.body.nodeIndices;
       const edgeLength = this.springLength;
       this.L_matrix = [];
-      for (let i2 = 0; i2 < nodesArray.length; i2++) {
-        this.L_matrix[nodesArray[i2]] = {};
+      for (let i = 0; i < nodesArray.length; i++) {
+        this.L_matrix[nodesArray[i]] = {};
         for (let j = 0; j < nodesArray.length; j++) {
-          this.L_matrix[nodesArray[i2]][nodesArray[j]] = edgeLength * D_matrix[nodesArray[i2]][nodesArray[j]];
+          this.L_matrix[nodesArray[i]][nodesArray[j]] = edgeLength * D_matrix[nodesArray[i]][nodesArray[j]];
         }
       }
     }
@@ -16753,10 +16753,10 @@
       const nodesArray = this.body.nodeIndices;
       const edgeStrength = this.springConstant;
       this.K_matrix = [];
-      for (let i2 = 0; i2 < nodesArray.length; i2++) {
-        this.K_matrix[nodesArray[i2]] = {};
+      for (let i = 0; i < nodesArray.length; i++) {
+        this.K_matrix[nodesArray[i]] = {};
         for (let j = 0; j < nodesArray.length; j++) {
-          this.K_matrix[nodesArray[i2]][nodesArray[j]] = edgeStrength * D_matrix[nodesArray[i2]][nodesArray[j]] ** -2;
+          this.K_matrix[nodesArray[i]][nodesArray[j]] = edgeStrength * D_matrix[nodesArray[i]][nodesArray[j]] ** -2;
         }
       }
     }
@@ -16779,16 +16779,16 @@
         let dE_dx = 0;
         let dE_dy = 0;
         for (let iIdx = mIdx; iIdx < nodesArray.length; iIdx++) {
-          const i2 = nodesArray[iIdx];
-          if (i2 !== m) {
-            const x_i = nodes[i2].x;
-            const y_i = nodes[i2].y;
+          const i = nodesArray[iIdx];
+          if (i !== m) {
+            const x_i = nodes[i].x;
+            const y_i = nodes[i].y;
             const denominator = 1 / Math.sqrt((x_m - x_i) ** 2 + (y_m - y_i) ** 2);
             this.E_matrix[m][iIdx] = [
-              this.K_matrix[m][i2] * (x_m - x_i - this.L_matrix[m][i2] * (x_m - x_i) * denominator),
-              this.K_matrix[m][i2] * (y_m - y_i - this.L_matrix[m][i2] * (y_m - y_i) * denominator)
+              this.K_matrix[m][i] * (x_m - x_i - this.L_matrix[m][i] * (x_m - x_i) * denominator),
+              this.K_matrix[m][i] * (y_m - y_i - this.L_matrix[m][i] * (y_m - y_i) * denominator)
             ];
-            this.E_matrix[i2][mIdx] = this.E_matrix[m][iIdx];
+            this.E_matrix[i][mIdx] = this.E_matrix[m][iIdx];
             dE_dx += this.E_matrix[m][iIdx][0];
             dE_dy += this.E_matrix[m][iIdx][1];
           }
@@ -16812,20 +16812,20 @@
       let dE_dx = 0;
       let dE_dy = 0;
       for (let iIdx = 0; iIdx < nodesArray.length; iIdx++) {
-        const i2 = nodesArray[iIdx];
-        if (i2 !== m) {
+        const i = nodesArray[iIdx];
+        if (i !== m) {
           const cell = colm[iIdx];
           const oldDx = cell[0];
           const oldDy = cell[1];
-          const x_i = nodes[i2].x;
-          const y_i = nodes[i2].y;
+          const x_i = nodes[i].x;
+          const y_i = nodes[i].y;
           const denominator = 1 / Math.sqrt((x_m - x_i) ** 2 + (y_m - y_i) ** 2);
-          const dx = kcolm[i2] * (x_m - x_i - lcolm[i2] * (x_m - x_i) * denominator);
-          const dy = kcolm[i2] * (y_m - y_i - lcolm[i2] * (y_m - y_i) * denominator);
+          const dx = kcolm[i] * (x_m - x_i - lcolm[i] * (x_m - x_i) * denominator);
+          const dy = kcolm[i] * (y_m - y_i - lcolm[i] * (y_m - y_i) * denominator);
           colm[iIdx] = [dx, dy];
           dE_dx += dx;
           dE_dy += dy;
-          const sum = this.E_sums[i2];
+          const sum = this.E_sums[i];
           sum[0] += dx - oldDx;
           sum[1] += dy - oldDy;
         }
@@ -17147,8 +17147,8 @@
      * Pre: parentReference init'ed properly for current network
      */
     checkIfTree() {
-      for (const i2 in this.parentReference) {
-        if (this.parentReference[i2].length > 1) {
+      for (const i in this.parentReference) {
+        if (this.parentReference[i].length > 1) {
           this.isTree = false;
           return;
         }
@@ -17202,8 +17202,8 @@
         if (this.childrenReference[nodeId2]) {
           const children = this.childrenReference[nodeId2];
           if (children.length > 0) {
-            for (let i2 = 0; i2 < children.length; i2++) {
-              level = Math.max(level, _getMaxLevel(children[i2]));
+            for (let i = 0; i < children.length; i++) {
+              level = Math.max(level, _getMaxLevel(children[i]));
             }
           }
         }
@@ -17285,9 +17285,9 @@
       if (parents1 === void 0 || parents2 === void 0) {
         return false;
       }
-      for (let i2 = 0; i2 < parents1.length; i2++) {
+      for (let i = 0; i < parents1.length; i++) {
         for (let j = 0; j < parents2.length; j++) {
-          if (parents1[i2] == parents2[j]) {
+          if (parents1[i] == parents2[j]) {
             return true;
           }
         }
@@ -17511,8 +17511,8 @@
       if (this.options.hierarchical.enabled !== true) {
         this._resetRNG(this.initialRandomSeed);
         const radius = nodesArray.length + 50;
-        for (let i2 = 0; i2 < nodesArray.length; i2++) {
-          const node = nodesArray[i2];
+        for (let i = 0; i < nodesArray.length; i++) {
+          const node = nodesArray[i];
           const angle = 2 * Math.PI * this._rng();
           if (node.x === void 0) {
             node.x = radius * Math.cos(angle);
@@ -17531,8 +17531,8 @@
       if (this.options.hierarchical.enabled !== true && this.options.improvedLayout === true) {
         const indices = this.body.nodeIndices;
         let positionDefined = 0;
-        for (let i2 = 0; i2 < indices.length; i2++) {
-          const node = this.body.nodes[indices[i2]];
+        for (let i = 0; i < indices.length; i++) {
+          const node = this.body.nodes[indices[i]];
           if (node.predefinedPosition === true) {
             positionDefined += 1;
           }
@@ -17599,8 +17599,8 @@
           );
           this._shiftToCenter();
           const offset = 70;
-          for (let i2 = 0; i2 < indices.length; i2++) {
-            const node = this.body.nodes[indices[i2]];
+          for (let i = 0; i < indices.length; i++) {
+            const node = this.body.nodes[indices[i]];
             if (node.predefinedPosition === false) {
               node.x += (0.5 - this._rng()) * offset;
               node.y += (0.5 - this._rng()) * offset;
@@ -17621,8 +17621,8 @@
         this.body.nodeIndices
       );
       const center = NetworkUtil.findCenter(range);
-      for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-        const node = this.body.nodes[this.body.nodeIndices[i2]];
+      for (let i = 0; i < this.body.nodeIndices.length; i++) {
+        const node = this.body.nodes[this.body.nodeIndices[i]];
         node.x -= center.x;
         node.y -= center.y;
       }
@@ -17635,11 +17635,11 @@
       let clustersPresent = true;
       while (clustersPresent === true) {
         clustersPresent = false;
-        for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-          if (this.body.nodes[this.body.nodeIndices[i2]].isCluster === true) {
+        for (let i = 0; i < this.body.nodeIndices.length; i++) {
+          if (this.body.nodes[this.body.nodeIndices[i]].isCluster === true) {
             clustersPresent = true;
             this.body.modules.clustering.openCluster(
-              this.body.nodeIndices[i2],
+              this.body.nodeIndices[i],
               {},
               false
             );
@@ -17717,10 +17717,10 @@
       const shiftTrees = () => {
         const treeSizes = getTreeSizes();
         let shiftBy = 0;
-        for (let i2 = 0; i2 < treeSizes.length - 1; i2++) {
-          const diff = treeSizes[i2].max - treeSizes[i2 + 1].min;
+        for (let i = 0; i < treeSizes.length - 1; i++) {
+          const diff = treeSizes[i].max - treeSizes[i + 1].min;
           shiftBy += diff + this.options.hierarchical.treeSpacing;
-          shiftTree(i2 + 1, shiftBy);
+          shiftTree(i + 1, shiftBy);
         }
       };
       const shiftTree = (index2, offset) => {
@@ -17735,8 +17735,8 @@
       };
       const getTreeSizes = () => {
         const treeWidths = [];
-        for (let i2 = 0; i2 < this.hierarchical.numTrees(); i2++) {
-          treeWidths.push(this.direction.getTreeSize(i2));
+        for (let i = 0; i < this.hierarchical.numTrees(); i++) {
+          treeWidths.push(this.direction.getTreeSize(i));
         }
         return treeWidths;
       };
@@ -17748,8 +17748,8 @@
         if (this.hierarchical.childrenReference[source.id]) {
           const children = this.hierarchical.childrenReference[source.id];
           if (children.length > 0) {
-            for (let i2 = 0; i2 < children.length; i2++) {
-              getBranchNodes(this.body.nodes[children[i2]], map);
+            for (let i = 0; i < children.length; i++) {
+              getBranchNodes(this.body.nodes[children[i]], map);
             }
           }
         }
@@ -17785,8 +17785,8 @@
       };
       const shiftElementsCloser = (callback, levels, centerParents) => {
         const hier = this.hierarchical;
-        for (let i2 = 0; i2 < levels.length; i2++) {
-          const level = levels[i2];
+        for (let i = 0; i < levels.length; i++) {
+          const level = levels[i];
           const levelNodes = hier.distributionOrdering[level];
           if (levelNodes.length > 1) {
             for (let j = 0; j < levelNodes.length - 1; j++) {
@@ -17836,11 +17836,11 @@
         const C2 = this.options.hierarchical.levelSeparation * this.options.hierarchical.levelSeparation;
         const referenceNodes = {};
         const aboveEdges = [];
-        for (let i2 = 0; i2 < allEdges.length; i2++) {
-          const edge = allEdges[i2];
+        for (let i = 0; i < allEdges.length; i++) {
+          const edge = allEdges[i];
           if (edge.toId != edge.fromId) {
             const otherNode = edge.toId == nodeId ? edge.from : edge.to;
-            referenceNodes[allEdges[i2].id] = otherNode;
+            referenceNodes[allEdges[i].id] = otherNode;
             if (this.hierarchical.levels[otherNode.id] < nodeLevel) {
               aboveEdges.push(edge);
             }
@@ -17848,9 +17848,9 @@
         }
         const getFx = (point, edges) => {
           let sum = 0;
-          for (let i2 = 0; i2 < edges.length; i2++) {
-            if (referenceNodes[edges[i2].id] !== void 0) {
-              const a = this.direction.getPosition(referenceNodes[edges[i2].id]) - point;
+          for (let i = 0; i < edges.length; i++) {
+            if (referenceNodes[edges[i].id] !== void 0) {
+              const a = this.direction.getPosition(referenceNodes[edges[i].id]) - point;
               sum += a / Math.sqrt(a * a + C2);
             }
           }
@@ -17858,9 +17858,9 @@
         };
         const getDFx = (point, edges) => {
           let sum = 0;
-          for (let i2 = 0; i2 < edges.length; i2++) {
-            if (referenceNodes[edges[i2].id] !== void 0) {
-              const a = this.direction.getPosition(referenceNodes[edges[i2].id]) - point;
+          for (let i = 0; i < edges.length; i++) {
+            if (referenceNodes[edges[i].id] !== void 0) {
+              const a = this.direction.getPosition(referenceNodes[edges[i].id]) - point;
               sum -= C2 * Math.pow(a * a + C2, -1.5);
             }
           }
@@ -17869,7 +17869,7 @@
         const getGuess = (iterations2, edges) => {
           let guess2 = this.direction.getPosition(node);
           const guessMap = {};
-          for (let i2 = 0; i2 < iterations2; i2++) {
+          for (let i = 0; i < iterations2; i++) {
             const fx = getFx(guess2, edges);
             const dfx = getDFx(guess2, edges);
             const limit = 40;
@@ -17878,7 +17878,7 @@
             if (guessMap[guess2] !== void 0) {
               break;
             }
-            guessMap[guess2] = i2;
+            guessMap[guess2] = i;
           }
           return guess2;
         };
@@ -17939,7 +17939,7 @@
       const minimizeEdgeLengthBottomUp = (iterations) => {
         let levels = this.hierarchical.getLevels();
         levels = levels.toReversed();
-        for (let i2 = 0; i2 < iterations; i2++) {
+        for (let i = 0; i < iterations; i++) {
           stillShifting = false;
           for (let j = 0; j < levels.length; j++) {
             const level = levels[j];
@@ -17956,7 +17956,7 @@
       const shiftBranchesCloserBottomUp = (iterations) => {
         let levels = this.hierarchical.getLevels();
         levels = levels.toReversed();
-        for (let i2 = 0; i2 < iterations; i2++) {
+        for (let i = 0; i < iterations; i++) {
           stillShifting = false;
           shiftElementsCloser(branchShiftCallback, levels, true);
           if (stillShifting !== true) {
@@ -17973,8 +17973,8 @@
       const centerAllParentsBottomUp = () => {
         let levels = this.hierarchical.getLevels();
         levels = levels.toReversed();
-        for (let i2 = 0; i2 < levels.length; i2++) {
-          const level = levels[i2];
+        for (let i = 0; i < levels.length; i++) {
+          const level = levels[i];
           const levelNodes = this.hierarchical.distributionOrdering[level];
           for (let j = 0; j < levelNodes.length; j++) {
             this._centerParent(levelNodes[j]);
@@ -18040,8 +18040,8 @@
     _centerParent(node) {
       if (this.hierarchical.parentReference[node.id]) {
         const parents = this.hierarchical.parentReference[node.id];
-        for (let i2 = 0; i2 < parents.length; i2++) {
-          const parentId = parents[i2];
+        for (let i = 0; i < parents.length; i++) {
+          const parentId = parents[i];
           const parentNode = this.body.nodes[parentId];
           const children = this.hierarchical.childrenReference[parentId];
           if (children !== void 0) {
@@ -18069,16 +18069,16 @@
           nodeArray = this._indexArrayToNodes(nodeArray);
           this.direction.sort(nodeArray);
           let handledNodeCount = 0;
-          for (let i2 = 0; i2 < nodeArray.length; i2++) {
-            const node = nodeArray[i2];
+          for (let i = 0; i < nodeArray.length; i++) {
+            const node = nodeArray[i];
             if (this.positionedNodes[node.id] === void 0) {
               const spacing = this.options.hierarchical.nodeSpacing;
-              let pos2 = spacing * handledNodeCount;
+              let pos = spacing * handledNodeCount;
               if (handledNodeCount > 0) {
-                pos2 = this.direction.getPosition(nodeArray[i2 - 1]) + spacing;
+                pos = this.direction.getPosition(nodeArray[i - 1]) + spacing;
               }
-              this.direction.setPosition(node, pos2, level);
-              this._validatePositionAndContinue(node, level, pos2);
+              this.direction.setPosition(node, pos, level);
+              this._validatePositionAndContinue(node, level, pos);
               handledNodeCount++;
             }
           }
@@ -18098,23 +18098,23 @@
         return;
       }
       const childNodes = [];
-      for (let i2 = 0; i2 < childRef.length; i2++) {
-        childNodes.push(this.body.nodes[childRef[i2]]);
+      for (let i = 0; i < childRef.length; i++) {
+        childNodes.push(this.body.nodes[childRef[i]]);
       }
       this.direction.sort(childNodes);
-      for (let i2 = 0; i2 < childNodes.length; i2++) {
-        const childNode = childNodes[i2];
+      for (let i = 0; i < childNodes.length; i++) {
+        const childNode = childNodes[i];
         const childNodeLevel = this.hierarchical.levels[childNode.id];
         if (childNodeLevel > parentLevel && this.positionedNodes[childNode.id] === void 0) {
           const spacing = this.options.hierarchical.nodeSpacing;
-          let pos2;
-          if (i2 === 0) {
-            pos2 = this.direction.getPosition(this.body.nodes[parentId]);
+          let pos;
+          if (i === 0) {
+            pos = this.direction.getPosition(this.body.nodes[parentId]);
           } else {
-            pos2 = this.direction.getPosition(childNodes[i2 - 1]) + spacing;
+            pos = this.direction.getPosition(childNodes[i - 1]) + spacing;
           }
-          this.direction.setPosition(childNode, pos2, childNodeLevel);
-          this._validatePositionAndContinue(childNode, childNodeLevel, pos2);
+          this.direction.setPosition(childNode, pos, childNodeLevel);
+          this._validatePositionAndContinue(childNode, childNodeLevel, pos);
         } else {
           return;
         }
@@ -18130,14 +18130,14 @@
      * @param {number} pos
      * @private
      */
-    _validatePositionAndContinue(node, level, pos2) {
+    _validatePositionAndContinue(node, level, pos) {
       if (!this.hierarchical.isTree) return;
       if (this.lastNodeOnLevel[level] !== void 0) {
         const previousPos = this.direction.getPosition(
           this.body.nodes[this.lastNodeOnLevel[level]]
         );
-        if (pos2 - previousPos < this.options.hierarchical.nodeSpacing) {
-          const diff = previousPos + this.options.hierarchical.nodeSpacing - pos2;
+        if (pos - previousPos < this.options.hierarchical.nodeSpacing) {
+          const diff = previousPos + this.options.hierarchical.nodeSpacing - pos;
           const sharedParent = this._findCommonParent(
             this.lastNodeOnLevel[level],
             node.id
@@ -18157,8 +18157,8 @@
      */
     _indexArrayToNodes(idArray) {
       const array2 = [];
-      for (let i2 = 0; i2 < idArray.length; i2++) {
-        array2.push(this.body.nodes[idArray[i2]]);
+      for (let i = 0; i < idArray.length; i++) {
+        array2.push(this.body.nodes[idArray[i]]);
       }
       return array2;
     }
@@ -18229,8 +18229,8 @@
         this.hierarchical.levelDownstream(nodeA, nodeB);
       };
       const hubSizes = this._getHubSizes();
-      for (let i2 = 0; i2 < hubSizes.length; ++i2) {
-        const hubSize = hubSizes[i2];
+      for (let i = 0; i < hubSizes.length; ++i) {
+        const hubSize = hubSizes[i];
         if (hubSize === 0) break;
         forEach(this.body.nodeIndices, (nodeId) => {
           const node = this.body.nodes[nodeId];
@@ -18269,8 +18269,8 @@
      * @private
      */
     _determineLevelsDirected() {
-      const nodes = this.body.nodeIndices.reduce((acc, id2) => {
-        acc.set(id2, this.body.nodes[id2]);
+      const nodes = this.body.nodeIndices.reduce((acc, id) => {
+        acc.set(id, this.body.nodes[id]);
         return acc;
       }, /* @__PURE__ */ new Map());
       if (this.options.hierarchical.shakeTowards === "roots") {
@@ -18308,8 +18308,8 @@
           progress[node.id] = true;
           let childNode;
           const edges = this._getActiveEdges(node);
-          for (let i2 = 0; i2 < edges.length; i2++) {
-            const edge = edges[i2];
+          for (let i = 0; i < edges.length; i++) {
+            const edge = edges[i];
             if (edge.connected === true) {
               if (edge.toId == node.id) {
                 childNode = edge.from;
@@ -18326,8 +18326,8 @@
       };
       if (startingNodeId === void 0) {
         let treeIndex = 0;
-        for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-          const nodeId = this.body.nodeIndices[i2];
+        for (let i = 0; i < this.body.nodeIndices.length; i++) {
+          const nodeId = this.body.nodeIndices[i];
           if (progress[nodeId] === void 0) {
             const node = this.body.nodes[nodeId];
             crawler(node, treeIndex);
@@ -18359,8 +18359,8 @@
         this.direction.shift(parentId2, diff);
         const childRef = this.hierarchical.childrenReference[parentId2];
         if (childRef !== void 0) {
-          for (let i2 = 0; i2 < childRef.length; i2++) {
-            shifter(childRef[i2]);
+          for (let i = 0; i < childRef.length; i++) {
+            shifter(childRef[i]);
           }
         }
       };
@@ -18378,8 +18378,8 @@
       const iterateParents = (parents2, child) => {
         const parentRef = this.hierarchical.parentReference[child];
         if (parentRef !== void 0) {
-          for (let i2 = 0; i2 < parentRef.length; i2++) {
-            const parent = parentRef[i2];
+          for (let i = 0; i < parentRef.length; i++) {
+            const parent = parentRef[i];
             parents2[parent] = true;
             iterateParents(parents2, parent);
           }
@@ -18388,8 +18388,8 @@
       const findParent = (parents2, child) => {
         const parentRef = this.hierarchical.parentReference[child];
         if (parentRef !== void 0) {
-          for (let i2 = 0; i2 < parentRef.length; i2++) {
-            const parent = parentRef[i2];
+          for (let i = 0; i < parentRef.length; i++) {
+            const parent = parentRef[i];
             if (parents2[parent] !== void 0) {
               return { foundParent: parent, withChild: child };
             }
@@ -18433,12 +18433,12 @@
     _getCenterPosition(childNodes) {
       let minPos = 1e9;
       let maxPos = -1e9;
-      for (let i2 = 0; i2 < childNodes.length; i2++) {
+      for (let i = 0; i < childNodes.length; i++) {
         let childNode;
-        if (childNodes[i2].id !== void 0) {
-          childNode = childNodes[i2];
+        if (childNodes[i].id !== void 0) {
+          childNode = childNodes[i];
         } else {
-          const childNodeId = childNodes[i2];
+          const childNodeId = childNodes[i];
           childNode = this.body.nodes[childNodeId];
         }
         const position = this.direction.getPosition(childNode);
@@ -18817,8 +18817,8 @@
       const selectedEdges = this.selectionHandler.getSelectedEdgeIds();
       let deleteFunction = void 0;
       if (selectedNodes.length > 0) {
-        for (let i2 = 0; i2 < selectedNodes.length; i2++) {
-          if (this.body.nodes[selectedNodes[i2]].isCluster === true) {
+        for (let i = 0; i < selectedNodes.length; i++) {
+          if (this.body.nodes[selectedNodes[i]].isCluster === true) {
             alert(
               this.options.locales[this.options.locale]["deleteClusterError"] || this.options.locales["en"]["deleteClusterError"]
             );
@@ -18922,15 +18922,15 @@
      * @returns {Node}
      * @private
      */
-    _getNewTargetNode(x2, y2) {
+    _getNewTargetNode(x, y) {
       const controlNodeStyle = deepExtend({}, this.options.controlNodeStyle);
       controlNodeStyle.id = "targetNode" + v4_default();
       controlNodeStyle.hidden = false;
       controlNodeStyle.physics = false;
-      controlNodeStyle.x = x2;
-      controlNodeStyle.y = y2;
+      controlNodeStyle.x = x;
+      controlNodeStyle.y = y;
       const node = this.body.functions.createNode(controlNodeStyle);
-      node.shape.boundingBox = { left: x2, right: x2, top: y2, bottom: y2 };
+      node.shape.boundingBox = { left: x, right: x, top: y, bottom: y };
       return node;
     }
     /**
@@ -19108,16 +19108,16 @@
      * @returns {HTMLElement}
      * @private
      */
-    _createButton(id2, className, label, labelClassName = "vis-label") {
-      this.manipulationDOM[id2 + "Div"] = document.createElement("button");
-      this.manipulationDOM[id2 + "Div"].className = "vis-button " + className;
-      this.manipulationDOM[id2 + "Label"] = document.createElement("div");
-      this.manipulationDOM[id2 + "Label"].className = labelClassName;
-      this.manipulationDOM[id2 + "Label"].innerText = label;
-      this.manipulationDOM[id2 + "Div"].appendChild(
-        this.manipulationDOM[id2 + "Label"]
+    _createButton(id, className, label, labelClassName = "vis-label") {
+      this.manipulationDOM[id + "Div"] = document.createElement("button");
+      this.manipulationDOM[id + "Div"].className = "vis-button " + className;
+      this.manipulationDOM[id + "Label"] = document.createElement("div");
+      this.manipulationDOM[id + "Label"].className = labelClassName;
+      this.manipulationDOM[id + "Label"].innerText = label;
+      this.manipulationDOM[id + "Div"].appendChild(
+        this.manipulationDOM[id + "Label"]
       );
-      return this.manipulationDOM[id2 + "Div"];
+      return this.manipulationDOM[id + "Div"];
     }
     /**
      *
@@ -19181,9 +19181,9 @@
      * @private
      */
     _unbindTemporaryEvents() {
-      for (let i2 = 0; i2 < this.temporaryEventFunctions.length; i2++) {
-        const eventName = this.temporaryEventFunctions[i2].event;
-        const boundFunction = this.temporaryEventFunctions[i2].boundFunction;
+      for (let i = 0; i < this.temporaryEventFunctions.length; i++) {
+        const eventName = this.temporaryEventFunctions[i].event;
+        const boundFunction = this.temporaryEventFunctions[i].boundFunction;
         this.body.emitter.off(eventName, boundFunction);
       }
       this.temporaryEventFunctions = [];
@@ -19214,20 +19214,20 @@
      * @private
      */
     _cleanupTemporaryNodesAndEdges() {
-      for (let i2 = 0; i2 < this.temporaryIds.edges.length; i2++) {
-        this.body.edges[this.temporaryIds.edges[i2]].disconnect();
-        delete this.body.edges[this.temporaryIds.edges[i2]];
+      for (let i = 0; i < this.temporaryIds.edges.length; i++) {
+        this.body.edges[this.temporaryIds.edges[i]].disconnect();
+        delete this.body.edges[this.temporaryIds.edges[i]];
         const indexTempEdge = this.body.edgeIndices.indexOf(
-          this.temporaryIds.edges[i2]
+          this.temporaryIds.edges[i]
         );
         if (indexTempEdge !== -1) {
           this.body.edgeIndices.splice(indexTempEdge, 1);
         }
       }
-      for (let i2 = 0; i2 < this.temporaryIds.nodes.length; i2++) {
-        delete this.body.nodes[this.temporaryIds.nodes[i2]];
+      for (let i = 0; i < this.temporaryIds.nodes.length; i++) {
+        delete this.body.nodes[this.temporaryIds.nodes[i]];
         const indexTempNode = this.body.nodeIndices.indexOf(
-          this.temporaryIds.nodes[i2]
+          this.temporaryIds.nodes[i]
         );
         if (indexTempNode !== -1) {
           this.body.nodeIndices.splice(indexTempNode, 1);
@@ -19279,10 +19279,10 @@
     _controlNodeDrag(event) {
       this.body.emitter.emit("disablePhysics");
       const pointer = this.body.functions.getPointer(event.center);
-      const pos2 = this.canvas.DOMtoCanvas(pointer);
+      const pos = this.canvas.DOMtoCanvas(pointer);
       if (this.selectedControlNode !== void 0) {
-        this.selectedControlNode.x = pos2.x;
-        this.selectedControlNode.y = pos2.y;
+        this.selectedControlNode.x = pos.x;
+        this.selectedControlNode.y = pos.y;
       } else {
         this.interactionHandler.onDrag(event);
       }
@@ -19303,9 +19303,9 @@
       this.selectionHandler.unselectAll();
       const overlappingNodeIds = this.selectionHandler._getAllNodesOverlappingWith(pointerObj);
       let node = void 0;
-      for (let i2 = overlappingNodeIds.length - 1; i2 >= 0; i2--) {
-        if (overlappingNodeIds[i2] !== this.selectedControlNode.id) {
-          node = this.body.nodes[overlappingNodeIds[i2]];
+      for (let i = overlappingNodeIds.length - 1; i >= 0; i--) {
+        if (overlappingNodeIds[i] !== this.selectedControlNode.id) {
+          node = this.body.nodes[overlappingNodeIds[i]];
           break;
         }
       }
@@ -19390,9 +19390,9 @@
       }
       const overlappingNodeIds = this.selectionHandler._getAllNodesOverlappingWith(pointerObj);
       let node = void 0;
-      for (let i2 = overlappingNodeIds.length - 1; i2 >= 0; i2--) {
-        if (this.temporaryIds.nodes.indexOf(overlappingNodeIds[i2]) === -1) {
-          node = this.body.nodes[overlappingNodeIds[i2]];
+      for (let i = overlappingNodeIds.length - 1; i >= 0; i--) {
+        if (this.temporaryIds.nodes.indexOf(overlappingNodeIds[i]) === -1) {
+          node = this.body.nodes[overlappingNodeIds[i]];
           break;
         }
       }
@@ -19425,9 +19425,9 @@
       }
       const overlappingNodeIds = this.selectionHandler._getAllNodesOverlappingWith(pointerObj);
       let node = void 0;
-      for (let i2 = overlappingNodeIds.length - 1; i2 >= 0; i2--) {
-        if (this.temporaryIds.nodes.indexOf(overlappingNodeIds[i2]) === -1) {
-          node = this.body.nodes[overlappingNodeIds[i2]];
+      for (let i = overlappingNodeIds.length - 1; i >= 0; i--) {
+        if (this.temporaryIds.nodes.indexOf(overlappingNodeIds[i]) === -1) {
+          node = this.body.nodes[overlappingNodeIds[i]];
           break;
         }
       }
@@ -19830,14 +19830,14 @@
      * @private
      */
     add(ids, doNotEmit = false) {
-      let id2;
+      let id;
       const newNodes = [];
-      for (let i2 = 0; i2 < ids.length; i2++) {
-        id2 = ids[i2];
-        const properties = this.body.data.nodes.get(id2);
+      for (let i = 0; i < ids.length; i++) {
+        id = ids[i];
+        const properties = this.body.data.nodes.get(id);
         const node = this.create(properties);
         newNodes.push(node);
-        this.body.nodes[id2] = node;
+        this.body.nodes[id] = node;
       }
       this.layoutEngine.positionInitially(newNodes);
       if (doNotEmit === false) {
@@ -19854,10 +19854,10 @@
     update(ids, changedData, oldData) {
       const nodes = this.body.nodes;
       let dataChanged = false;
-      for (let i2 = 0; i2 < ids.length; i2++) {
-        const id2 = ids[i2];
-        let node = nodes[id2];
-        const data = changedData[i2];
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        let node = nodes[id];
+        const data = changedData[i];
         if (node !== void 0) {
           if (node.setOptions(data)) {
             dataChanged = true;
@@ -19865,7 +19865,7 @@
         } else {
           dataChanged = true;
           node = this.create(data);
-          nodes[id2] = node;
+          nodes[id] = node;
         }
       }
       if (!dataChanged && oldData !== void 0) {
@@ -19887,9 +19887,9 @@
      */
     remove(ids) {
       const nodes = this.body.nodes;
-      for (let i2 = 0; i2 < ids.length; i2++) {
-        const id2 = ids[i2];
-        delete nodes[id2];
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        delete nodes[id];
       }
       this.body.emitter.emit("_dataChanged");
     }
@@ -19934,10 +19934,10 @@
       const dataArray = {};
       if (ids !== void 0) {
         if (Array.isArray(ids) === true) {
-          for (let i2 = 0; i2 < ids.length; i2++) {
-            if (this.body.nodes[ids[i2]] !== void 0) {
-              const node = this.body.nodes[ids[i2]];
-              dataArray[ids[i2]] = {
+          for (let i = 0; i < ids.length; i++) {
+            if (this.body.nodes[ids[i]] !== void 0) {
+              const node = this.body.nodes[ids[i]];
+              dataArray[ids[i]] = {
                 x: Math.round(node.x),
                 y: Math.round(node.y)
               };
@@ -19950,9 +19950,9 @@
           }
         }
       } else {
-        for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-          const node = this.body.nodes[this.body.nodeIndices[i2]];
-          dataArray[this.body.nodeIndices[i2]] = {
+        for (let i = 0; i < this.body.nodeIndices.length; i++) {
+          const node = this.body.nodes[this.body.nodeIndices[i]];
+          dataArray[this.body.nodeIndices[i]] = {
             x: Math.round(node.x),
             y: Math.round(node.y)
           };
@@ -19967,17 +19967,17 @@
      * @throws {ReferenceError} If an invalid id is provided.
      * @returns {{ x: number, y: number }} Returns X, Y canvas position of the node with given id.
      */
-    getPosition(id2) {
-      if (id2 == void 0) {
+    getPosition(id) {
+      if (id == void 0) {
         throw new TypeError("No id was specified for getPosition method.");
-      } else if (this.body.nodes[id2] == void 0) {
+      } else if (this.body.nodes[id] == void 0) {
         throw new ReferenceError(
-          `NodeId provided for getPosition does not exist. Provided: ${id2}`
+          `NodeId provided for getPosition does not exist. Provided: ${id}`
         );
       } else {
         return {
-          x: Math.round(this.body.nodes[id2].x),
-          y: Math.round(this.body.nodes[id2].y)
+          x: Math.round(this.body.nodes[id].x),
+          y: Math.round(this.body.nodes[id].y)
         };
       }
     }
@@ -19988,12 +19988,12 @@
       const dataArray = [];
       const dataset = this.body.data.nodes.getDataSet();
       for (const dsNode of dataset.get()) {
-        const id2 = dsNode.id;
-        const bodyNode = this.body.nodes[id2];
-        const x2 = Math.round(bodyNode.x);
-        const y2 = Math.round(bodyNode.y);
-        if (dsNode.x !== x2 || dsNode.y !== y2) {
-          dataArray.push({ id: id2, x: x2, y: y2 });
+        const id = dsNode.id;
+        const bodyNode = this.body.nodes[id];
+        const x = Math.round(bodyNode.x);
+        const y = Math.round(bodyNode.y);
+        if (dsNode.x !== x || dsNode.y !== y) {
+          dataArray.push({ id, x, y });
         }
       }
       dataset.update(dataArray);
@@ -20020,8 +20020,8 @@
       if (this.body.nodes[nodeId] !== void 0) {
         const node = this.body.nodes[nodeId];
         const nodeObj = {};
-        for (let i2 = 0; i2 < node.edges.length; i2++) {
-          const edge = node.edges[i2];
+        for (let i = 0; i < node.edges.length; i++) {
+          const edge = node.edges[i];
           if (direction !== "to" && edge.toId == node.id) {
             if (nodeObj[edge.fromId] === void 0) {
               nodeList.push(edge.fromId);
@@ -20046,8 +20046,8 @@
       const edgeList = [];
       if (this.body.nodes[nodeId] !== void 0) {
         const node = this.body.nodes[nodeId];
-        for (let i2 = 0; i2 < node.edges.length; i2++) {
-          edgeList.push(node.edges[i2].id);
+        for (let i = 0; i < node.edges.length; i++) {
+          edgeList.push(node.edges[i].id);
         }
       } else {
         console.error(
@@ -20063,10 +20063,10 @@
      * @param {number} x
      * @param {number} y
      */
-    moveNode(nodeId, x2, y2) {
+    moveNode(nodeId, x, y) {
       if (this.body.nodes[nodeId] !== void 0) {
-        this.body.nodes[nodeId].x = Number(x2);
-        this.body.nodes[nodeId].y = Number(y2);
+        this.body.nodes[nodeId].x = Number(x);
+        this.body.nodes[nodeId].y = Number(y);
         setTimeout(() => {
           this.body.emitter.emit("startSimulation");
         }, 0);
@@ -20112,8 +20112,8 @@
         const nodeCount = nodeIndices.length;
         const barnesHutTree = this._formBarnesHutTree(nodes, nodeIndices);
         this.barnesHutTree = barnesHutTree;
-        for (let i2 = 0; i2 < nodeCount; i2++) {
-          node = nodes[nodeIndices[i2]];
+        for (let i = 0; i < nodeCount; i++) {
+          node = nodes[nodeIndices[i]];
           if (node.options.mass > 0) {
             this._getForceContributions(barnesHutTree.root, node);
           }
@@ -20196,22 +20196,22 @@
       let minY = nodes[nodeIndices[0]].y;
       let maxX = nodes[nodeIndices[0]].x;
       let maxY = nodes[nodeIndices[0]].y;
-      for (let i2 = 1; i2 < nodeCount; i2++) {
-        const node2 = nodes[nodeIndices[i2]];
-        const x2 = node2.x;
-        const y2 = node2.y;
+      for (let i = 1; i < nodeCount; i++) {
+        const node2 = nodes[nodeIndices[i]];
+        const x = node2.x;
+        const y = node2.y;
         if (node2.options.mass > 0) {
-          if (x2 < minX) {
-            minX = x2;
+          if (x < minX) {
+            minX = x;
           }
-          if (x2 > maxX) {
-            maxX = x2;
+          if (x > maxX) {
+            maxX = x;
           }
-          if (y2 < minY) {
-            minY = y2;
+          if (y < minY) {
+            minY = y;
           }
-          if (y2 > maxY) {
-            maxY = y2;
+          if (y > maxY) {
+            maxY = y;
           }
         }
       }
@@ -20246,8 +20246,8 @@
         }
       };
       this._splitBranch(barnesHutTree.root);
-      for (let i2 = 0; i2 < nodeCount; i2++) {
-        node = nodes[nodeIndices[i2]];
+      for (let i = 0; i < nodeCount; i++) {
+        node = nodes[nodeIndices[i]];
         if (node.options.mass > 0) {
           this._placeInTree(barnesHutTree.root, node);
         }
@@ -20480,8 +20480,8 @@
       const nodes = this.body.nodes;
       const nodeIndices = this.physicsBody.physicsNodeIndices;
       const forces = this.physicsBody.forces;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         node = nodes[nodeId];
         dx = -node.x;
         dy = -node.y;
@@ -20593,9 +20593,9 @@
       const nodeIndices = this.physicsBody.physicsNodeIndices;
       const forces = this.physicsBody.forces;
       const nodeDistance = this.options.nodeDistance;
-      for (let i2 = 0; i2 < nodeIndices.length - 1; i2++) {
-        const node1 = nodes[nodeIndices[i2]];
-        for (let j = i2 + 1; j < nodeIndices.length; j++) {
+      for (let i = 0; i < nodeIndices.length - 1; i++) {
+        const node1 = nodes[nodeIndices[i]];
+        for (let j = i + 1; j < nodeIndices.length; j++) {
           const node2 = nodes[nodeIndices[j]];
           if (node1.level === node2.level) {
             const theseNodesDistance = nodeDistance + this.overlapAvoidanceFactor * ((node1.shape.radius || 0) / 2 + (node2.shape.radius || 0) / 2);
@@ -20653,13 +20653,13 @@
       const edgeIndices = this.physicsBody.physicsEdgeIndices;
       const nodeIndices = this.physicsBody.physicsNodeIndices;
       const forces = this.physicsBody.forces;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         forces[nodeId].springFx = 0;
         forces[nodeId].springFy = 0;
       }
-      for (let i2 = 0; i2 < edgeIndices.length; i2++) {
-        edge = edges[edgeIndices[i2]];
+      for (let i = 0; i < edgeIndices.length; i++) {
+        edge = edges[edgeIndices[i]];
         if (edge.connected === true) {
           edgeLength = edge.options.length === void 0 ? this.options.springLength : edge.options.length;
           dx = edge.from.x - edge.to.x;
@@ -20692,8 +20692,8 @@
       }
       springForce = 1;
       let springFx, springFy;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         springFx = Math.min(
           springForce,
           Math.max(-springForce, forces[nodeId].springFx)
@@ -20707,15 +20707,15 @@
       }
       let totalFx = 0;
       let totalFy = 0;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         totalFx += forces[nodeId].x;
         totalFy += forces[nodeId].y;
       }
       const correctionFx = totalFx / nodeIndices.length;
       const correctionFy = totalFy / nodeIndices.length;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         forces[nodeId].x -= correctionFx;
         forces[nodeId].y -= correctionFy;
       }
@@ -20753,9 +20753,9 @@
       const nodeDistance = this.options.nodeDistance;
       const a = -2 / 3 / nodeDistance;
       const b = 4 / 3;
-      for (let i2 = 0; i2 < nodeIndices.length - 1; i2++) {
-        node1 = nodes[nodeIndices[i2]];
-        for (let j = i2 + 1; j < nodeIndices.length; j++) {
+      for (let i = 0; i < nodeIndices.length - 1; i++) {
+        node1 = nodes[nodeIndices[i]];
+        for (let j = i + 1; j < nodeIndices.length; j++) {
           node2 = nodes[nodeIndices[j]];
           dx = node2.x - node1.x;
           dy = node2.y - node1.y;
@@ -20809,8 +20809,8 @@
       const edgeIndices = this.physicsBody.physicsEdgeIndices;
       const edges = this.body.edges;
       let node1, node2, node3;
-      for (let i2 = 0; i2 < edgeIndices.length; i2++) {
-        edge = edges[edgeIndices[i2]];
+      for (let i = 0; i < edgeIndices.length; i++) {
+        edge = edges[edgeIndices[i]];
         if (edge.connected === true && edge.toId !== edge.fromId) {
           if (this.body.nodes[edge.toId] !== void 0 && this.body.nodes[edge.fromId] !== void 0) {
             if (edge.edgeType.via !== void 0) {
@@ -21240,8 +21240,8 @@
           }
         }
       }
-      for (let i2 = 0; i2 < this.physicsBody.physicsNodeIndices.length; i2++) {
-        const nodeId = this.physicsBody.physicsNodeIndices[i2];
+      for (let i = 0; i < this.physicsBody.physicsNodeIndices.length; i++) {
+        const nodeId = this.physicsBody.physicsNodeIndices[i];
         this.physicsBody.forces[nodeId] = { x: 0, y: 0 };
         if (this.physicsBody.velocities[nodeId] === void 0) {
           this.physicsBody.velocities[nodeId] = { x: 0, y: 0 };
@@ -21261,8 +21261,8 @@
       const nodes = this.body.nodes;
       const velocities = this.physicsBody.velocities;
       this.referenceState = {};
-      for (let i2 = 0; i2 < nodeIds.length; i2++) {
-        const nodeId = nodeIds[i2];
+      for (let i = 0; i < nodeIds.length; i++) {
+        const nodeId = nodeIds[i];
         if (nodes[nodeId] !== void 0) {
           if (nodes[nodeId].options.physics === true) {
             this.referenceState[nodeId] = {
@@ -21308,8 +21308,8 @@
       let maxNodeVelocity = 0;
       let averageNodeVelocity = 0;
       const velocityAdaptiveThreshold = 5;
-      for (let i2 = 0; i2 < nodeIndices.length; i2++) {
-        const nodeId = nodeIndices[i2];
+      for (let i = 0; i < nodeIndices.length; i++) {
+        const nodeId = nodeIndices[i];
         const nodeVelocity = this._performStep(nodeId);
         maxNodeVelocity = Math.max(maxNodeVelocity, nodeVelocity);
         averageNodeVelocity += nodeVelocity;
@@ -21401,11 +21401,11 @@
      */
     _freezeNodes() {
       const nodes = this.body.nodes;
-      for (const id2 in nodes) {
-        if (Object.prototype.hasOwnProperty.call(nodes, id2)) {
-          if (nodes[id2].x && nodes[id2].y) {
-            const fixed = nodes[id2].options.fixed;
-            this.freezeCache[id2] = { x: fixed.x, y: fixed.y };
+      for (const id in nodes) {
+        if (Object.prototype.hasOwnProperty.call(nodes, id)) {
+          if (nodes[id].x && nodes[id].y) {
+            const fixed = nodes[id].options.fixed;
+            this.freezeCache[id] = { x: fixed.x, y: fixed.y };
             fixed.x = true;
             fixed.y = true;
           }
@@ -21418,11 +21418,11 @@
      */
     _restoreFrozenNodes() {
       const nodes = this.body.nodes;
-      for (const id2 in nodes) {
-        if (Object.prototype.hasOwnProperty.call(nodes, id2)) {
-          if (this.freezeCache[id2] !== void 0) {
-            nodes[id2].options.fixed.x = this.freezeCache[id2].x;
-            nodes[id2].options.fixed.y = this.freezeCache[id2].y;
+      for (const id in nodes) {
+        if (Object.prototype.hasOwnProperty.call(nodes, id)) {
+          if (this.freezeCache[id] !== void 0) {
+            nodes[id].options.fixed.x = this.freezeCache[id].x;
+            nodes[id].options.fixed.y = this.freezeCache[id].y;
           }
         }
       }
@@ -21524,8 +21524,8 @@
      * @private
      */
     _drawForces(ctx) {
-      for (let i2 = 0; i2 < this.physicsBody.physicsNodeIndices.length; i2++) {
-        const index2 = this.physicsBody.physicsNodeIndices[i2];
+      for (let i = 0; i < this.physicsBody.physicsNodeIndices.length; i++) {
+        const index2 = this.physicsBody.physicsNodeIndices[i];
         const node = this.body.nodes[index2];
         const force = this.physicsBody.forces[index2];
         const factor = 20;
@@ -21828,8 +21828,8 @@
     _getAllNodesOverlappingWith(object2) {
       const overlappingNodes = [];
       const nodes = this.body.nodes;
-      for (let i2 = 0; i2 < this.body.nodeIndices.length; i2++) {
-        const nodeId = this.body.nodeIndices[i2];
+      for (let i = 0; i < this.body.nodeIndices.length; i++) {
+        const nodeId = this.body.nodeIndices[i];
         if (nodes[nodeId].isOverlappingWith(object2)) {
           overlappingNodes.push(nodeId);
         }
@@ -21878,8 +21878,8 @@
      */
     _getEdgesOverlappingWith(object2, overlappingEdges) {
       const edges = this.body.edges;
-      for (let i2 = 0; i2 < this.body.edgeIndices.length; i2++) {
-        const edgeId = this.body.edgeIndices[i2];
+      for (let i = 0; i < this.body.edgeIndices.length; i++) {
+        const edgeId = this.body.edgeIndices[i];
         if (edges[edgeId].isOverlappingWith(object2)) {
           overlappingEdges.push(edgeId);
         }
@@ -21907,8 +21907,8 @@
       let mindist = 10;
       let overlappingEdge = null;
       const edges = this.body.edges;
-      for (let i2 = 0; i2 < this.body.edgeIndices.length; i2++) {
-        const edgeId = this.body.edgeIndices[i2];
+      for (let i = 0; i < this.body.edgeIndices.length; i++) {
+        const edgeId = this.body.edgeIndices[i];
         const edge = edges[edgeId];
         if (edge.connected) {
           const xFrom = edge.from.x;
@@ -21990,8 +21990,8 @@
      * @private
      */
     _hoverConnectedEdges(node) {
-      for (let i2 = 0; i2 < node.edges.length; i2++) {
-        const edge = node.edges[i2];
+      for (let i = 0; i < node.edges.length; i++) {
+        const edge = node.edges[i];
         edge.hover = true;
         this._addToHover(edge);
       }
@@ -22198,19 +22198,19 @@
         this.unselectAll();
       }
       if (selection.nodes) {
-        for (const id2 of selection.nodes) {
-          const node = this.body.nodes[id2];
+        for (const id of selection.nodes) {
+          const node = this.body.nodes[id];
           if (!node) {
-            throw new RangeError('Node with id "' + id2 + '" not found');
+            throw new RangeError('Node with id "' + id + '" not found');
           }
           this.selectObject(node, options2.highlightEdges);
         }
       }
       if (selection.edges) {
-        for (const id2 of selection.edges) {
-          const edge = this.body.edges[id2];
+        for (const id of selection.edges) {
+          const edge = this.body.edges[id];
           if (!edge) {
-            throw new RangeError('Edge with id "' + id2 + '" not found');
+            throw new RangeError('Edge with id "' + id + '" not found');
           }
           this.selectObject(edge);
         }
@@ -22284,15 +22284,15 @@
       const items = [];
       const nodeIndices = this.body.nodeIndices;
       const nodes = this.body.nodes;
-      for (let i2 = nodeIndices.length - 1; i2 >= 0; i2--) {
-        const node = nodes[nodeIndices[i2]];
+      for (let i = nodeIndices.length - 1; i >= 0; i--) {
+        const node = nodes[nodeIndices[i]];
         const ret = node.getItemsOnPoint(point);
         items.push.apply(items, ret);
       }
       const edgeIndices = this.body.edgeIndices;
       const edges = this.body.edges;
-      for (let i2 = edgeIndices.length - 1; i2 >= 0; i2--) {
-        const edge = edges[edgeIndices[i2]];
+      for (let i = edgeIndices.length - 1; i >= 0; i--) {
+        const edge = edges[edgeIndices[i]];
         const ret = edge.getItemsOnPoint(point);
         items.push.apply(items, ret);
       }
@@ -23778,13 +23778,13 @@
     recursiveDOMDelete(this.body.container);
   };
   Network.prototype._updateValueRange = function(obj) {
-    let id2;
+    let id;
     let valueMin = void 0;
     let valueMax = void 0;
     let valueTotal = 0;
-    for (id2 in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, id2)) {
-        const value = obj[id2].getValue();
+    for (id in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, id)) {
+        const value = obj[id].getValue();
         if (value !== void 0) {
           valueMin = valueMin === void 0 ? value : Math.min(value, valueMin);
           valueMax = valueMax === void 0 ? value : Math.max(value, valueMax);
@@ -23793,9 +23793,9 @@
       }
     }
     if (valueMin !== void 0 && valueMax !== void 0) {
-      for (id2 in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, id2)) {
-          obj[id2].setValueRange(valueMin, valueMax, valueTotal);
+      for (id in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, id)) {
+          obj[id].setValueRange(valueMin, valueMax, valueTotal);
         }
       }
     }
@@ -24012,7 +24012,26 @@
     return options2;
   };
 
+  // js/toast.js
+  var toast = {
+    success: (message) => {
+      const el = document.querySelector("#topology-plugin-success-toast");
+      if (!el) return console.error("Could not find toast component!");
+      const content = el.querySelector("span");
+      content.textContent = message;
+      window.Toast.getOrCreateInstance(el).show();
+    },
+    error: (message) => {
+      const el = document.querySelector("#topology-plugin-error-toast");
+      if (!el) return console.error("Could not find toast component!");
+      const content = el.querySelector("span");
+      content.textContent = message;
+      window.Toast.getOrCreateInstance(el).show();
+    }
+  };
+
   // js/home.js
+  var labelColor = () => document.documentElement.dataset.bsTheme === "dark" ? "#fff" : "#000";
   function escapeXml(text) {
     return String(text).replace(/[&<>"']/g, (c2) => `&#${c2.charCodeAt(0)};`);
   }
@@ -24056,7 +24075,7 @@
       font: {
         multi: "md",
         face: "helvetica",
-        color: document.documentElement.dataset.netboxColorMode === "dark" ? "#fff" : "#000"
+        color: labelColor()
       }
     },
     edges: {
@@ -24071,23 +24090,22 @@
     },
     physics: {
       solver: "forceAtlas2Based",
-      // forceAtlas2Based can leave nodes orbiting each other indefinitely
-      // instead of settling below vis-network's stabilization velocity
-      // threshold, especially for larger/denser graphs (see GitHub #634 -
-      // "Spinning topology"). Cap the initial layout pass at a fixed
-      // number of iterations so it can never run forever, and explicitly
-      // turn physics off once that pass ends (see the
-      // stabilizationIterationsDone handler below) so the simulation
-      // doesn't keep running indefinitely in the background afterward.
+      // Nothing is drawn during the stabilization pass, so keep it short and let
+      // the layout settle on screen afterwards. forceAtlas2Based can leave nodes
+      // orbiting indefinitely (GitHub #634 - "Spinning topology"), so physics is
+      // turned off once stable or when a layout limit is reached (see below).
       stabilization: {
         enabled: true,
-        iterations: 1e3
+        iterations: 100
       }
     }
   };
+  var PHYSICS_ITERATION_LIMIT = 1e3;
+  var PHYSICS_TIME_LIMIT_MS = 15e3;
   var graph = null;
   var container = document.querySelector("#visgraph");
   var coordSaveCheckbox = document.querySelector("#id_save_coords");
+  var layoutProgress = document.querySelector("#layout-progress");
   (function handleLoadData() {
     if (!topologyData) return;
     function htmlTitle(text) {
@@ -24100,7 +24118,6 @@
         title: htmlTitle(node.title)
       }))
     );
-    window.nodes = nodes;
     const edges = new DataSet(
       topologyData.edges.map((node) => __spreadValues(__spreadProps(__spreadValues({}, node), {
         title: htmlTitle(node.title)
@@ -24123,16 +24140,43 @@
     const group_locations = topologyData.options.group_locations;
     const group_racks = topologyData.options.group_racks;
     const group_virtualchassis = topologyData.options.group_virtualchassis;
-    const gridSize = parseInt(topologyData.options.grid_size[0]);
+    const gridSize = topologyData.options.grid_size;
     var dragMode = false;
+    const needsLayout = topologyData.nodes.some((node) => node.physics !== false);
+    const progressBar = layoutProgress == null ? void 0 : layoutProgress.querySelector(".progress-bar");
+    const progressLabel = layoutProgress == null ? void 0 : layoutProgress.querySelector("small");
+    const layoutStart = performance.now();
+    if (layoutProgress && needsLayout) layoutProgress.style.display = "flex";
     graph = new Network(container, { nodes, edges }, options);
     graph.fit();
-    graph.once("stabilizationIterationsDone", () => {
+    let physicsRunning = true;
+    const stopPhysics = () => {
+      if (!physicsRunning) return;
+      physicsRunning = false;
       graph.setOptions({ physics: false });
+      graph.fit();
+      if (layoutProgress) layoutProgress.style.display = "none";
+    };
+    const updateLayoutProgress = (iterations) => {
+      const progress = Math.max(
+        iterations / PHYSICS_ITERATION_LIMIT,
+        (performance.now() - layoutStart) / PHYSICS_TIME_LIMIT_MS
+      );
+      if (progress >= 1) return stopPhysics();
+      if (!progressBar) return;
+      const percent = Math.round(progress * 100);
+      progressBar.style.width = `${percent}%`;
+      progressBar.setAttribute("aria-valuenow", percent);
+      progressLabel.textContent = `Laying out\u2026 ${percent}%`;
+    };
+    graph.on("stabilizationProgress", (params) => updateLayoutProgress(params.iterations));
+    graph.on("afterDrawing", () => {
+      if (physicsRunning) updateLayoutProgress(graph.physics.stabilizationIterations);
     });
+    graph.once("stabilized", stopPhysics);
     function getGridPosition(nodeId, gridSize2) {
-      x = graph.getPosition(nodeId).x;
-      y = graph.getPosition(nodeId).y;
+      let x = graph.getPosition(nodeId).x;
+      let y = graph.getPosition(nodeId).y;
       if (x >= 0) {
         if (x % gridSize2 > gridSize2 / 2) {
           x += gridSize2;
@@ -24172,23 +24216,23 @@
       const top = rasterizedCenterY - gridSize - vSpace;
       const bottom = rasterizedCenterY + gridSize + vSpace;
       canvascontext.beginPath();
-      for (let x2 = left; x2 < right; x2 += gridSize) {
-        canvascontext.moveTo(x2, top);
-        canvascontext.lineTo(x2, bottom);
+      for (let x = left; x < right; x += gridSize) {
+        canvascontext.moveTo(x, top);
+        canvascontext.lineTo(x, bottom);
       }
-      for (let y2 = top; y2 < bottom; y2 += gridSize) {
-        canvascontext.moveTo(left, y2);
-        canvascontext.lineTo(right, y2);
+      for (let y = top; y < bottom; y += gridSize) {
+        canvascontext.moveTo(left, y);
+        canvascontext.lineTo(right, y);
       }
       canvascontext.strokeStyle = "#777777";
       canvascontext.stroke();
     }
     function drawGridSnapHint(canvascontext) {
       if (gridSize > 0 && dragMode == true && graph.getSelectedNodes().length > 0) {
-        for (i = 0; i < graph.getSelectedNodes().length; i++) {
-          id = graph.getSelectedNodes()[i];
-          if (window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-            pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+        for (let i = 0; i < graph.getSelectedNodes().length; i++) {
+          const id = graph.getSelectedNodes()[i];
+          if (nodes.get(id).x != graph.getPosition(id).x || nodes.get(id).y != graph.getPosition(id).y) {
+            const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
             canvascontext.beginPath();
             canvascontext.arc(graph.getPosition(graph.getSelectedNodes()[i]).x, graph.getPosition(graph.getSelectedNodes()[i]).y, 5, 0, 2 * Math.PI);
             canvascontext.fillStyle = "#FF3D3D";
@@ -24212,28 +24256,24 @@
     graph.on("dragEnd", (params) => {
       dragMode = false;
       if (gridSize > 0 && graph.getSelectedNodes().length > 0) {
-        for (i = 0; i < graph.getSelectedNodes().length; i++) {
-          id = graph.getSelectedNodes()[i];
-          if (window.nodes.get(id).x != graph.getPosition(id).x || window.nodes.get(id).y != graph.getPosition(id).y) {
-            pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
-            window.nodes.update({ id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y });
+        for (let i = 0; i < graph.getSelectedNodes().length; i++) {
+          const id = graph.getSelectedNodes()[i];
+          if (nodes.get(id).x != graph.getPosition(id).x || nodes.get(id).y != graph.getPosition(id).y) {
+            const pos = getGridPosition(graph.getSelectedNodes()[i], gridSize);
+            nodes.update({ id: graph.getSelectedNodes()[i], x: pos.x, y: pos.y });
           }
         }
       }
-      if (coordSaveCheckbox.options[coordSaveCheckbox.selectedIndex].text != "Yes") return;
+      if ((coordSaveCheckbox == null ? void 0 : coordSaveCheckbox.value) !== "True") return;
       Promise.allSettled(
         Object.entries(graph.getPositions(params.nodes)).map(
           (_0) => __async(null, [_0], function* ([nodeId, nodePosition]) {
-            if (!isNaN(parseInt(nodeId))) {
-              nodeKey = parseInt(nodeId);
-            } else {
-              nodeKey = nodeId;
-            }
+            const nodeKey = isNaN(parseInt(nodeId)) ? nodeId : parseInt(nodeId);
             try {
-              window.nodes.update({ id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y });
+              nodes.update({ id: nodeKey, physics: false, x: nodePosition.x, y: nodePosition.y });
             } catch (e) {
               console.log([
-                "Error while executing window.nodes.update()",
+                "Error while executing nodes.update()",
                 "nodeId: " + nodeId,
                 "nodeKey: " + nodeKey,
                 "x: " + nodePosition.x,
@@ -24258,9 +24298,15 @@
                 })
               }
             );
+            if (!res.ok) throw new Error(`${nodeId}: ${res.status} ${res.statusText}`);
           })
         )
-      );
+      ).then((results) => {
+        const failed = results.filter((result) => result.status === "rejected");
+        if (failed.length === 0) return;
+        console.error("Saving coordinates failed", failed.map((result) => result.reason));
+        toast.error(`Saving coordinates failed for ${failed.length} node(s)`);
+      });
     });
     graph.on("doubleClick", (params) => {
       if (params.nodes.length > 0) {
@@ -24269,7 +24315,7 @@
         });
       } else {
         params.edges.forEach((edge) => {
-          window.open(edges.get(edge).href, "_blank");
+          if (edges.get(edge).href) window.open(edges.get(edge).href, "_blank");
         });
       }
     });
@@ -24342,7 +24388,7 @@
     });
     function combineNodeInfo(typeId, type) {
       let nodesArray = [];
-      for (let [key, value] of nodes._data) {
+      for (const value of nodes.get()) {
         if (value[typeId] != void 0) {
           nodesArray.push([value.id, value[typeId], value[type], value.label_num_lines]);
         }
@@ -24473,38 +24519,31 @@
   });
   function performXmlDownload() {
     const tempDownloadLink = document.createElement("a");
-    let xml_search_options = "";
-    if (typeof is_htmx !== "undefined") {
-      var curr_url = window.location.href;
-      const sites_prefix = "/sites/";
-      const location_prefix = "/locations/";
-      if (curr_url.includes(sites_prefix)) {
-        var site_id = curr_url.split(sites_prefix)[1];
-        site_id = site_id.split("/")[0];
-        xml_search_options = "site_id=" + site_id + "&show_cables=True&show_unconnected=True";
-      } else if (curr_url.includes(location_prefix)) {
-        var location_id = curr_url.split(location_prefix)[1];
-        location_id = location_id.split("/")[0];
-        xml_search_options = "location_id=" + location_id + "&show_cables=True&show_unconnected=True";
-      }
-    } else {
-      xml_search_options = new URLSearchParams(window.location.search);
-    }
-    fetch("/" + basePath + "api/plugins/netbox_topology_views/xml-export/?" + xml_search_options).then((response) => response.text()).then((data) => {
-      var blob = new Blob([data], { type: "text/plain" });
-      tempDownloadLink.setAttribute("href", window.URL.createObjectURL(blob));
+    const xml_search_options = new URLSearchParams(window.location.search);
+    fetch("/" + basePath + "api/plugins/netbox_topology_views/xml-export/?" + xml_search_options).then((response) => {
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return response.text();
+    }).then((data) => {
+      const blob = new Blob([data], { type: "application/xml" });
+      const url = window.URL.createObjectURL(blob);
+      tempDownloadLink.setAttribute("href", url);
       tempDownloadLink.setAttribute("download", "topology.xml");
-      tempDownloadLink.dataset.downloadurl = ["text/plain", tempDownloadLink.download, tempDownloadLink.href].join(":");
       tempDownloadLink.click();
+      window.URL.revokeObjectURL(url);
+    }).catch((err) => {
+      console.error(err);
+      toast.error(`XML export failed: ${err.message}`);
     });
+  }
+  if (!graph) {
+    downloadButton.disabled = true;
+    downloadXmlButton.disabled = true;
   }
   var observer = new MutationObserver(
     (mutations) => mutations.forEach((mutation) => {
       if (!graph || mutation.type !== "attributes" || mutation.attributeName !== "data-bs-theme" || !(mutation.target instanceof HTMLElement))
         return;
-      const netboxColorMode = mutation.target.dataset.bsTheme;
-      options.nodes.font.color = netboxColorMode === "dark" ? "#fff" : "#000";
-      graph.setOptions(options);
+      graph.setOptions({ nodes: { font: { color: labelColor() } } });
     })
   );
   observer.observe(document.documentElement, {
