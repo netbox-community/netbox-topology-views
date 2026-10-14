@@ -130,3 +130,4 @@ dmypy.json
 
 node_modules
 app.js.map
+SECURITY_FIXES.md

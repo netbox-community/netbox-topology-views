@@ -1,5 +1,4 @@
 from typing import Dict
-import sys
 
 from netbox.api.viewsets import BaseViewSet, NetBoxModelViewSet
 
@@ -24,16 +23,21 @@ from netbox_topology_views.api.serializers import (
     PowerPanelCoordinateSerializer,
     PowerFeedCoordinateSerializer,
 )
-import netbox_topology_views.models
 from netbox_topology_views.models import RoleImage, IndividualOptions, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 from netbox_topology_views.views import get_topology_data
-from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings
+from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings, is_allowed_image
 from netbox_topology_views.filters import DeviceFilterSet
 
-class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
-    permission_required = 'netbox_topology_views.change_coordinate'
+NODE_TYPES = {
+    "c": (Circuit, CircuitCoordinate),
+    "p": (PowerPanel, PowerPanelCoordinate),
+    "f": (PowerFeed, PowerFeedCoordinate),
+    "": (Device, Coordinate),
+}
 
-    queryset = Device.objects.none()
+class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
+    # TokenPermissions derives the required permission (change_coordinate for PATCH) from this model
+    queryset = Coordinate.objects.none()
     serializer_class = TopologyDummySerializer
 
     @action(detail=False, methods=["patch"])
@@ -43,39 +47,28 @@ class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
         ]:
             return Response({"status": "not allowed to save coords"}, status=403)
 
-        device_id: str = request.data.get("node_id", None)
+        node_id = str(request.data.get("node_id", ""))
         x_coord = request.data.get("x", None)
         y_coord = request.data.get("y", None)
-        group_id = request.data.get("group", "None")
+        group_id = request.data.get("group", None)
 
-        actual_device = None
-        if device_id.startswith("c"):
-            device_id = device_id.lstrip("c")
-            actual_device = Circuit.objects.get(id=device_id)
-            model_name = 'CircuitCoordinate'
-        elif device_id.startswith("p"):
-            device_id = device_id.lstrip("p")
-            actual_device = PowerPanel.objects.get(id=device_id)
-            model_name = 'PowerPanelCoordinate'
-        elif device_id.startswith("f"):
-            device_id = device_id.lstrip("f")
-            actual_device = PowerFeed.objects.get(id=device_id)
-            model_name = 'PowerFeedCoordinate'
-        elif device_id.isnumeric():
-            actual_device = Device.objects.get(id=device_id)
-            model_name = 'Coordinate'
-
-        if not actual_device:
+        prefix, pk = ("", node_id) if node_id.isdigit() else (node_id[:1], node_id[1:])
+        if prefix not in NODE_TYPES or not pk.isdigit():
             return Response({"status": "invalid node_id in body"}, status=400)
 
-        model_class = getattr(netbox_topology_views.models, model_name)
+        node_model, model_class = NODE_TYPES[prefix]
+        actual_device = node_model.objects.restrict(request.user, "view").filter(pk=pk).first()
+        if actual_device is None:
+            return Response({"status": "invalid node_id in body"}, status=400)
 
         if group_id is None or group_id == "default":
             group_id = model_class.get_or_create_default_group(group_id)
             if not group_id:
                 return Response(
                     {"status": "Error while creating default group."}, status=500
-                )  
+                )
+        elif not str(group_id).isdigit():
+            return Response({"status": "invalid group in body"}, status=400)
 
         try:
             if CoordinateGroup.objects.filter(pk=group_id):
@@ -125,7 +118,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
             # Read options from saved filters as NetBox does not handle custom plugin filters
             if "filter_id" in request.GET and request.GET["filter_id"] != '':
                 try:
-                    saved_filter = SavedFilter.objects.get(pk=filter_id)
+                    saved_filter = SavedFilter.objects.restrict(request.user, 'view').restrict_to_shared(request.user).get(pk=filter_id)
                     saved_filter_params = getattr(saved_filter, 'parameters')
 
                     if ignore_cable_type == () and 'ignore_cable_type' in saved_filter_params: ignore_cable_type = saved_filter_params['ignore_cable_type']
@@ -161,6 +154,7 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
                 group_id = request.query_params["group"]
             topo_data = get_topology_data(
                 queryset=self.queryset,
+                user=request.user,
                 individualOptions=individualOptions,
                 ignore_cable_type=ignore_cable_type,
                 save_coords=save_coords,
@@ -192,40 +186,30 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
             )
 
 class SaveRoleImageViewSet(BaseViewSet, ReadOnlyModelViewSet):
+    # TokenPermissions requires dcim.add_devicerole for POST; change is checked in save()
     queryset = DeviceRole.objects.none()
     serializer_class = RoleImageSerializer
-    permission_required = (
-        "dcim.add_devicerole",
-        "dcim.change_devicerole",
-    )
 
     @action(detail=False, methods=["post"])
     def save(self, request):
+        if not request.user.has_perm("dcim.change_devicerole"):
+            return JsonResponse({"status": "Permission denied"}, status=403)
+
         if not isinstance(request.data, dict):
             return JsonResponse(
                 {"status": "Missing or malformed request body"}, status=400
             )
 
-        if sys.version_info >= (3,9,0):
-            device_roles = {
-                k: v.removeprefix(settings.STATIC_URL)
-                for k, v in request.data.items()
-                if k.isnumeric()}
-            content_type_ids = {
-                k[2:]: v.removeprefix(settings.STATIC_URL)
-                for k, v in request.data.items()
-                if k.startswith("ct") and k[2:].isnumeric()
-            }
-        else:
-            device_roles = {}
-            for k, v in request.data.items():
-                if k.isdigit() and v.startswith(settings.STATIC_URL):
-                    device_roles[k] = v[len(settings.STATIC_URL):]
+        images = {k: get_image_from_url(v) for k, v in request.data.items() if isinstance(v, str)}
+        if len(images) != len(request.data) or not all(map(is_allowed_image, images.values())):
+            return JsonResponse({"status": "Invalid image path"}, status=400)
 
-            content_type_ids = {}
-            for k, v in request.data.items():
-                if k.startswith("ct") and k[2:].isdigit() and v.startswith(settings.STATIC_URL):
-                    content_type_ids[k[2:]] = v[len(settings.STATIC_URL):]
+        device_roles = {k: v for k, v in images.items() if k.isnumeric()}
+        content_type_ids = {
+            k[2:]: v
+            for k, v in images.items()
+            if k.startswith("ct") and k[2:].isnumeric()
+        }
 
         roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(device_roles.keys())
         content_types: Dict[int, ContentType] = ContentType.objects.in_bulk(

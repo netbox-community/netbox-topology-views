@@ -1,6 +1,10 @@
 import { DataSet } from 'vis-data/esnext'
 import { Network } from 'vis-network/esnext'
 
+function escapeXml(text) {
+    return String(text).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
+}
+
 function generatePortSVG(text) {
     // pre-calculate text width
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -34,7 +38,7 @@ function generatePortSVG(text) {
     encodeURIComponent( 
         '<svg xmlns="http://www.w3.org/2000/svg" width="' + (svgWidth) + '" height="' + (svgHeight) + '">' +
         '<rect x="' + rectX + '" y="' + rectY + '" rx="4" ry="4" width="' + (rectWidth) + '" height="' + (rectHeight) + '" fill="#ffdf3f" stroke="#ffc93f" stroke-width="' + (rectBorderWidth) + '" style="opacity:0.5"/>' +
-        '<text x="' + textX + '" y="' + textY + '" font-family="' + fontFamily + '" font-size="' + (fontSize) + '" fill="black" text-anchor="middle" dominant-baseline="middle">' + text + '</text>' +
+        '<text x="' + textX + '" y="' + textY + '" font-family="' + fontFamily + '" font-size="' + (fontSize) + '" fill="black" text-anchor="middle" dominant-baseline="middle">' + escapeXml(text) + '</text>' +
         '</svg>'
         )
 }
