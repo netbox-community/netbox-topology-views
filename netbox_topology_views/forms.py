@@ -1,4 +1,3 @@
-from cProfile import label
 from django import forms
 from django.conf import settings
 
@@ -483,7 +482,7 @@ class PowerPanelCoordinatesFilterForm(NetBoxModelFilterSetForm):
     )
 
 class PowerFeedCoordinatesFilterForm(NetBoxModelFilterSetForm):
-    model = Coordinate
+    model = PowerFeedCoordinate
     fieldsets = (
         FieldSet('q', 'filter_id'),
         FieldSet('group', 'device', 'x', 'y', name=_("PowerFeed Coordinates")),
