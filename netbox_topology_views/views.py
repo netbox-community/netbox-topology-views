@@ -20,13 +20,11 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet, Count
-from django.db.models.functions import Lower
 from django.http import Http404, HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.html import format_html
 from django.views.generic import View
-from extras.models import Tag
 from wireless.models import WirelessLink
 from netbox.views.generic import (
     ObjectView,
@@ -35,7 +33,7 @@ from netbox.views.generic import (
     ObjectDeleteView,
     BulkImportView
 )
-from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet, CircuitCoordinatesFilterSet, PowerPanelCoordinatesFilterSet, PowerFeedCoordinatesFilterSet
+from netbox_topology_views.filters import DeviceFilterSet, CoordinateGroupFilterSet, CoordinatesFilterSet, CircuitCoordinatesFilterSet, PowerPanelCoordinatesFilterSet, PowerFeedCoordinatesFilterSet
 from netbox_topology_views.forms import (
     DeviceFilterForm, 
     IndividualOptionsForm, 
@@ -113,12 +111,12 @@ def get_image_resolver():
     return resolve
 
 
-def get_coordinate_group(group_id) -> Optional[CoordinateGroup]:
+def get_coordinate_group(group_id, user) -> Optional[CoordinateGroup]:
     if group_id in (None, "default"):
         return CoordinateGroup.objects.filter(name="default").first()
     if not str(group_id).isdigit():
         raise Http404("Invalid coordinate group")
-    return get_object_or_404(CoordinateGroup, pk=group_id)
+    return get_object_or_404(CoordinateGroup.objects.restrict(user, "view"), pk=group_id)
 
 
 def get_coordinates(group: Optional[CoordinateGroup]) -> Dict:
@@ -224,7 +222,7 @@ def create_node(
         if device.rack is not None:
             node_content += format_html("<tr><th>Rack: </th><td>{}</td></tr>", device.rack.name)
         if device.position is not None:
-            if device.face is not None:
+            if device.face:
                 node_content += format_html("<tr><th>Position: </th><td>{} ({})</td></tr>", device.position, device.face)
             else:
                 node_content += (
@@ -453,7 +451,7 @@ def get_topology_data(
     nodes_powerfeed: Dict[int, PowerFeed] = {}
     cable_ids = DefaultDict(dict)
     interface_ids = DefaultDict(dict)
-    coordinates = get_coordinates(get_coordinate_group(group_id))
+    coordinates = get_coordinates(get_coordinate_group(group_id, user))
     image_resolver = get_image_resolver()
 
     device_ids = {d.pk for d in queryset}
@@ -669,8 +667,6 @@ def get_topology_data(
                         if "A" in cable_ids[link.cable_id]:
                             if cable_ids[link.cable_id]["A"] is not None:
                                 complete_link = True
-                else:
-                    print("Unkown cable end")
                 cable_ids[link.cable_id][link.cable_end] = link
 
                 if complete_link:
@@ -811,7 +807,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         topo_data = None
 
         if request.GET:
-            query_settings = get_query_settings(request)
+            query_settings = get_query_settings(request, notify_user=True)
             filter_required = True
             empty_result = False
 
@@ -892,30 +888,30 @@ class TopologyImagesView(PermissionRequiredMixin, View):
     )
 
     def get(self, request: HttpRequest):
-        images = [
-            {"url": image_static_url(image), "title": image.stem}
-            for image in CONF_IMAGE_DIR.iterdir() if image.name.lower().endswith(IMAGE_FILETYPES)
-        ]
+        images = []
+        if CONF_IMAGE_DIR.is_dir():
+            images = [
+                {"url": image_static_url(image), "title": image.stem}
+                for image in CONF_IMAGE_DIR.iterdir() if image.suffix.lstrip(".").lower() in IMAGE_FILETYPES
+            ]
+        else:
+            messages.warning(request, f"Image directory {CONF_IMAGE_DIR} does not exist")
 
-        roles = reduce(
-            lambda acc, cur: {
-                **acc,
-                cur.name: {
-                    "id": cur.pk,
-                    "name": cur.name,
-                    "slug": cur.slug,
-                    "image": find_image_url(cur.slug),
-                },
-            },
-            DeviceRole.objects.all(),
-            dict(),
-        )
+        roles = {
+            role.pk: {
+                "id": role.pk,
+                "name": role.name,
+                "slug": role.slug,
+                "image": find_image_url(role.slug),
+            }
+            for role in DeviceRole.objects.all()
+        }
 
         for additional_role in ADDITIONAL_ROLES:
             cur = get_model_role(additional_role)
             ct = ContentType.objects.get_for_model(additional_role).pk
 
-            roles[cur.name] = {
+            roles[f"ct{ct}"] = {
                 "id": f"ct{ct}",
                 "name": cur.name,
                 "slug": cur.slug,
@@ -925,14 +921,15 @@ class TopologyImagesView(PermissionRequiredMixin, View):
         role_images = RoleImage.objects.all()
 
         for role_image in role_images:
-            if (role := roles.get(role_image.role.name)) is not None:
+            key = role_image.object_id if role_image.object_id is not None else f"ct{role_image.content_type_id}"
+            if (role := roles.get(key)) is not None:
                 role["image"] = role_image.get_image_url()
 
         return render(
             request,
             "netbox_topology_views/images.html",
             {
-                "roles": sorted(list(roles.values()), key=lambda r: r["name"]),
+                "roles": sorted(roles.values(), key=lambda r: (r["name"], str(r["id"]))),
                 "images": images,
                 "basepath": settings.BASE_PATH,
             },
@@ -1092,13 +1089,13 @@ class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
     queryset = CoordinateGroup.objects.all()
 
     def get_extra_context(self, request, instance):
-        circuittable = CircuitCoordinateListTable(instance.circuitcoordinate_set.all())
+        circuittable = CircuitCoordinateListTable(instance.circuitcoordinate_set.restrict(request.user, 'view'))
         circuittable.configure(request)
-        powerpaneltable = PowerPanelCoordinateListTable(instance.powerpanelcoordinate_set.all())
+        powerpaneltable = PowerPanelCoordinateListTable(instance.powerpanelcoordinate_set.restrict(request.user, 'view'))
         powerpaneltable.configure(request)
-        powerfeedtable = PowerFeedCoordinateListTable(instance.powerfeedcoordinate_set.all())
+        powerfeedtable = PowerFeedCoordinateListTable(instance.powerfeedcoordinate_set.restrict(request.user, 'view'))
         powerfeedtable.configure(request)
-        table = CoordinateListTable(instance.coordinate_set.all())
+        table = CoordinateListTable(instance.coordinate_set.restrict(request.user, 'view'))
         table.configure(request)
 
         return {
@@ -1127,6 +1124,7 @@ class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
     )
     table = CoordinateGroupListTable
     template_name = 'netbox_topology_views/coordinategroup_list.html'
+    filterset = CoordinateGroupFilterSet
 
 class CoordinateGroupEditView(PermissionRequiredMixin, ObjectEditView):
     permission_required = 'netbox_topology_views.change_coordinategroup'

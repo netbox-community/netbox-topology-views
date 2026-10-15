@@ -6,13 +6,10 @@ from django.utils.translation import gettext as _
 from circuits.models import Circuit
 from dcim.models import Device, Site, SiteGroup, Region, DeviceRole, Location, Rack, Manufacturer, DeviceType, Platform, PowerPanel, PowerFeed
 
-from django import forms
 from dcim.choices import DeviceStatusChoices, DeviceAirflowChoices
-from tenancy.models import TenantGroup, Tenant
 from extras.models import ConfigTemplate
 from extras.forms import LocalConfigContextFilterForm
 from tenancy.forms import ContactModelFilterForm, TenancyFilterForm
-from django.conf import settings
 from netbox.forms import NetBoxModelFilterSetForm, NetBoxModelForm, NetBoxModelImportForm
 from utilities.forms.rendering import FieldSet
 from utilities.forms import BOOLEAN_WITH_BLANK_CHOICES, add_blank_choice

@@ -56,7 +56,7 @@ def is_allowed_image(image: str) -> bool:
 
 def find_image_in_dir(glob: str, dir: Path):
     return next(
-        (f for f in dir.glob(f"{glob}.*") if f.suffix.lstrip(".") in IMAGE_FILETYPES),
+        (f for f in dir.glob(f"{glob}.*") if f.suffix.lstrip(".").lower() in IMAGE_FILETYPES),
         None,
     )
 
@@ -115,7 +115,7 @@ BOOLEAN_OPTIONS = (
 )
 
 
-def get_query_settings(request) -> dict:
+def get_query_settings(request, notify_user=False) -> dict:
     params = request.GET.copy()
 
     # Read options from saved filters as NetBox does not handle custom plugin filters.
@@ -132,7 +132,7 @@ def get_query_settings(request) -> dict:
                     merged.setlist(key, values)
             params = merged
 
-    if str(params.get("save_coords")) == "True" and not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
+    if notify_user and str(params.get("save_coords")) == "True" and not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
         messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
 
     try:

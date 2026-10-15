@@ -5,7 +5,6 @@ from netbox.api.viewsets import BaseViewSet, NetBoxModelViewSet
 
 from dcim.models import Device, DeviceRole
 from django.conf import settings
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.utils import DataError, IntegrityError
@@ -27,7 +26,14 @@ from netbox_topology_views.api.serializers import (
 from netbox_topology_views.models import RoleImage, CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate, NODE_TYPES
 from netbox_topology_views.views import ADDITIONAL_ROLES, get_topology_data
 from netbox_topology_views.utils import get_image_from_url, export_data_to_xml, get_query_settings, is_allowed_image
-from netbox_topology_views.filters import DeviceFilterSet
+from netbox_topology_views.filters import (
+    DeviceFilterSet,
+    CoordinateGroupFilterSet,
+    CoordinatesFilterSet,
+    CircuitCoordinatesFilterSet,
+    PowerPanelCoordinatesFilterSet,
+    PowerFeedCoordinatesFilterSet,
+)
 from users.models import Token
 
 class SaveCoordsViewSet(BaseViewSet, ReadOnlyModelViewSet):
@@ -193,19 +199,24 @@ class SaveRoleImageViewSet(BaseViewSet, ReadOnlyModelViewSet):
 class CoordinateGroupViewSet(NetBoxModelViewSet):
     queryset = CoordinateGroup.objects.all()
     serializer_class = CoordinateGroupSerializer
+    filterset_class = CoordinateGroupFilterSet
 
 class CoordinateViewSet(NetBoxModelViewSet):
     queryset = Coordinate.objects.all()
     serializer_class = CoordinateSerializer
+    filterset_class = CoordinatesFilterSet
 
 class CircuitCoordinateViewSet(NetBoxModelViewSet):
     queryset = CircuitCoordinate.objects.all()
     serializer_class = CircuitCoordinateSerializer
+    filterset_class = CircuitCoordinatesFilterSet
 
 class PowerPanelCoordinateViewSet(NetBoxModelViewSet):
     queryset = PowerPanelCoordinate.objects.all()
     serializer_class = PowerPanelCoordinateSerializer
+    filterset_class = PowerPanelCoordinatesFilterSet
 
 class PowerFeedCoordinateViewSet(NetBoxModelViewSet):
     queryset = PowerFeedCoordinate.objects.all()
     serializer_class = PowerFeedCoordinateSerializer
+    filterset_class = PowerFeedCoordinatesFilterSet

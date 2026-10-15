@@ -1,6 +1,6 @@
 import django_tables2 as tables
 
-from netbox.tables import NetBoxTable, ChoiceFieldColumn
+from netbox.tables import NetBoxTable
 from netbox_topology_views.models import CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 
 class CoordinateGroupListTable(NetBoxTable):

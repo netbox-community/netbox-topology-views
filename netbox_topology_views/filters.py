@@ -165,6 +165,20 @@ class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilter
     def _virtual_chassis_member(self, queryset, name, value):
         return queryset.exclude(virtual_chassis__isnull=value)
 
+class CoordinateGroupFilterSet(NetBoxModelFilterSet):
+    class Meta:
+        model = CoordinateGroup
+        fields = ['id', 'name', 'description']
+
+    def search(self, queryset, name, value):
+        """Perform the filtered search."""
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(name__icontains=value) |
+            Q(description__icontains=value)
+        )
+
 class RestrictCoordinateGroupMixin:
     """
     Restrict the `group` filter's choices to CoordinateGroups the requesting
