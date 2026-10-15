@@ -2,6 +2,14 @@ import { toast } from './toast.js'
 
 const mapping = {}
 
+async function errorMessage(res) {
+    try {
+        return (await res.json()).status ?? res.statusText
+    } catch {
+        return res.statusText
+    }
+}
+
 document.querySelector('form#images').addEventListener('submit', async (e) => {
     e.preventDefault()
     try {        
@@ -14,7 +22,7 @@ document.querySelector('form#images').addEventListener('submit', async (e) => {
             }
         })
 
-        if (!res.ok) throw new Error(await res.text())
+        if (!res.ok) throw new Error(await errorMessage(res))
         toast.success('Saved settings')
     } catch (err) {
         console.dir(err)

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "vis-data": "^8.0.5",
-    "vis-network": "^10.1.2",
+    "vis-network": "~10.1.2",
     "vis-util": "^6.0.2"
   },
   "devDependencies": {
