@@ -129,19 +129,26 @@ def get_coordinates(group: Optional[CoordinateGroup]) -> Dict:
     return coordinates
 
 
-def restrict_terminations(user, model_names) -> Q:
-    return reduce(or_, (
-        Q(termination_type=ct, termination_id__in=ct.model_class().objects.restrict(user, "view").values("pk"))
-        for ct in ContentType.objects.filter(app_label="dcim", model__in=model_names)
-    ), Q(pk__in=[]))
+def restrict_terminations(user, model_names, device_ids) -> Q:
+    def visible(ct):
+        queryset = ct.model_class().objects.restrict(user, "view")
+        if not queryset.query.has_filters():
+            return Q(termination_type=ct)
+        return Q(termination_type=ct, termination_id__in=queryset.filter(device_id__in=device_ids).values("pk"))
+
+    return reduce(or_, map(visible, ContentType.objects.filter(app_label="dcim", model__in=model_names)), Q(pk__in=[]))
 
 
-def get_path_destinations(interfaces, user) -> Dict[int, list]:
+def get_path_destination_ids(interface_paths) -> Dict[int, list]:
     interface_ct = ContentType.objects.get_for_model(Interface).pk
-    destination_ids = {
-        interface.pk: [pk for ct_id, pk in map(decompile_path_node, interface._path.path[-1]) if ct_id == interface_ct]
-        for interface in interfaces
+    return {
+        pk: [destination_id for ct_id, destination_id in map(decompile_path_node, path[-1]) if ct_id == interface_ct]
+        for pk, path in interface_paths
     }
+
+
+def get_path_destinations(interface_paths, user) -> Dict[int, list]:
+    destination_ids = get_path_destination_ids(interface_paths)
     destinations = Interface.objects.restrict(user, "view").select_related("device").in_bulk(
         {pk for ids in destination_ids.values() for pk in ids}
     )
@@ -438,7 +445,8 @@ def get_topology_data(
     for t in IndividualOptions.CHOICES:
         supported_termination_types.append(t[1])
 
-    if not queryset:
+    device_rows = list(queryset.values_list("pk", "site_id"))
+    if not device_rows:
         return None
 
     nodes_devices = {}
@@ -454,8 +462,8 @@ def get_topology_data(
     coordinates = get_coordinates(get_coordinate_group(group_id, user))
     image_resolver = get_image_resolver()
 
-    device_ids = {d.pk for d in queryset}
-    site_ids = {d.site_id for d in queryset}
+    device_ids = {pk for pk, _ in device_rows}
+    site_ids = {site_id for _, site_id in device_rows}
     visible_devices = Device.objects.restrict(user, 'view')
     visible_cables = Cable.objects.restrict(user, 'view')
     visible_interfaces = Interface.objects.restrict(user, 'view')
@@ -463,117 +471,128 @@ def get_topology_data(
     if show_neighbors:
         origins = set(
             CableTermination.objects.filter(
-                Q(_device_id__in=device_ids) & restrict_terminations(user, ("interface", "frontport", "rearport"))
-            ).values_list("cable_id", "cable_end")
+                Q(_device_id__in=device_ids)
+                & restrict_terminations(user, ("interface", "frontport", "rearport"), device_ids)
+            ).order_by().values_list("cable_id", "cable_end")
         )
         neighbor_ids = {
             peer_device_id
             for cable_id, cable_end, peer_device_id in CableTermination.objects.filter(
                 cable_id__in={cable_id for cable_id, _ in origins}, _device_id__isnull=False
-            ).values_list("cable_id", "cable_end", "_device_id")
+            ).order_by().values_list("cable_id", "cable_end", "_device_id")
             if (cable_id, cable_end) not in origins
         }
 
         if show_logical_connections:
             path_complete_interfaces = visible_interfaces.filter(
                 Q(_path__is_complete=True) & Q(device_id__in=device_ids)
-            ).select_related("_path")
-            for destinations in get_path_destinations(path_complete_interfaces, user).values():
-                neighbor_ids.update(destination.device_id for destination in destinations)
+            ).order_by().values_list("pk", "_path__path")
+            destination_ids = {pk for ids in get_path_destination_ids(path_complete_interfaces).values() for pk in ids}
+            neighbor_ids.update(
+                visible_interfaces.filter(pk__in=destination_ids).order_by().values_list("device_id", flat=True)
+            )
 
         device_ids.update(visible_devices.filter(pk__in=neighbor_ids).exclude(pk__in=device_ids).values_list('pk', flat=True))
 
     if show_circuit:
-        circuit_terminations = CircuitTermination.objects.restrict(user, 'view').filter(
-            (Q(_site_id__in=site_ids) | Q(_provider_network__isnull=False))
-            & Q(circuit__in=Circuit.objects.restrict(user, 'view'))
+        visible_circuit_terminations = CircuitTermination.objects.restrict(user, 'view').filter(
+            circuit__in=Circuit.objects.restrict(user, 'view')
+        )
+        circuit_ids = visible_circuit_terminations.filter(
+            Q(_site_id__in=site_ids)
+            | Q(cable__in=visible_cables.filter(terminations___device__in=device_ids))
+        ).values("circuit_id")
+        circuit_terminations = list(visible_circuit_terminations.filter(
+            Q(circuit_id__in=circuit_ids)
             & (Q(cable__isnull=True) | Q(cable__in=visible_cables))
         ).select_related(
             "circuit__provider", "circuit__type", "cable"
-        ).prefetch_related("cable__terminations__termination")
+        ).prefetch_related("cable__terminations__termination"))
+        circuit_termination_ids = {circuit_termination.pk for circuit_termination in circuit_terminations}
+        visible_device_ends = set(
+            CableTermination.objects.filter(
+                Q(cable_id__in={circuit_termination.cable_id for circuit_termination in circuit_terminations})
+                & restrict_terminations(user, ("interface", "frontport", "rearport"), device_ids)
+            ).order_by().values_list("termination_type_id", "termination_id")
+        )
+
+        def is_visible_end(termination):
+            if isinstance(termination, CircuitTermination):
+                return termination.pk in circuit_termination_ids
+            return (
+                termination.device_id in device_ids
+                and (ContentType.objects.get_for_model(termination).pk, termination.pk) in visible_device_ends
+            )
+
+        circuit_cable_ids = set()
+        circuit_links = []
         for circuit_termination in circuit_terminations:
             circuit_termination: CircuitTermination
-            if (
-                show_unconnected
-                and circuit_termination.circuit_id not in nodes_circuits
-            ):
-                nodes_circuits[
-                    circuit_termination.circuit.pk
-                ] = circuit_termination.circuit
+            if show_unconnected:
+                nodes_circuits[circuit_termination.circuit_id] = circuit_termination.circuit
 
-            termination_a = {}
-            termination_b = {}
-            circuit_model = {}
-            if circuit_termination.cable is not None and bool(circuit_termination.cable.a_terminations) and bool(circuit_termination.cable.b_terminations):
-                termination_a = create_circuit_termination(
-                    circuit_termination.cable.a_terminations[0]
+            cable = circuit_termination.cable
+            if cable is None or cable.pk in circuit_cable_ids or not cable.a_terminations or not cable.b_terminations:
+                continue
+            circuit_cable_ids.add(cable.pk)
+
+            ends = (cable.a_terminations[0], cable.b_terminations[0])
+            termination_a, termination_b = map(create_circuit_termination, ends)
+            device_ends = [t for t in ends if not isinstance(t, CircuitTermination)]
+            if not termination_a or not termination_b or not all(map(is_visible_end, ends)):
+                continue
+
+            for termination in device_ends:
+                nodes_devices[termination.device_id] = termination.device
+            if device_ends:
+                nodes_circuits[circuit_termination.circuit_id] = circuit_termination.circuit
+            circuit_links.append((circuit_termination, ends, termination_a, termination_b))
+
+        # Circuit-to-circuit cables are only drawn once both circuits are part of the topology
+        for circuit_termination, ends, termination_a, termination_b in circuit_links:
+            if any(isinstance(t, CircuitTermination) and t.circuit_id not in nodes_circuits for t in ends):
+                continue
+            edge_ids += 1
+            edges.append(
+                create_edge(
+                    edge_id=edge_ids,
+                    cable=circuit_termination.cable,
+                    circuit={"provider_name": circuit_termination.circuit.provider.name},
+                    termination_a=termination_a,
+                    termination_b=termination_b,
+                    straight_cables=straight_cables,
+                    draw_termination_labels=draw_termination_labels,
+                    draw_cable_labels=draw_cable_labels,
                 )
-                termination_b = create_circuit_termination(
-                    circuit_termination.cable.b_terminations[0]
-                )
-
-            if bool(termination_a) and bool(termination_b) and all(
-                isinstance(t["device_id"], str) or t["device_id"] in device_ids
-                for t in (termination_a, termination_b)
-            ):
-                circuit_model = {
-                    "provider_name": circuit_termination.circuit.provider.name
-                }
-                edge_ids += 1
-                edges.append(
-                    create_edge(
-                        edge_id=edge_ids,
-                        cable=circuit_termination.cable,
-                        circuit=circuit_model,
-                        termination_a=termination_a,
-                        termination_b=termination_b,
-                        straight_cables=straight_cables,
-                        draw_termination_labels=draw_termination_labels,
-                        draw_cable_labels=draw_cable_labels,
-                    )
-                )
-
-                circuit_has_connections = False
-                for termination in [
-                    circuit_termination.cable.a_terminations[0],
-                    circuit_termination.cable.b_terminations[0],
-                ]:
-                    if not isinstance(termination, CircuitTermination):
-                        if (
-                            termination.device_id not in nodes_devices
-                            and termination.device_id in device_ids
-                        ):
-                            nodes_devices[termination.device_id] = termination.device
-                            circuit_has_connections = True
-                        else:
-                            if termination.device_id in device_ids:
-                                circuit_has_connections = True
-
-                if circuit_has_connections and not show_unconnected:
-                    if circuit_termination.circuit_id not in nodes_circuits:
-                        nodes_circuits[
-                            circuit_termination.circuit.pk
-                        ] = circuit_termination.circuit
+            )
 
         for d in nodes_circuits.values():
             nodes.append(create_node(d, node_label_items, coordinates, image_resolver))
 
     if show_power:
-        power_panels_ids = PowerPanel.objects.restrict(user, 'view').filter(
-            Q(site_id__in=site_ids)
-        ).values_list("pk", flat=True)
-        power_feeds: QuerySet[PowerFeed] = PowerFeed.objects.restrict(user, 'view').filter(
-            Q(power_panel_id__in=power_panels_ids)
-        ).select_related("power_panel__site", "power_panel__location")
+        power_feeds = list(PowerFeed.objects.restrict(user, 'view').filter(
+            Q(power_panel__in=PowerPanel.objects.restrict(user, 'view'))
+            & (
+                Q(power_panel__site_id__in=site_ids)
+                | Q(cable__in=visible_cables.filter(terminations___device__in=device_ids))
+            )
+        ).select_related("power_panel__site", "power_panel__location"))
+        power_cable_ids = {power_feed.cable_id for power_feed in power_feeds if power_feed.cable_id}
         visible_power_cable_ids = set(
-            visible_cables.filter(pk__in=power_feeds.values('cable_id')).values_list('pk', flat=True)
+            visible_cables.filter(pk__in=power_cable_ids).values_list('pk', flat=True)
         )
+        power_feed_peers = {
+            link.cable_id: link.termination
+            for link in CableTermination.objects.filter(
+                Q(cable_id__in=visible_power_cable_ids) & restrict_terminations(user, ("powerport",), device_ids)
+            ).order_by().prefetch_related("termination")
+        }
 
         for power_feed in power_feeds:
             power_link_name = ""
             if not show_unconnected:
-                link_peer = next(iter(power_feed.link_peers), None)
-                if getattr(link_peer, "device_id", None) not in device_ids:
+                link_peer = power_feed_peers.get(power_feed.cable_id)
+                if link_peer is None or link_peer.device_id not in device_ids:
                     continue
                 power_link_name = link_peer.name
 
@@ -613,10 +632,11 @@ def get_topology_data(
             nodes.append(create_node(d, node_label_items, coordinates, image_resolver))
 
     if show_logical_connections:
-        interfaces = list(visible_interfaces.filter(
+        path_complete_interfaces = visible_interfaces.filter(
             Q(_path__is_complete=True) & Q(device_id__in=device_ids)
-        ).select_related("_path", "device"))
-        path_destinations = get_path_destinations(interfaces, user)
+        )
+        path_destinations = get_path_destinations(path_complete_interfaces.values_list("pk", "_path__path"), user)
+        interfaces = list(path_complete_interfaces.select_related("device"))
 
         for interface in interfaces:
             for destination in path_destinations[interface.pk]:
@@ -628,8 +648,12 @@ def get_topology_data(
                     # print('Destination interface already exists, ignoring')
                     continue
 
-                if not show_single_cable_logical_conns and interface.cable_id==destination.cable_id and show_cables:
-                    # interface connection is the same as the cable connection, ignore this connection
+                same_cable = interface.cable_id is not None and interface.cable_id == destination.cable_id
+                same_wireless_link = (
+                    interface.wireless_link_id is not None and interface.wireless_link_id == destination.wireless_link_id
+                )
+                if not show_single_cable_logical_conns and (same_cable and show_cables or same_wireless_link and show_wireless):
+                    # interface connection is the same as the cable or wireless connection, ignore this connection
                     continue
         
                 interface_ids[interface.id]=interface
@@ -641,17 +665,19 @@ def get_topology_data(
                 nodes_devices[destination.device.id] = destination.device
 
     if show_cables:
+        cable_device_pairs = set()
         links: QuerySet[CableTermination] = CableTermination.objects.filter(
             Q(_device_id__in=device_ids) & Q(cable__in=visible_cables)
-            & restrict_terminations(user, supported_termination_types)
-        ).select_related("termination_type", "cable").prefetch_related("termination__device")
+            & restrict_terminations(user, supported_termination_types, device_ids)
+        ).select_related("cable").prefetch_related("termination__device")
 
         for link in links:
-            if link.termination_type.model in ignore_cable_type:
+            termination_model = ContentType.objects.get_for_id(link.termination_type_id).model
+            if termination_model in ignore_cable_type:
                 continue
 
             # Normal device cables
-            if link.termination_type.model in supported_termination_types:
+            if termination_model in supported_termination_types:
                 complete_link = False
                 if link.cable_end == "A":
                     if link.cable_id not in cable_ids:
@@ -670,7 +696,6 @@ def get_topology_data(
                 cable_ids[link.cable_id][link.cable_end] = link
 
                 if complete_link:
-                    edge_ids += 1
                     if isinstance(cable_ids[link.cable_id]["B"], CableTermination):
                         if cable_ids[link.cable_id]["B"]._device_id not in nodes_devices:
                             nodes_devices[
@@ -709,6 +734,11 @@ def get_topology_data(
                     else:
                         termination_a = cable_ids[link.cable_id]["A"]
 
+                    device_pair = (link.cable_id, termination_a["device_id"], termination_b["device_id"])
+                    if device_pair in cable_device_pairs:
+                        continue
+                    cable_device_pairs.add(device_pair)
+                    edge_ids += 1
                     edges.append(
                         create_edge(
                             edge_id=edge_ids,
@@ -773,9 +803,9 @@ def get_topology_data(
         options['group_virtualchassis'] = 'on'
     options['grid_size'] = grid_size
 
-    for qs_device in queryset:
-        if qs_device.pk not in nodes_devices and show_unconnected:
-            nodes_devices[qs_device.pk] = qs_device
+    for pk, _ in device_rows:
+        if pk not in nodes_devices and show_unconnected:
+            nodes_devices[pk] = None
 
     results = {}
 
@@ -895,7 +925,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 for image in CONF_IMAGE_DIR.iterdir() if image.suffix.lstrip(".").lower() in IMAGE_FILETYPES
             ]
         else:
-            messages.warning(request, f"Image directory {CONF_IMAGE_DIR} does not exist")
+            messages.warning(request, "The configured image directory does not exist")
 
         roles = {
             role.pk: {
@@ -904,7 +934,7 @@ class TopologyImagesView(PermissionRequiredMixin, View):
                 "slug": role.slug,
                 "image": find_image_url(role.slug),
             }
-            for role in DeviceRole.objects.all()
+            for role in DeviceRole.objects.restrict(request.user, 'view')
         }
 
         for additional_role in ADDITIONAL_ROLES:

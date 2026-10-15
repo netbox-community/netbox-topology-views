@@ -152,7 +152,7 @@ class SaveRoleImageViewSet(BaseViewSet, ReadOnlyModelViewSet):
             if k.startswith("ct") and k[2:].isnumeric()
         }
 
-        roles: Dict[int, DeviceRole] = DeviceRole.objects.in_bulk(device_roles.keys())
+        roles: Dict[int, DeviceRole] = DeviceRole.objects.restrict(request.user, 'change').in_bulk(device_roles.keys())
         allowed_content_type_ids = [ct.pk for ct in ContentType.objects.get_for_models(*ADDITIONAL_ROLES).values()]
         content_types: Dict[int, ContentType] = ContentType.objects.filter(pk__in=allowed_content_type_ids).in_bulk(
             content_type_ids.keys()
