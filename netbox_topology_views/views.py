@@ -23,6 +23,7 @@ from django.db.models import Q, QuerySet, Count
 from django.db.models.functions import Lower
 from django.http import Http404, HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.utils.html import format_html
 from django.views.generic import View
 from extras.models import Tag
@@ -827,7 +828,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             q = QueryDict(mutable=True)
             if not request.user.is_authenticated:
                 q['draw_init'] = "False"
-                return HttpResponseRedirect(f"{request.path}?{q.urlencode()}")
+                return HttpResponseRedirect(f"{reverse('plugins:netbox_topology_views:home')}?{q.urlencode()}")
 
             individualOptions, created = IndividualOptions.objects.get_or_create(
                 user=request.user,
@@ -861,7 +862,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 q['draw_init'] = "False"
 
             query_string = q.urlencode()
-            return HttpResponseRedirect(f"{request.path}?{query_string}")
+            return HttpResponseRedirect(f"{reverse('plugins:netbox_topology_views:home')}?{query_string}")
 
         return render(
             request,
