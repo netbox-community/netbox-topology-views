@@ -3,7 +3,6 @@ from typing import Optional
 
 from circuits.models import Circuit
 from dcim.models import Device, DeviceRole, PowerPanel, PowerFeed
-from extras.models import Tag
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -24,8 +23,6 @@ from netbox_topology_views.utils import (
     get_model_role,
     image_static_url,
 )
-
-from netbox_topology_views.choices import NodeLabelItems
 
 class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
@@ -97,7 +94,7 @@ class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
             self.get_image()
         except ValueError:
             return self.get_default_image(dir)
-        return static(f"/{self.image}")
+        return static(f"{self.image}")
 
 class CoordinateGroup(NetBoxModel):
     """
@@ -123,6 +120,21 @@ class CoordinateGroup(NetBoxModel):
     def get_absolute_url(self):
         return reverse('plugins:netbox_topology_views:coordinategroup', args=[self.pk])
 
+    @classmethod
+    def get_default(cls):
+        # Default group named "default" must always exist in order to make sure
+        # that coordinate values can be stored even if no coordinate group has been
+        # selected. The default group will be added automatically if it does not exist.
+        group, _ = cls.objects.get_or_create(
+            name="default",
+            defaults={
+                "description": "Automatically generated default group. If you delete "
+                    "this group, all default coordinates are gone for good but "
+                    "the group itself will be re-created."
+            },
+        )
+        return group
+
 class Coordinate(NetBoxModel):
     """
     Coordinates are being used to place devices in a topology view onto a certain 
@@ -140,27 +152,6 @@ class Coordinate(NetBoxModel):
         help_text='Y-coordinate of the device (vertical) on the canvas. '
             'Smaller values correspond to a position further up on the monitor.',
     )
-
-    def get_or_create_default_group(group_id):
-        # Default group named "default" must always exist in order to make sure
-        # that coordinate values can be stored even if no coordinate group has been
-        # selected. The default group will be added automatically if it does not exist.
-        try:
-            if CoordinateGroup.objects.filter(name="default"):
-                group = CoordinateGroup.objects.get(name="default")
-                group_id = group.pk
-            else:
-                group = CoordinateGroup(
-                    name="default",
-                    description="Automatically generated default group. If you delete "
-                        "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
-                )
-                group.save()
-                group_id = group.pk
-        except:
-            return False
-        return group_id
 
     class Meta:
         ordering = ['group', 'device']
@@ -190,27 +181,6 @@ class CircuitCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    def get_or_create_default_group(group_id):
-        # Default group named "default" must always exist in order to make sure
-        # that coordinate values can be stored even if no coordinate group has been
-        # selected. The default group will be added automatically if it does not exist.
-        try:
-            if CoordinateGroup.objects.filter(name="default"):
-                group = CoordinateGroup.objects.get(name="default")
-                group_id = group.pk
-            else:
-                group = CoordinateGroup(
-                    name="default",
-                    description="Automatically generated default group. If you delete "
-                        "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
-                )
-                group.save()
-                group_id = group.pk
-        except:
-            return False
-        return group_id
-
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
@@ -238,27 +208,6 @@ class PowerPanelCoordinate(NetBoxModel):
         help_text='Y-coordinate of the device (vertical) on the canvas. '
             'Smaller values correspond to a position further up on the monitor.',
     )
-
-    def get_or_create_default_group(group_id):
-        # Default group named "default" must always exist in order to make sure
-        # that coordinate values can be stored even if no coordinate group has been
-        # selected. The default group will be added automatically if it does not exist.
-        try:
-            if CoordinateGroup.objects.filter(name="default"):
-                group = CoordinateGroup.objects.get(name="default")
-                group_id = group.pk
-            else:
-                group = CoordinateGroup(
-                    name="default",
-                    description="Automatically generated default group. If you delete "
-                        "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
-                )
-                group.save()
-                group_id = group.pk
-        except:
-            return False
-        return group_id
 
     class Meta:
         ordering = ['group', 'device']
@@ -288,27 +237,6 @@ class PowerFeedCoordinate(NetBoxModel):
             'Smaller values correspond to a position further up on the monitor.',
     )
 
-    def get_or_create_default_group(group_id):
-        # Default group named "default" must always exist in order to make sure
-        # that coordinate values can be stored even if no coordinate group has been
-        # selected. The default group will be added automatically if it does not exist.
-        try:
-            if CoordinateGroup.objects.filter(name="default"):
-                group = CoordinateGroup.objects.get(name="default")
-                group_id = group.pk
-            else:
-                group = CoordinateGroup(
-                    name="default",
-                    description="Automatically generated default group. If you delete "
-                        "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
-                )
-                group.save()
-                group_id = group.pk
-        except:
-            return False
-        return group_id
-
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
@@ -318,6 +246,13 @@ class PowerFeedCoordinate(NetBoxModel):
 
     def get_absolute_url(self):
         return reverse('plugins:netbox_topology_views:powerfeedcoordinate', args=[self.pk])
+
+NODE_TYPES = {
+    "c": (Circuit, CircuitCoordinate),
+    "p": (PowerPanel, PowerPanelCoordinate),
+    "f": (PowerFeed, PowerFeedCoordinate),
+    "": (Device, Coordinate),
+}
 
 class IndividualOptions(NetBoxModel):
     CHOICES = (
@@ -330,13 +265,14 @@ class IndividualOptions(NetBoxModel):
         ('consoleserverport', 'consoleserverport'),
     )
 
-    user_id = models.IntegerField(
-        null=True,
-        unique=True
+    user = models.OneToOneField(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='+',
     )
-    ignore_cable_type = models.CharField(
-        max_length = 255,
-        blank = True,
+    ignore_cable_type = models.JSONField(
+        default=list,
+        blank=True,
     )
     preselected_device_roles = models.ManyToManyField(
         to='dcim.DeviceRole',
@@ -404,12 +340,12 @@ class IndividualOptions(NetBoxModel):
     grid_size = models.PositiveSmallIntegerField(
         default=0
     )
-    node_label_items = models.CharField(
-        max_length=255,
-        blank=True
+    node_label_items = models.JSONField(
+        default=list,
+        blank=True,
     )
     
     _netbox_private = True
 
-    def __str___(self):
-        return f"{self.user_id}"
+    def __str__(self):
+        return f"{self.user}"

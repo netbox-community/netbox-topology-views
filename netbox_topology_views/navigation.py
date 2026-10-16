@@ -20,13 +20,13 @@ circuitcoordinate_buttons = (
         link='plugins:netbox_topology_views:circuitcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_circuitcoordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:circuitcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_circuitcoordinate']
     )
 )
 
@@ -35,13 +35,13 @@ powerpanelcoordinate_buttons = (
         link='plugins:netbox_topology_views:powerpanelcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_powerpanelcoordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:powerpanelcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_powerpanelcoordinate']
     )
 )
 
@@ -50,13 +50,13 @@ powerfeedcoordinate_buttons = (
         link='plugins:netbox_topology_views:powerfeedcoordinate_add',
         title='Add',
         icon_class='mdi mdi-plus-thick',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_powerfeedcoordinate']
     ),
     PluginMenuButton(
         link='plugins:netbox_topology_views:powerfeedcoordinate_import',
         title='Import',
         icon_class='mdi mdi-upload',
-        permissions=['netbox_topology_views.add_coordinate']
+        permissions=['netbox_topology_views.add_powerfeedcoordinate']
     )
 )
 
@@ -88,9 +88,9 @@ menu = PluginMenu(
             (
                 PluginMenuItem(link="plugins:netbox_topology_views:coordinategroup_list", link_text="Coordinate Groups", buttons=coordinategroup_buttons, permissions=['netbox_topology_views.view_coordinategroup']),
                 PluginMenuItem(link="plugins:netbox_topology_views:coordinate_list", link_text="Device Coordinates", buttons=coordinate_buttons, permissions=['netbox_topology_views.view_coordinate']),
-                PluginMenuItem(link="plugins:netbox_topology_views:powerfeedcoordinate_list", link_text="Power Feed Coords", buttons=powerfeedcoordinate_buttons, permissions=['netbox_topology_views.view_coordinate']),
-                PluginMenuItem(link="plugins:netbox_topology_views:powerpanelcoordinate_list", link_text="Power Panel Coords", buttons=powerpanelcoordinate_buttons, permissions=['netbox_topology_views.view_coordinate']),
-                PluginMenuItem(link="plugins:netbox_topology_views:circuitcoordinate_list", link_text="Circuit Coordinates", buttons=circuitcoordinate_buttons, permissions=['netbox_topology_views.view_coordinate']),
+                PluginMenuItem(link="plugins:netbox_topology_views:powerfeedcoordinate_list", link_text="Power Feed Coords", buttons=powerfeedcoordinate_buttons, permissions=['netbox_topology_views.view_powerfeedcoordinate']),
+                PluginMenuItem(link="plugins:netbox_topology_views:powerpanelcoordinate_list", link_text="Power Panel Coords", buttons=powerpanelcoordinate_buttons, permissions=['netbox_topology_views.view_powerpanelcoordinate']),
+                PluginMenuItem(link="plugins:netbox_topology_views:circuitcoordinate_list", link_text="Circuit Coordinates", buttons=circuitcoordinate_buttons, permissions=['netbox_topology_views.view_circuitcoordinate']),
             ),
         ),
         ('PREFERENCES', 
