@@ -10,8 +10,6 @@ from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
 from django.contrib import messages
-from extras.models import SavedFilter
-from utilities.querydict import dict_to_querydict
 
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
 CONF_IMAGE_DIR: Path = Path(settings.STATIC_ROOT) / settings.PLUGINS_CONFIG[
@@ -115,23 +113,11 @@ BOOLEAN_OPTIONS = (
 )
 
 
-def get_query_settings(request, notify_user=False) -> dict:
-    params = request.GET.copy()
-
-    # Read options from saved filters as NetBox does not handle custom plugin filters.
-    # Non-empty query parameters take precedence over the saved filter.
-    filter_id = params.get("filter_id", "")
-    if filter_id.isdigit():
-        saved_filter = SavedFilter.objects.restrict(request.user, 'view').restrict_to_shared(request.user).filter(
-            pk=filter_id
-        ).first()
-        if saved_filter is not None:
-            merged = dict_to_querydict(saved_filter.parameters)
-            for key, values in params.lists():
-                if values := [value for value in values if value != ""]:
-                    merged.setlist(key, values)
-            params = merged
-
+def get_query_settings(request, params, notify_user=False) -> dict:
+    """
+    Read the plugin options from params. Pass the filterset's data so saved filters (filter_id)
+    are applied exactly as NetBox applies them to the device filters.
+    """
     if notify_user and str(params.get("save_coords")) == "True" and not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
         messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
 
