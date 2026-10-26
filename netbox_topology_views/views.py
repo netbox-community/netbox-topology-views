@@ -832,16 +832,18 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         self.queryset = Device.objects.restrict(request.user, 'view').select_related(
             "device_type", "role"
         )
-        self.queryset = self.filterset(request.GET, self.queryset, request=request).qs
+        filterset = self.filterset(request.GET, self.queryset, request=request)
+        self.queryset = filterset.qs
         self.model = self.queryset.model
         topo_data = None
 
         if request.GET:
-            query_settings = get_query_settings(request, notify_user=True)
+            # filterset.data includes the parameters of any selected saved filters
+            query_settings = get_query_settings(request, filterset.data, notify_user=True)
             filter_required = True
             empty_result = False
 
-            if not "draw_init" in request.GET or "draw_init" in request.GET and request.GET["draw_init"].lower() == "true":
+            if filterset.data.get("draw_init", "true").lower() == "true":
                 filter_required = False
 
                 topo_data = get_topology_data(self.queryset, request.user, **query_settings)

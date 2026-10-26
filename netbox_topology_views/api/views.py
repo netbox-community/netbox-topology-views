@@ -114,10 +114,11 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
         self.queryset = Device.objects.restrict(request.user, 'view').select_related(
             "device_type", "role"
         )
-        self.queryset = self.filterset(request.GET, self.queryset, request=request).qs
+        filterset = self.filterset(request.GET, self.queryset, request=request)
+        self.queryset = filterset.qs
 
         if request.GET:
-            topo_data = get_topology_data(self.queryset, request.user, **get_query_settings(request))
+            topo_data = get_topology_data(self.queryset, request.user, **get_query_settings(request, filterset.data))
             xml_data = export_data_to_xml(topo_data).decode('utf-8').replace('\n', '&#xa;')
 
             return HttpResponse(xml_data, content_type="application/xml; charset=utf-8")
