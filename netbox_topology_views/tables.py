@@ -1,6 +1,6 @@
 import django_tables2 as tables
 
-from netbox.tables import NetBoxTable
+from netbox.tables import NetBoxTable, columns
 from netbox_topology_views.models import CoordinateGroup, Coordinate, CircuitCoordinate, PowerPanelCoordinate, PowerFeedCoordinate
 
 class CoordinateGroupListTable(NetBoxTable):
@@ -8,10 +8,13 @@ class CoordinateGroupListTable(NetBoxTable):
         linkify=True
     )
     devices = tables.Column()
+    tags = columns.TagColumn(
+        url_name='plugins:netbox_topology_views:coordinategroup_list'
+    )
 
     class Meta(NetBoxTable.Meta):
         model = CoordinateGroup
-        fields = ('pk', 'id', 'name', 'description', 'devices')
+        fields = ('pk', 'id', 'name', 'description', 'devices', 'tags')
         default_columns = ('name', 'description', 'devices')
 
 class CircuitCoordinateListTable(NetBoxTable):

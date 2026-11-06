@@ -967,14 +967,10 @@ class TopologyImagesView(PermissionRequiredMixin, View):
             },
         )
 
-class CircuitCoordinateView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_circuitcoordinate'
-
+class CircuitCoordinateView(ObjectView):
     queryset = CircuitCoordinate.objects.all()
 
-class CircuitCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_circuitcoordinate'
-
+class CircuitCoordinateAddView(ObjectEditView):
     queryset = CircuitCoordinate.objects.all()
     form = CircuitCoordinatesForm
     template_name = 'netbox_topology_views/circuitcoordinate_add.html'
@@ -983,35 +979,25 @@ class CircuitCoordinateBulkImportView(BulkImportView):
     queryset = CircuitCoordinate.objects.all()
     model_form = CircuitCoordinatesImportForm
 
-class CircuitCoordinateListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_circuitcoordinate'
-
+class CircuitCoordinateListView(ObjectListView):
     queryset = CircuitCoordinate.objects.all()
     table = CircuitCoordinateListTable
     template_name = 'netbox_topology_views/circuitcoordinate_list.html'
     filterset = CircuitCoordinatesFilterSet
     filterset_form = CircuitCoordinatesFilterForm
 
-class CircuitCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_circuitcoordinate'
-
+class CircuitCoordinateEditView(ObjectEditView):
     queryset = CircuitCoordinate.objects.all()
     form = CircuitCoordinatesForm
     template_name = 'netbox_topology_views/circuitcoordinate_edit.html'
 
-class CircuitCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_circuitcoordinate'
-
+class CircuitCoordinateDeleteView(ObjectDeleteView):
     queryset = CircuitCoordinate.objects.all()
 
-class PowerPanelCoordinateView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_powerpanelcoordinate'
-
+class PowerPanelCoordinateView(ObjectView):
     queryset = PowerPanelCoordinate.objects.all()
 
-class PowerPanelCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_powerpanelcoordinate'
-
+class PowerPanelCoordinateAddView(ObjectEditView):
     queryset = PowerPanelCoordinate.objects.all()
     form = PowerPanelCoordinatesForm
     template_name = 'netbox_topology_views/powerpanelcoordinate_add.html'
@@ -1020,35 +1006,25 @@ class PowerPanelCoordinateBulkImportView(BulkImportView):
     queryset = PowerPanelCoordinate.objects.all()
     model_form = PowerPanelCoordinatesImportForm
 
-class PowerPanelCoordinateListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_powerpanelcoordinate'
-
+class PowerPanelCoordinateListView(ObjectListView):
     queryset = PowerPanelCoordinate.objects.all()
     table = PowerPanelCoordinateListTable
     template_name = 'netbox_topology_views/powerpanelcoordinate_list.html'
     filterset = PowerPanelCoordinatesFilterSet
     filterset_form = PowerPanelCoordinatesFilterForm
 
-class PowerPanelCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_powerpanelcoordinate'
-
+class PowerPanelCoordinateEditView(ObjectEditView):
     queryset = PowerPanelCoordinate.objects.all()
     form = PowerPanelCoordinatesForm
     template_name = 'netbox_topology_views/powerpanelcoordinate_edit.html'
 
-class PowerPanelCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_powerpanelcoordinate'
-
+class PowerPanelCoordinateDeleteView(ObjectDeleteView):
     queryset = PowerPanelCoordinate.objects.all()
 
-class PowerFeedCoordinateView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_powerfeedcoordinate'
-
+class PowerFeedCoordinateView(ObjectView):
     queryset = PowerFeedCoordinate.objects.all()
 
-class PowerFeedCoordinateAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_powerfeedcoordinate'
-
+class PowerFeedCoordinateAddView(ObjectEditView):
     queryset = PowerFeedCoordinate.objects.all()
     form = PowerFeedCoordinatesForm
     template_name = 'netbox_topology_views/powerfeedcoordinate_add.html'
@@ -1057,35 +1033,25 @@ class PowerFeedCoordinateBulkImportView(BulkImportView):
     queryset = PowerFeedCoordinate.objects.all()
     model_form = PowerFeedCoordinatesImportForm
 
-class PowerFeedCoordinateListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_powerfeedcoordinate'
-
+class PowerFeedCoordinateListView(ObjectListView):
     queryset = PowerFeedCoordinate.objects.all()
     table = PowerFeedCoordinateListTable
     template_name = 'netbox_topology_views/powerfeedcoordinate_list.html'
     filterset = PowerFeedCoordinatesFilterSet
     filterset_form = PowerFeedCoordinatesFilterForm
 
-class PowerFeedCoordinateEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_powerfeedcoordinate'
-
+class PowerFeedCoordinateEditView(ObjectEditView):
     queryset = PowerFeedCoordinate.objects.all()
     form = PowerFeedCoordinatesForm
     template_name = 'netbox_topology_views/powerfeedcoordinate_edit.html'
 
-class PowerFeedCoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_powerfeedcoordinate'
-
+class PowerFeedCoordinateDeleteView(ObjectDeleteView):
     queryset = PowerFeedCoordinate.objects.all()
 
-class CoordinateView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_coordinate'
-
+class CoordinateView(ObjectView):
     queryset = Coordinate.objects.all()
 
-class CoordinateAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_coordinate'
-
+class CoordinateAddView(ObjectEditView):
     queryset = Coordinate.objects.all()
     form = CoordinatesForm
     template_name = 'netbox_topology_views/coordinate_add.html'
@@ -1094,30 +1060,22 @@ class CoordinateBulkImportView(BulkImportView):
     queryset = Coordinate.objects.all()
     model_form = CoordinatesImportForm
 
-class CoordinateListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_coordinate'
-
+class CoordinateListView(ObjectListView):
     queryset = Coordinate.objects.all()
     table = CoordinateListTable
     template_name = 'netbox_topology_views/coordinate_list.html'
     filterset = CoordinatesFilterSet
     filterset_form = CoordinatesFilterForm
 
-class CoordinateEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_coordinate'
-
+class CoordinateEditView(ObjectEditView):
     queryset = Coordinate.objects.all()
     form = CoordinatesForm
     template_name = 'netbox_topology_views/coordinate_edit.html'
 
-class CoordinateDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_coordinate'
-
+class CoordinateDeleteView(ObjectDeleteView):
     queryset = Coordinate.objects.all()
 
-class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
-    permission_required = 'netbox_topology_views.view_coordinategroup'
-
+class CoordinateGroupView(ObjectView):
     queryset = CoordinateGroup.objects.all()
 
     def get_extra_context(self, request, instance):
@@ -1137,9 +1095,7 @@ class CoordinateGroupView(PermissionRequiredMixin, ObjectView):
             'coordinates_table': table,
         }
 
-class CoordinateGroupAddView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.add_coordinategroup'
-
+class CoordinateGroupAddView(ObjectEditView):
     queryset = CoordinateGroup.objects.all()
     form = CoordinateGroupsForm
     template_name = 'netbox_topology_views/coordinategroup_add.html'
@@ -1148,9 +1104,7 @@ class CoordinateGroupBulkImportView(BulkImportView):
     queryset = CoordinateGroup.objects.all()
     model_form = CoordinateGroupsImportForm
 
-class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'netbox_topology_views.view_coordinategroup'
-
+class CoordinateGroupListView(ObjectListView):
     queryset = CoordinateGroup.objects.annotate(
         devices = Count('coordinate')
     )
@@ -1158,16 +1112,12 @@ class CoordinateGroupListView(PermissionRequiredMixin, ObjectListView):
     template_name = 'netbox_topology_views/coordinategroup_list.html'
     filterset = CoordinateGroupFilterSet
 
-class CoordinateGroupEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'netbox_topology_views.change_coordinategroup'
-
+class CoordinateGroupEditView(ObjectEditView):
     queryset = CoordinateGroup.objects.all()
     form = CoordinateGroupsForm
     template_name = 'netbox_topology_views/coordinategroup_edit.html'
 
-class CoordinateGroupDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'netbox_topology_views.delete_coordinategroup'
-
+class CoordinateGroupDeleteView(ObjectDeleteView):
     queryset = CoordinateGroup.objects.all()
 
 class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
