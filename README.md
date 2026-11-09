@@ -220,3 +220,20 @@ Set `Power Panel Coordinates` according to your needs:
 
 Set `Circuit Coordinates` according to your needs:
  + netbox_topology_views | circuit coordinate | view/add/change/delete
+
+#### Restricting access to specific Coordinate Groups
+
+Object permissions can be limited with [constraints](https://netboxlabs.com/docs/netbox/administration/permissions/#constraints). Constraints are evaluated per object type and are **not** inherited.  
+Add a matching constraint to each coordinate permission, filtering on the related group via `group__`.
+
+Example: a user should only see the groups whose name starts with `XXX - `.
+
+| Object type | Constraint |
+|---|---|
+| netbox_topology_views \| coordinate group | `{"name__istartswith": "XXX - "}` |
+| netbox_topology_views \| coordinate | `{"group__name__istartswith": "XXX - "}` |
+| netbox_topology_views \| circuit coordinate | `{"group__name__istartswith": "XXX - "}` |
+| netbox_topology_views \| power panel coordinate | `{"group__name__istartswith": "XXX - "}` |
+| netbox_topology_views \| power feed coordinate | `{"group__name__istartswith": "XXX - "}` |
+
+Coordinate Groups support tags, so you can also constrain on a tag instead: `{"tags__slug": "team-xxx"}`  and `{"group__tags__slug": "team-xxx"}` for the coordinates.
