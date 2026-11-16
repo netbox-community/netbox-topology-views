@@ -71,6 +71,7 @@ from netbox_topology_views.utils import (
     image_static_url,
     LinePattern,
     get_query_settings,
+    is_true,
     IMAGE_FILETYPES
 )
 
@@ -843,7 +844,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             filter_required = True
             empty_result = False
 
-            if filterset.data.get("draw_init", "true").lower() == "true":
+            if is_true(filterset.data.get("draw_init", "true")):
                 filter_required = False
 
                 topo_data = get_topology_data(self.queryset, request.user, **query_settings)
