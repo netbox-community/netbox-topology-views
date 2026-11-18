@@ -60,6 +60,9 @@
           {% if filter_required %}
             <div class="bg-warning text-white p-2">Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.</div>
           {% endif %}
+          {% if invalid_filter %}
+            <div class="bg-danger text-white p-2">Invalid filter! Topology was not generated. Please review your filter settings.</div>
+          {% endif %}
           {% if empty_result %}
             <div class="bg-warning text-white p-2">Empty result set! Please review your filter settings.</div>
             <div class="bg-info text-white p-2">Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".</div>
