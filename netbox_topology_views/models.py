@@ -155,7 +155,12 @@ class Coordinate(NetBoxModel):
 
     class Meta:
         ordering = ['group', 'device']
-        unique_together = ('device', 'group')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('device', 'group'),
+                name='%(app_label)s_%(class)s_unique_device_group'
+            ),
+        )
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -183,7 +188,12 @@ class CircuitCoordinate(NetBoxModel):
 
     class Meta:
         ordering = ['group', 'device']
-        unique_together = ('device', 'group')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('device', 'group'),
+                name='%(app_label)s_%(class)s_unique_device_group'
+            ),
+        )
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -211,7 +221,12 @@ class PowerPanelCoordinate(NetBoxModel):
 
     class Meta:
         ordering = ['group', 'device']
-        unique_together = ('device', 'group')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('device', 'group'),
+                name='%(app_label)s_%(class)s_unique_device_group'
+            ),
+        )
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -239,7 +254,12 @@ class PowerFeedCoordinate(NetBoxModel):
 
     class Meta:
         ordering = ['group', 'device']
-        unique_together = ('device', 'group')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('device', 'group'),
+                name='%(app_label)s_%(class)s_unique_device_group'
+            ),
+        )
 
     def __str__(self):
         return f'{self.x};{self.y}'
