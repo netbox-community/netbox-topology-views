@@ -113,12 +113,17 @@ BOOLEAN_OPTIONS = (
 )
 
 
+def is_true(value) -> bool:
+    """Saved filters keep JSON types (True) while query strings are text ("True"/"true")."""
+    return str(value).lower() == "true"
+
+
 def get_query_settings(request, params, notify_user=False) -> dict:
     """
     Read the plugin options from params. Pass the filterset's data so saved filters (filter_id)
     are applied exactly as NetBox applies them to the device filters.
     """
-    if notify_user and str(params.get("save_coords")) == "True" and not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
+    if notify_user and is_true(params.get("save_coords")) and not settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"]:
         messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
 
     try:
@@ -126,7 +131,7 @@ def get_query_settings(request, params, notify_user=False) -> dict:
     except (TypeError, ValueError):
         grid_size = 0
 
-    query_settings = {name: str(params.get(name)) == "True" for name in BOOLEAN_OPTIONS}
+    query_settings = {name: is_true(params.get(name)) for name in BOOLEAN_OPTIONS}
     query_settings.update(
         ignore_cable_type=params.getlist("ignore_cable_type"),
         node_label_items=params.getlist("node_label_items"),
