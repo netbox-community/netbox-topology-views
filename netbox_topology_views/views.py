@@ -837,6 +837,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
         self.queryset = filterset.qs
         self.model = self.queryset.model
         topo_data = None
+        invalid_filter = False
 
         if request.GET:
             # filterset.data includes the parameters of any selected saved filters
@@ -844,7 +845,12 @@ class TopologyHomeView(PermissionRequiredMixin, View):
             filter_required = True
             empty_result = False
 
-            if is_true(filterset.data.get("draw_init", "true")):
+            if not filterset.is_valid():
+                invalid_filter = True
+                filter_required = False
+                for field, errors in filterset.errors.items():
+                    messages.error(request, f"Invalid filter '{field}': {' '.join(errors)}")
+            elif is_true(filterset.data.get("draw_init", "true")):
                 filter_required = False
 
                 topo_data = get_topology_data(self.queryset, request.user, **query_settings)
@@ -904,6 +910,7 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "basepath": settings.BASE_PATH,
                 "filter_required": filter_required,
                 "empty_result": empty_result,
+                "invalid_filter": invalid_filter,
             },
         )
 

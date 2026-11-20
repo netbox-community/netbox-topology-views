@@ -118,6 +118,11 @@ class ExportTopoToXML(BaseViewSet, ViewSet):
         self.queryset = filterset.qs
 
         if request.GET:
+            if not filterset.is_valid():
+                return JsonResponse(
+                    {"status": "Invalid filter", "errors": {k: list(v) for k, v in filterset.errors.items()}},
+                    status=400,
+                )
             topo_data = get_topology_data(self.queryset, request.user, **get_query_settings(request, filterset.data))
             xml_data = export_data_to_xml(topo_data).decode('utf-8').replace('\n', '&#xa;')
 
